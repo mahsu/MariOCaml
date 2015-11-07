@@ -1,9 +1,14 @@
+open Sprite
 
-type Aobj_type = |Block |Monster |Player
+type obj_type = |Block |Monster |Player
 type block =  | Breakable | Unbreakable
 
+type xy = float * float
+type obj = {
+  sprite: Sprite.sprite;
+  pos: xy;
+}
 
-type obj_data = {
-  sprite: sprite;
-  pos_xy: float * float;
-} 
+val new_object : Sprite.sprite_params -> Dom_html.canvasRenderingContext2D Js.t
+          -> xy -> obj
+
