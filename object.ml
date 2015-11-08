@@ -18,7 +18,8 @@ type collidable_object = {
   grounded: bool;
 }
 
-type collidable = Player of collidable_object
+type collidable =
+  | Player of collidable_object
   | Monster of collidable_object
   | Item of collidable_object
   | BBlock of collidable_object
