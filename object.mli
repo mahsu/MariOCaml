@@ -2,11 +2,9 @@ open Sprite
 
 type xy = float * float
 type vel = float * float
-type obj = {
-  sprite: sprite;
-  pos: xy;
-}
-type collidable_object = {
+
+
+type collidable_obj = {
   sprite: sprite;
   pos: xy;
   speed: float;
@@ -16,13 +14,13 @@ type collidable_object = {
 }
 
 type collidable =
-  | Player of collidable_object
-  | Monster of collidable_object
-  | Item of collidable_object
-  | BBlock of collidable_object
-  | UnBBlock of collidable_object
+  | Player of collidable_obj
+  | Monster of collidable_obj
+  | Item of collidable_obj
+  | BBlock of collidable_obj
+  | UnBBlock of collidable_obj
 
 
 val new_object : Sprite.sprite_params -> Dom_html.canvasRenderingContext2D Js.t
-          -> xy -> collidable_object
+          -> xy -> collidable_obj
 

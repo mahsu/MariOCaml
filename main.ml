@@ -19,7 +19,7 @@ let load _ =
   let obj_c1 = Object.new_object coin context (0.0,0.0) in
   let coin2 = Sprite.setup_sprite "coin.png" 10 (100.,100.) (0.,0.) in
   let obj_c2 = Object.new_object coin2 context (200.0,300.0) in
-  Draw.update_loop canvas [obj_c1; obj_c2] ;
+  Director.update_loop canvas [obj_c1; obj_c2] ;
   ()
 
 let inc_counter _ = 
@@ -35,4 +35,4 @@ let preload _ =
     (Html.handler (fun ev ->  inc_counter(); Js._true)) Js._true)) imgs
 
 
-let _ = Dom_html.window##onload <- Dom_html.handler (fun _ -> ignore (preload()); Js._true)
+let _ = Dom_html.window##onload <- Dom_html.handler (fun _ -> ignore (load()); Js._true)

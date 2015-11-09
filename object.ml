@@ -1,15 +1,11 @@
 open Sprite
 
-(* type obj_type = |Block |Monster |Player
-type block = | Breakable | Unbreakable *)
 
 type xy = float * float
 type vel = float * float
-type obj = {
-  sprite: sprite;
-  pos: xy;
-}
-type collidable_object = {
+type destroyed = bool
+
+type collidable_obj = {
   sprite: sprite;
   pos: xy;
   speed: float;
@@ -19,11 +15,11 @@ type collidable_object = {
 }
 
 type collidable =
-  | Player of collidable_object
-  | Monster of collidable_object
-  | Item of collidable_object
-  | BBlock of collidable_object
-  | UnBBlock of collidable_object
+  | Player of collidable_obj
+  | Monster of collidable_obj
+  | Item of collidable_obj
+  | BBlock of collidable_obj
+  | UnBBlock of collidable_obj
 
 let new_object spr_param context pos_xy =
   let spr = new_sprite spr_param context in
