@@ -5,6 +5,8 @@ let document = Html.document
 let jstr = Js.string
 
 
+let get_context canvas = canvas##getContext (Dom_html._2d_)
+
 let render obj = 
   let sprite = obj.sprite in
   let context = sprite.context in
@@ -26,7 +28,10 @@ let clear_canvas canvas =
 let update_animation (sprite: sprite) =
   sprite.frame := (!(sprite.frame) + 1) mod sprite.max_frames 
 
- 
+let fps canvas fps_val =
+  let fps_str = int_of_float fps_val |> string_of_int in
+  let context = canvas##getContext (Dom_html._2d_) in
+  ignore context##fillText (Js.string fps_str, 10.,10.)
 
 let debug f = Printf.ksprintf (fun s -> Firebug.console##log (jstr s)) f
 let alert f = Printf.ksprintf (fun s -> Dom_html.window##alert(Js.string s); failwith "poo") f

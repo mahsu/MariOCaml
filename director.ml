@@ -12,13 +12,13 @@ let rec update_loop canvas objs =
     
     let fps = calc_fps !last_time time in
     last_time := time;
-    Printf.printf "fps: %f \n" fps;
 
     (*check for collisions *) 
     
     Draw.clear_canvas canvas;
     List.iter (fun obj -> ignore (update_operation canvas obj)) objs ;
     
+    Draw.fps canvas fps;
     ignore Dom_html.window##requestAnimationFrame( 
         Js.wrap_callback (fun (t:float) -> update_helper t canvas !loop_objs))
 
