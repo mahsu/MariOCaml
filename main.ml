@@ -1,5 +1,9 @@
 open Sprite
 open Object
+module Html = Dom_html
+
+  let loadCount =  ref 0
+let imgsToLoad = 1
 
 let load _ =
   let canvas_id = "canvas" in
@@ -13,7 +17,22 @@ let load _ =
   let context = canvas##getContext (Dom_html._2d_) in
   let coin = Sprite.setup_sprite "coin.png" 10 (100.,100.) (0.,0.) in
   let obj_c1 = Object.new_object coin context (0.0,0.0) in
-    Draw.init_draw canvas obj_c1;
+  let coin2 = Sprite.setup_sprite "coin.png" 10 (100.,100.) (0.,0.) in
+  let obj_c2 = Object.new_object coin2 context (200.0,300.0) in
+  Draw.update_loop canvas [obj_c1; obj_c2] ;
   ()
 
-let _ = Dom_html.window##onload <- Dom_html.handler (fun _ -> ignore (load()); Js._true)
+let inc_counter _ = 
+  loadCount := !loadCount + 1;
+  if !loadCount = imgsToLoad then load() else ()
+
+let preload _ =
+  let imgs = [ "coin.png" ] in
+  List.map (fun img_src ->
+    let img = (Dom_html.createImg Dom_html.document) in
+    img##src <- (Js.string img_src) ;
+    ignore(Html.addEventListener  img Dom_html.Event.load 
+    (Html.handler (fun ev ->  inc_counter(); Js._true)) Js._true)) imgs
+
+
+let _ = Dom_html.window##onload <- Dom_html.handler (fun _ -> ignore (preload()); Js._true)

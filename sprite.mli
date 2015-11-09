@@ -11,9 +11,9 @@ type sprite_params =
     bbox_size: wh;
   }
 
-type sprite =
+type sprite = 
   {
-    context: Dom_html.canvasRenderingContext2D Js.t;
+    context: Dom_html.canvasRenderingContext2D Js.t; 
     frame: int ref;
     max_frames: int;
     img: Dom_html.imageElement Js.t;
@@ -21,7 +21,7 @@ type sprite =
     src_offset: xy;
   }
 
-val setup_sprite : string -> int -> wh -> xy -> sprite_params
+val setup_sprite : string -> int -> wh -> xy -> sprite_params 
 
 val new_sprite : sprite_params -> Dom_html.canvasRenderingContext2D Js.t
    -> sprite

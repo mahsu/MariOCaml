@@ -30,4 +30,8 @@ let new_object spr_param context pos_xy =
   {
     sprite =  spr;
     pos = pos_xy;
+    vel = (0.0,0.0);
+    speed = 0.0;
+    jumping = false;
+    grounded = false;
   }

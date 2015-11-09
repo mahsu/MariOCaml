@@ -1,14 +1,28 @@
 open Sprite
 
-type obj_type = |Block |Monster |Player
-type block =  | Breakable | Unbreakable
-
 type xy = float * float
+type vel = float * float
 type obj = {
-  sprite: Sprite.sprite;
+  sprite: sprite;
   pos: xy;
 }
+type collidable_object = {
+  sprite: sprite;
+  pos: xy;
+  speed: float;
+  vel: vel;
+  jumping: bool;
+  grounded: bool;
+}
+
+type collidable =
+  | Player of collidable_object
+  | Monster of collidable_object
+  | Item of collidable_object
+  | BBlock of collidable_object
+  | UnBBlock of collidable_object
+
 
 val new_object : Sprite.sprite_params -> Dom_html.canvasRenderingContext2D Js.t
-          -> xy -> obj
+          -> xy -> collidable_object
 

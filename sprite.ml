@@ -7,6 +7,8 @@ type sprite_params =
     img_src: string;
     frame_size: wh;
     src_offset: xy;
+    bbox_offset: xy;
+    bbox_size: wh;
   }
 
 type sprite = 
@@ -25,6 +27,8 @@ let setup_sprite img_src max_frames frame_size src_offset =
     max_frames;
     frame_size;
     src_offset;
+    bbox_offset = (0.,0.);
+    bbox_size = (0.,0.);
   }
 
 let new_sprite spr context  =
