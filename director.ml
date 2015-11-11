@@ -4,7 +4,7 @@ let calc_fps t0 t1 =
   let delta = (t1 -. t0) /. 1000. in
   1. /. delta
 
-let rec update_loop canvas objs = 
+let update_loop canvas objs = 
   let loop_objs = ref [] in
   let last_time = ref 0. in
   let rec update_helper time canvas objs  = 

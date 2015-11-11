@@ -25,8 +25,6 @@ let clear_canvas canvas =
   let cheight = float_of_int canvas##height in
   ignore context##clearRect(0.,0.,cwidth,cheight)
 
-let update_animation (sprite: sprite) =
-  sprite.frame := (!(sprite.frame) + 1) mod sprite.max_frames 
 
 let fps canvas fps_val =
   let fps_str = int_of_float fps_val |> string_of_int in

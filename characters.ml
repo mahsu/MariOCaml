@@ -1,17 +1,16 @@
-type enemy_typ = 
+type actor = 
+  (* Enemies *)
   | Goomba
   | GKoopa
   | RKoopa
   | GKoopaShell
   | RKoopaShell
-
-type block_typ = 
+  (* Block *)
   | QBlock
   | Brick
   | UnBBlock
- 
-type item_type =
+  (* Items *)
   | Mushroom
-  | Flower 
+  | Flower
 
 

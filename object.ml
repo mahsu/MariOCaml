@@ -23,7 +23,7 @@ type collidable =
 
 type noncollidable =
   | Dead of dead_type * sprite
-  | Scenery of sprite
+  | Scenery of sprite * obj
 
 let new_object spr_param context pos_xy =
   let spr = new_sprite spr_param context in
