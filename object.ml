@@ -1,30 +1,30 @@
 open Sprite
-open Characters
+open Actors
 
 type xy = float * float
-type vel = float * float
-type destroyed = bool
-type direction = | North | South | East | West
 
-type collidable_obj = {
+type direction = | Up | Down | Right | Left
+
+
+type obj = {
   sprite: sprite;
   pos: xy;
   speed: float;
-  vel: vel;
+  vel: xy;
   jumping: bool;
   grounded: bool;
+  dir: direction;
 }
 
 type collidable =
-  | Player of sprite * obj
-  | Enemy of enemy_typ * sprite * obj
-  | Item of item_typ * sprite * obj
-  | Block of block_typ * sprite * obj
+  | Player of actor * sprite * obj
+  | Monster of actor * sprite * obj
+  | Item of actor * sprite * obj
+  | Block of actor * sprite * obj
 
 type noncollidable =
   | Dead of dead_type * sprite
   | Scenery of sprite * obj
-
 let new_object spr_param context pos_xy =
   let spr = new_sprite spr_param context in
   {
