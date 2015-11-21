@@ -27,20 +27,24 @@ type sprite =
     x_refl: int;
   }
 
-let setup_sprite img_src max_frames frame_size src_offset = 
+  
+let setup_sprite ?anim:(anim=Frame) img_src max_frames frame_size src_offset = 
   {
     img_src;
     max_frames;
     frame_size;
     src_offset;
     bbox_offset = (0.,0.);
-    bbox_size = (0.,0.);
-    anim = Frame;
+    bbox_size = frame_size;
+    anim;
   }
+let from_actor = function
+  | _ -> setup_sprite "coin.png" 10 (100.,100.) (0.,0.)
 
 let new_sprite actor context  =
+  let spr = from_actor actor in
   let img = (Dom_html.createImg Dom_html.document) in
-  (*img##src <- (Js.string spr.img_src) ;*)
+  img##src <- (Js.string spr.img_src) ;
   {
     context;
     img;
@@ -54,10 +58,9 @@ let new_sprite actor context  =
     x_refl=0;
   }
 
-
+let reflect_sprite spr = failwith "todo"
 let update_animation (spr: sprite) =
   match spr.anim with
   | Frame -> spr.frame := (!(spr.frame) + 1) mod spr.max_frames
   | Reflect -> reflect_sprite spr
 
-let reflect_sprite spr = failwith "todo"

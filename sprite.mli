@@ -4,7 +4,7 @@ open Actors
 type xy = float * float (* x, y *)
 
 (* The type of animation of the sprite *)
-type animation_typ = | Reflection | Frame
+type animation_typ = | Reflect | Frame
 
 (* Inherent sprite parameters from which to create the sprite *)
 type sprite_params =
@@ -35,8 +35,8 @@ type sprite =
 
 
 (* Sets up a sprite to create *)
-val setup_sprite : string -> int -> xy -> xy -> xy -> xy 
-                          -> animation_typ -> sprite_params 
+val setup_sprite : ?anim:animation_typ -> string -> int -> xy -> xy 
+                          -> sprite_params 
 
 (* Creates a sprite given the actor type *)
 val new_sprite : actor -> Dom_html.canvasRenderingContext2D Js.t
