@@ -1,3 +1,4 @@
+open Actors
 open Sprite
 open Object
 module Html = Dom_html
@@ -15,10 +16,10 @@ let load _ =
   (*let () = Graphics_js.open_canvas canvas in*)
   (*let context = get_context() in*)
   let context = canvas##getContext (Dom_html._2d_) in
-  let coin = Sprite.setup_sprite "coin.png" 10 (100.,100.) (0.,0.) in
-  let obj_c1 = Object.new_object coin context (0.0,0.0) in
-  let coin2 = Sprite.setup_sprite "coin.png" 10 (100.,100.) (0.,0.) in
-  let obj_c2 = Object.new_object coin2 context (200.0,300.0) in
+  let _ = Sprite.setup_sprite "coin.png" 10 (100.,100.) (0.,0.) in
+  let obj_c1 = Object.spawn Coin context (0.0,0.0) in
+  let _ = Sprite.setup_sprite "coin.png" 10 (100.,100.) (0.,0.) in
+  let obj_c2 = Object.spawn Coin context (200.0,300.0) in
   Director.update_loop canvas [obj_c1; obj_c2] ;
   ()
 

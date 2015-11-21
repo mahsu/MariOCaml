@@ -22,10 +22,10 @@ let update_loop canvas objs =
     ignore Dom_html.window##requestAnimationFrame( 
         Js.wrap_callback (fun (t:float) -> update_helper t canvas !loop_objs))
 
-  and update_operation canvas (obj:Object.collidable_obj) =
+  and update_operation canvas (obj:Object.obj) =
     (* TODO: optimize. Draw static elements only once *) 
     Draw.render obj;
-    Draw.update_animation obj.sprite; (* return bool * variant *)
+    Sprite.update_animation obj.sprite; (* return bool * variant *)
     (* if bool *)
     loop_objs := if false = false then obj::!loop_objs else !loop_objs
   

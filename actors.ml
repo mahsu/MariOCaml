@@ -1,4 +1,5 @@
-type actor = 
+type actor =
+  | Mario 
   (* Enemies *)
   | Goomba
   | GKoopa
@@ -12,5 +13,6 @@ type actor =
   (* Items *)
   | Mushroom
   | Flower
+  | Coin
 
 

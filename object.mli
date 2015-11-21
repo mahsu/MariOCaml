@@ -1,13 +1,17 @@
 open Sprite
 open Actors
 
-(* A xy coordinate vector *)
-type xy = float * float
-
-
+type xy = {
+  mutable x: float;
+  mutable y: float;
+}
 type direction = | Up | Down | Right | Left
 
-(* Represents an object in the game *)
+type aabb = {
+  center: xy;
+  half: xy;
+}
+
 type obj = {
   sprite: sprite;
   pos: xy;
@@ -16,18 +20,16 @@ type obj = {
   jumping: bool;
   grounded: bool;
   dir: direction;
+  inv: int;
 }
 
-(* Represents a collidable object *)
 type collidable =
   | Player of actor * sprite * obj
   | Monster of actor * sprite * obj
   | Item of actor * sprite * obj
   | Block of actor * sprite * obj
 
-(* Represents a noncollidable object *)
 type noncollidable =
-  | Dead of dead_type * sprite
   | Scenery of sprite * obj
 
 (* Returns the sprite associated with the object *)
@@ -35,11 +37,11 @@ val get_sprite : collidable -> Sprite.sprite
 
 (* Creates a new object with a given
  * actor type on the the canvas at a given position *)
-val spawn : Character.actor  -> Dom_html.canvasRenderingContext2D Js.t
-          -> xy -> collidable
+val spawn : Actors.actor  -> Dom_html.canvasRenderingContext2D Js.t
+          -> float*float -> obj 
 
 (* Destroys the object, returning a list of destruction effect objects *)
-val kill : obj -> noncollidable list option
+val kill : obj -> noncollidable list
 
 (* Updates the velocity of the object *)
 val update_vel : obj -> obj
