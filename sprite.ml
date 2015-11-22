@@ -11,7 +11,8 @@ type sprite_params =
     src_offset: xy;
     bbox_offset: xy;
     bbox_size: xy;
-    anim: animation_typ; 
+    anim: animation_typ;
+    loop: bool; 
   }
 
 type sprite = 
@@ -28,10 +29,11 @@ type sprite =
     bbox_size: xy;
     anim: animation_typ;
     x_refl: int;
+    loop: bool;
   }
 
   
-let setup_sprite ?anim:(anim=Frame) img_src max_frames max_ticks frame_size src_offset = 
+let setup_sprite ?anim:(anim=Frame) ?loop:(loop=true) img_src max_frames max_ticks frame_size src_offset = 
   {
         img_src;
     max_frames;
@@ -41,9 +43,17 @@ let setup_sprite ?anim:(anim=Frame) img_src max_frames max_ticks frame_size src_
     bbox_offset = (0.,0.);
     bbox_size = frame_size;
     anim;
+    loop;
   }
 let from_actor = function
-  | _ -> setup_sprite "./sprites/general.png" 3 15 (18.,18.) (299.,98.)
+  | _ -> setup_sprite "./sprites/general.png" 1 0 (18.,18.) (335.,188.)
+  (*Question mark normal | _ -> setup_sprite "./sprites/general.png" 4 15 (18.,18.) (299.,116.) *)
+  (*Question mark unbreakable setup_sprite "./sprites/general.png" 1 0 (18.,18.) (371.,116.)*)
+  (*Breakable brick setup_sprite "./sprites/general.png" 5 15 (18.,18.) (299.,134.) *)
+  (*COIN *| _ -> setup_sprite "./sprites/general.png" 3 15 (18.,18.) (299.,98.)*)
+  (* Mushroom setup_sprite "./sprites/general.png" 1 0 (18.,18.) (299.,188.) *)
+  (* Flower setup_sprite "./sprites/general.png" 1 0 (18.,18.) (335.,188.) *)
+  (* Star setup_sprite "./sprites/general.png" 1 0 (18.,18.) (353.,206.) *)
 
 let new_sprite actor context  =
   let spr = from_actor actor in
@@ -62,6 +72,7 @@ let new_sprite actor context  =
     bbox_size = spr.bbox_size;
     anim = spr.anim;
     x_refl=0;
+    loop= spr.loop;
   }
 
 let reflect_sprite spr = failwith "todo"

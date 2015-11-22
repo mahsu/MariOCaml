@@ -1,4 +1,12 @@
 open Object
+  open Dom_html
+
+type keys = {
+  mutable left: bool;
+  mutable right: bool;
+  mutable up: bool;
+  mutable down: bool;
+}
 
 let calc_fps t0 t1 =
   let delta = (t1 -. t0) /. 1000. in
@@ -31,3 +39,9 @@ let update_loop canvas objs =
   
   in update_helper 0. canvas objs
 
+
+let keydown (evt) = 
+  match evt##keyCode with
+  | 38 | 32 -> print_endline  "Meow \n"; Js._true
+  | 39 -> Js._true
+  | _ -> Js._true

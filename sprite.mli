@@ -17,6 +17,7 @@ type sprite_params =
     bbox_offset: xy;
     bbox_size: xy;
     anim: animation_typ;
+    loop: bool;
   }
 
 (* Concrete sprite created to visually represent an object *)
@@ -34,11 +35,12 @@ type sprite =
     bbox_size: xy;
     anim: animation_typ;
     x_refl: int;
+    loop: bool;
   }
 
 
 (* Sets up a sprite to create *)
-val setup_sprite : ?anim:animation_typ -> string -> int -> int -> xy -> xy 
+val setup_sprite : ?anim:animation_typ -> ?loop:bool -> string -> int -> int -> xy -> xy 
                           -> sprite_params 
 
 (* Creates a sprite given the actor type *)
