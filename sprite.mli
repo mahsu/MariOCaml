@@ -10,6 +10,7 @@ type animation_typ = | Reflect | Frame
 type sprite_params =
   {
     max_frames: int;
+    max_ticks: int;
     img_src: string;
     frame_size: xy;
     src_offset: xy;
@@ -23,7 +24,9 @@ type sprite =
   {
     context: Dom_html.canvasRenderingContext2D Js.t; 
     frame: int ref;
+    ticks: int ref;
     max_frames: int;
+    max_ticks: int;
     img: Dom_html.imageElement Js.t;
     frame_size: xy;
     src_offset: xy;
@@ -35,7 +38,7 @@ type sprite =
 
 
 (* Sets up a sprite to create *)
-val setup_sprite : ?anim:animation_typ -> string -> int -> xy -> xy 
+val setup_sprite : ?anim:animation_typ -> string -> int -> int -> xy -> xy 
                           -> sprite_params 
 
 (* Creates a sprite given the actor type *)

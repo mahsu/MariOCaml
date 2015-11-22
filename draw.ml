@@ -14,8 +14,9 @@ let render obj =
   let (sw, sh) = sprite.frame_size in
   let (dx, dy) = (obj.pos.x,obj.pos.y) in
   let (dw, dh) = sprite.frame_size in
-  let sx = (float_of_int !(sprite.frame)) *. sw in
+  let sx = sx +. (float_of_int !(sprite.frame)) *. sw in
   (*context##clearRect(0.,0.,sw, sh);*)
+  Printf.printf "xpos %f\n" sx;
   context##drawImage_full(sprite.img, sx, sy, sw, sh, dx, dy, dw, dh)
 
 

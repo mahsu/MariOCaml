@@ -5,6 +5,7 @@ type animation_typ =  | Reflect | Frame
 type sprite_params =
   {
     max_frames: int;
+    max_ticks: int;
     img_src: string;
     frame_size: xy;
     src_offset: xy;
@@ -17,7 +18,9 @@ type sprite =
   {
     context: Dom_html.canvasRenderingContext2D Js.t; 
     frame: int ref;
+    ticks: int ref;
     max_frames: int;
+    max_ticks: int;
     img: Dom_html.imageElement Js.t;
     frame_size: xy;
     src_offset: xy;
@@ -28,10 +31,11 @@ type sprite =
   }
 
   
-let setup_sprite ?anim:(anim=Frame) img_src max_frames frame_size src_offset = 
+let setup_sprite ?anim:(anim=Frame) img_src max_frames max_ticks frame_size src_offset = 
   {
-    img_src;
+        img_src;
     max_frames;
+    max_ticks;
     frame_size;
     src_offset;
     bbox_offset = (0.,0.);
@@ -39,7 +43,7 @@ let setup_sprite ?anim:(anim=Frame) img_src max_frames frame_size src_offset =
     anim;
   }
 let from_actor = function
-  | _ -> setup_sprite "coin.png" 10 (100.,100.) (0.,0.)
+  | _ -> setup_sprite "./sprites/general.png" 3 15 (18.,18.) (299.,98.)
 
 let new_sprite actor context  =
   let spr = from_actor actor in
@@ -49,6 +53,8 @@ let new_sprite actor context  =
     context;
     img;
     frame = ref 0;
+    ticks = ref 0;
+    max_ticks = spr.max_ticks;
     max_frames = spr.max_frames;
     frame_size = spr.frame_size;
     src_offset = spr.src_offset;
@@ -60,7 +66,11 @@ let new_sprite actor context  =
 
 let reflect_sprite spr = failwith "todo"
 let update_animation (spr: sprite) =
-  match spr.anim with
-  | Frame -> spr.frame := (!(spr.frame) + 1) mod spr.max_frames
-  | Reflect -> reflect_sprite spr
-
+  (* Only advance frame when ticked *)
+  let curr_ticks = !(spr.ticks) in
+  if curr_ticks = spr.max_ticks then (
+    spr.ticks := 0;
+    match spr.anim with
+    | Frame -> spr.frame := (!(spr.frame) + 1) mod spr.max_frames
+    | Reflect -> reflect_sprite spr
+  ) else spr.ticks := curr_ticks + 1
