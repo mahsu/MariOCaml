@@ -12,33 +12,39 @@ type aabb = {
   half: xy;
 }
 
+type obj_params = {
+  has_gravity: bool;
+  max_speed: bool;
+}
 type obj = {
-  sprite: sprite;
+  params: obj_params;
   pos: xy;
   speed: float;
   vel: xy;
   jumping: bool;
   grounded: bool;
   dir: direction;
-  inv: int;
+  invuln: int;
 }
 
 type collidable =
   | Player of player_typ * sprite * obj
-  | Monster of enemy_typ * sprite * obj
+  | Enemy of enemy_typ * sprite * obj
   | Item of item_typ * sprite * obj
   | Block of block_typ * sprite * obj
 
 type noncollidable =
   | Scenery of sprite * obj
 
+
 (* Returns the sprite associated with the object *)
 val get_sprite : collidable -> Sprite.sprite
 
+val get_obj : collidable -> obj
 (* Creates a new object with a given
  * actor type on the the canvas at a given position *)
 val spawn : Actors.spawn_typ  -> Dom_html.canvasRenderingContext2D Js.t
-          -> float*float -> obj 
+          -> float*float -> collidable 
 
 (* Destroys the object, returning a list of destruction effect objects *)
 val kill : obj -> noncollidable list

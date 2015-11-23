@@ -1,6 +1,6 @@
 
 (* Renders a given object on the canvas *)
-val render : Object.obj -> unit
+val render : Sprite.sprite -> float * float  -> unit
 
 (* Clears the canvas *)
 val clear_canvas : Dom_html.canvasElement Js.t -> unit

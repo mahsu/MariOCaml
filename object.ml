@@ -13,20 +13,25 @@ type aabb = {
   half: xy;
 }
 
+type obj_params = {
+  has_gravity: bool;
+  max_speed: bool;
+}
+
 type obj = {
-  sprite: sprite;
+  params: obj_params;
   pos: xy;
   speed: float;
   vel: xy;
   jumping: bool;
   grounded: bool;
   dir: direction;
-  inv: int;
+  invuln: int;
 }
 
 type collidable =
   | Player of player_typ * sprite * obj
-  | Monster of enemy_typ * sprite * obj
+  | Enemy of enemy_typ * sprite * obj
   | Item of item_typ * sprite * obj
   | Block of block_typ * sprite * obj
 
@@ -34,25 +39,60 @@ type noncollidable =
   (*| Dead of dead_type * sprite*)
   | Scenery of sprite * obj
 
+let make_player = function
+  | _ -> failwith "todo"
+
+
+let make_item = function
+  | Mushroom -> failwith "todo"
+  | FireFlower -> failwith "todo"
+  | Star -> failwith "todo"
+  | Coin -> failwith "todo"
+
+let make_enemy = function
+  | Goomba -> failwith "todo"
+  | GKoopa -> failwith "todo"
+  | RKoopa -> failwith "todo"
+  | GKoopaShell -> failwith "todo"
+  | RKoopaShell -> failwith "todo"
+
+let make_block = function
+  | QBlock -> failwith "todo"
+  | QBlockUsed -> failwith "todo"
+  | Brick -> failwith "todo"
+  | UnBBlock -> failwith "todo"
+
+let make_type = function
+  | SPlayer t -> make_player t 
+  | SEnemy t -> make_enemy t
+  | SItem t -> make_item t
+  | SBlock t -> make_block t
+
 let spawn spawnable context (posx, posy) =
   let spr = Sprite.make spawnable context in
-  {
-    sprite =  spr;
+  let params = make_type spawnable in 
+  let obj = {
+    params;
     pos = {x=posx; y=posy};
     vel = {x=0.0;y=0.0};
     speed = 0.0;
     jumping = false;
     grounded = false;
     dir = Left;
-    inv = 0;
-  }
+    invuln = 0;
+  } in
+  match spawnable with
+  | SPlayer t -> Player(t,spr,obj)
+  | SEnemy t -> Enemy(t,spr,obj)
+  | SItem t -> Item(t,spr,obj)
+  | SBlock t -> Block(t,spr,obj)
 
 let get_sprite = function
-  | Player (_,s,_) | Monster (_,s, _) | Item (_,s, _) | Block (_,s, _)  -> s
+  | Player (_,s,_) | Enemy (_,s, _) | Item (_,s, _) | Block (_,s, _)  -> s
 
 let get_obj = function
   | Player (_,_,o) 
-  | Monster (_,_,o) | Item (_,_,o) | Block (_,_,o) -> o
+  | Enemy (_,_,o) | Item (_,_,o) | Block (_,_,o) -> o
 
 let get_aabb obj  =
   let spr = ((get_sprite obj).params)  in

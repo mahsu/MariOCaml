@@ -25,7 +25,7 @@ type player_typ =
 
 type spawn_typ = 
   | SPlayer of player_typ
-  | SMonster of enemy_typ
+  | SEnemy of enemy_typ
   | SItem of item_typ
   | SBlock of block_typ
 

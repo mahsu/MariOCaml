@@ -47,7 +47,7 @@ let make_player = function
   | Running -> failwith "todo"
   | Crouching -> failwith "todo"
 
-let make_monster = function
+let make_enemy = function
   | Goomba -> failwith "todo" 
   | GKoopa -> failwith "todo"
   | RKoopa -> failwith "todo"
@@ -70,7 +70,7 @@ let make_block = function
 
 let make_type = function
   | SPlayer t -> make_player t 
-  | SMonster t -> make_monster t
+  | SEnemy t -> make_enemy t
   | SItem t -> make_item t
   | SBlock t -> make_block t
       

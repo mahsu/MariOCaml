@@ -19,11 +19,11 @@ let calc_fps t0 t1 =
   1. /. delta
 
 let update_loop canvas objs = 
-  let loop_objs = ref [] in
+  let collid_objs = ref [] in
   let last_time = ref 0. in
   let rec update_helper time canvas objs  = 
-    loop_objs := [];
-    
+    collid_objs := [];
+     
     let fps = calc_fps !last_time time in
     last_time := time;
 
@@ -31,17 +31,19 @@ let update_loop canvas objs =
     
     Draw.clear_canvas canvas;
     List.iter (fun obj -> ignore (update_operation canvas obj)) objs ;
-    
+
     Draw.fps canvas fps;
     ignore Dom_html.window##requestAnimationFrame( 
-        Js.wrap_callback (fun (t:float) -> update_helper t canvas !loop_objs))
+        Js.wrap_callback (fun (t:float) -> update_helper t canvas !collid_objs))
 
-  and update_operation canvas (obj:Object.obj) =
+  and update_operation canvas (obj:Object.collidable) =
     (* TODO: optimize. Draw static elements only once *) 
-    Draw.render obj;
-    Sprite.update_animation obj.sprite; (* return bool * variant *)
+    let obj' = Object.get_obj obj in
+    let spr = Object.get_sprite obj in
+    Draw.render spr (obj'.pos.x,obj'.pos.y);
+    Sprite.update_animation spr; (* return bool * variant *)
     (* if bool *)
-    loop_objs := if false = false then obj::!loop_objs else !loop_objs
+    if false = false then (collid_objs := obj::!collid_objs)
   
   in update_helper 0. canvas objs
 
