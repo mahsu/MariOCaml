@@ -1,14 +1,34 @@
+<!DOCTYPE html>
 <html>
   <head>
+  <link href='https://fonts.googleapis.com/css?family=Droid+Sans:400,700' rel='stylesheet' type='text/css'>
     <style>
+      html {
+        display: table;
+        width: 100%;
+      }
+      
+      body {
+        margin: 0 auto;
+        padding: 0;
+        text-align: center;
+        display: table-cell;
+        font-family: 'Droid Sans' 'sans-serif';
+      }
+      
+      h1, p {
+        text-align: center
+      }
+      
       #canvas {
         border-style: solid;
         border-width: 1px;
       }
     </style>
-    <script src="_build/main.d.js"></script>
   </head>
   <body>
-    <canvas id="canvas" width="500" height="500"></canvas>
+    <h1>MariOcaml</h1>
+    <canvas id="canvas" width="480" height="320"></canvas>
+        <script src="_build/main.d.js"></script>
   </body>
 </html>

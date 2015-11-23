@@ -5,6 +5,7 @@ type xy = {
   mutable x: float;
   mutable y: float;
 }
+
 type direction = | Up | Down | Right | Left
 
 type aabb = {
@@ -24,17 +25,17 @@ type obj = {
 }
 
 type collidable =
-  | Player of actor * sprite * obj
-  | Monster of actor * sprite * obj
-  | Item of actor * sprite * obj
-  | Block of actor * sprite * obj
+  | Player of player_typ * sprite * obj
+  | Monster of enemy_typ * sprite * obj
+  | Item of item_typ * sprite * obj
+  | Block of block_typ * sprite * obj
 
 type noncollidable =
   (*| Dead of dead_type * sprite*)
   | Scenery of sprite * obj
 
-let spawn actor context (posx, posy) =
-  let spr = new_sprite actor context in
+let spawn spawnable context (posx, posy) =
+  let spr = Sprite.make spawnable context in
   {
     sprite =  spr;
     pos = {x=posx; y=posy};

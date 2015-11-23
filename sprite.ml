@@ -1,3 +1,4 @@
+open Actors
 type xy = float * float
 
 type animation_typ =  | Reflect | Frame
@@ -26,7 +27,8 @@ type sprite =
   }
 
   
-let setup_sprite ?anim:(anim=Frame) ?loop:(loop=true) img_src max_frames max_ticks frame_size src_offset = 
+let setup_sprite ?anim:(anim=Frame) ?loop:(loop=true) 
+                 img_src max_frames max_ticks frame_size src_offset = 
   {
     img_src;
     max_frames;
@@ -38,18 +40,42 @@ let setup_sprite ?anim:(anim=Frame) ?loop:(loop=true) img_src max_frames max_tic
     anim;
     loop;
   }
-let from_actor = function
-  | _ -> setup_sprite "./sprites/general.png" 1 0 (18.,18.) (335.,188.)
-  (*Question mark normal | _ -> setup_sprite "./sprites/general.png" 4 15 (18.,18.) (299.,116.) *)
-  (*Question mark unbreakable setup_sprite "./sprites/general.png" 1 0 (18.,18.) (371.,116.)*)
-  (*Breakable brick setup_sprite "./sprites/general.png" 5 15 (18.,18.) (299.,134.) *)
-  (*COIN *| _ -> setup_sprite "./sprites/general.png" 3 15 (18.,18.) (299.,98.)*)
-  (* Mushroom setup_sprite "./sprites/general.png" 1 0 (18.,18.) (299.,188.) *)
-  (* Flower setup_sprite "./sprites/general.png" 1 0 (18.,18.) (335.,188.) *)
-  (* Star setup_sprite "./sprites/general.png" 1 0 (18.,18.) (353.,206.) *)
 
-let new_sprite actor context  =
-  let params = from_actor actor in
+let make_player = function
+  | Standing -> failwith "todo"
+  | Jumping -> failwith "todo"
+  | Running -> failwith "todo"
+  | Crouching -> failwith "todo"
+
+let make_monster = function
+  | Goomba -> failwith "todo" 
+  | GKoopa -> failwith "todo"
+  | RKoopa -> failwith "todo"
+  | GKoopaShell -> failwith "todo"
+  | RKoopaShell -> failwith "todo"
+
+let make_item = function
+  (* 18x18 grid with 11x8 offset *)
+  | Coin -> setup_sprite "./sprites/general.png" 3 15 (18.,18.) (299.,98.)
+  | FireFlower -> setup_sprite "./sprites/general.png" 1 0 (18.,18.) (335.,188.)
+  | Mushroom -> setup_sprite "./sprites/general.png" 1 0 (18.,18.) (299.,188.)
+  | Star -> setup_sprite "./sprites/general.png" 1 0 (18.,18.) (353.,206.)
+
+let make_block = function
+  (* 18x18 grid with 11x8 offset *)
+  | Brick -> setup_sprite "./sprites/general.png" 5 15 (18.,18.) (299.,134.)
+  | QBlock -> setup_sprite "./sprites/general.png" 4 15 (18.,18.) (299.,116.)
+  | QBlockUsed -> setup_sprite "./sprites/general.png" 1 0 (18.,18.) (371.,116.)
+  | UnBBlock -> failwith "todo"
+
+let make_type = function
+  | SPlayer t -> make_player t 
+  | SMonster t -> make_monster t
+  | SItem t -> make_item t
+  | SBlock t -> make_block t
+      
+let make spawn context  =
+  let params = make_type spawn in
   let img = (Dom_html.createImg Dom_html.document) in
   img##src <- (Js.string params.img_src) ;
   {

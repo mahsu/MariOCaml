@@ -37,7 +37,7 @@ val setup_sprite : ?anim:animation_typ -> ?loop:bool -> string -> int -> int -> 
                           -> sprite_params 
 
 (* Creates a sprite given the actor type *)
-val new_sprite : actor -> Dom_html.canvasRenderingContext2D Js.t
+val make : Actors.spawn_typ -> Dom_html.canvasRenderingContext2D Js.t
    -> sprite
 
 (* Updates the sprite's animation *)

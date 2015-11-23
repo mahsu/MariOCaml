@@ -21,8 +21,8 @@ let load _ =
   let context = canvas##getContext (Dom_html._2d_) in
   let _ = Html.addEventListener Html.document Html.Event.keydown (Html.handler Director.keydown) Js._true in
   let _ = Html.addEventListener Html.document Html.Event.keyup (Html.handler Director.keyup) Js._true in
-  let obj_c1 = Object.spawn Coin context (0.0,0.0) in
-  let obj_c2 = Object.spawn Coin context (200.0,300.0) in
+  let obj_c1 = Object.spawn (SItem Coin) context (0.0,0.0) in
+  let obj_c2 = Object.spawn (SItem Coin) context (200.0,300.0) in
   Director.update_loop canvas [obj_c1; obj_c2] ;
   ()
 

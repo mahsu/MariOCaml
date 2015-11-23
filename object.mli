@@ -24,10 +24,10 @@ type obj = {
 }
 
 type collidable =
-  | Player of actor * sprite * obj
-  | Monster of actor * sprite * obj
-  | Item of actor * sprite * obj
-  | Block of actor * sprite * obj
+  | Player of player_typ * sprite * obj
+  | Monster of enemy_typ * sprite * obj
+  | Item of item_typ * sprite * obj
+  | Block of block_typ * sprite * obj
 
 type noncollidable =
   | Scenery of sprite * obj
@@ -37,7 +37,7 @@ val get_sprite : collidable -> Sprite.sprite
 
 (* Creates a new object with a given
  * actor type on the the canvas at a given position *)
-val spawn : Actors.actor  -> Dom_html.canvasRenderingContext2D Js.t
+val spawn : Actors.spawn_typ  -> Dom_html.canvasRenderingContext2D Js.t
           -> float*float -> obj 
 
 (* Destroys the object, returning a list of destruction effect objects *)
