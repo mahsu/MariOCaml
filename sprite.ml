@@ -17,25 +17,18 @@ type sprite_params =
 
 type sprite = 
   {
+    params: sprite_params;
     context: Dom_html.canvasRenderingContext2D Js.t; 
     frame: int ref;
     ticks: int ref;
-    max_frames: int;
-    max_ticks: int;
     img: Dom_html.imageElement Js.t;
-    frame_size: xy;
-    src_offset: xy;
-    bbox_offset: float * float;
-    bbox_size: xy;
-    anim: animation_typ;
     x_refl: int;
-    loop: bool;
   }
 
   
 let setup_sprite ?anim:(anim=Frame) ?loop:(loop=true) img_src max_frames max_ticks frame_size src_offset = 
   {
-        img_src;
+    img_src;
     max_frames;
     max_ticks;
     frame_size;
@@ -56,32 +49,28 @@ let from_actor = function
   (* Star setup_sprite "./sprites/general.png" 1 0 (18.,18.) (353.,206.) *)
 
 let new_sprite actor context  =
-  let spr = from_actor actor in
+  let params = from_actor actor in
   let img = (Dom_html.createImg Dom_html.document) in
-  img##src <- (Js.string spr.img_src) ;
+  img##src <- (Js.string params.img_src) ;
   {
+    params;
     context;
     img;
     frame = ref 0;
     ticks = ref 0;
-    max_ticks = spr.max_ticks;
-    max_frames = spr.max_frames;
-    frame_size = spr.frame_size;
-    src_offset = spr.src_offset;
-    bbox_offset= spr.bbox_offset;
-    bbox_size = spr.bbox_size;
-    anim = spr.anim;
     x_refl=0;
-    loop= spr.loop;
   }
 
 let reflect_sprite spr = failwith "todo"
+
 let update_animation (spr: sprite) =
   (* Only advance frame when ticked *)
   let curr_ticks = !(spr.ticks) in
-  if curr_ticks = spr.max_ticks then (
+  if curr_ticks = spr.params.max_ticks then (
     spr.ticks := 0;
-    match spr.anim with
-    | Frame -> spr.frame := (!(spr.frame) + 1) mod spr.max_frames
+    match spr.params.anim with
+    | Frame -> 
+        if spr.params.loop then 
+        spr.frame := (!(spr.frame) + 1) mod spr.params.max_frames
     | Reflect -> reflect_sprite spr
   ) else spr.ticks := curr_ticks + 1

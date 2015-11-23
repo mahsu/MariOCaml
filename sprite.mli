@@ -23,19 +23,12 @@ type sprite_params =
 (* Concrete sprite created to visually represent an object *)
 type sprite = 
   {
+    params: sprite_params;
     context: Dom_html.canvasRenderingContext2D Js.t; 
     frame: int ref;
     ticks: int ref;
-    max_frames: int;
-    max_ticks: int;
     img: Dom_html.imageElement Js.t;
-    frame_size: xy;
-    src_offset: xy;
-    bbox_offset: xy;
-    bbox_size: xy;
-    anim: animation_typ;
     x_refl: int;
-    loop: bool;
   }
 
 

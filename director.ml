@@ -1,11 +1,17 @@
 open Object
-  open Dom_html
 
 type keys = {
   mutable left: bool;
   mutable right: bool;
   mutable up: bool;
   mutable down: bool;
+}
+
+let pressed_keys = {
+  left = false;
+  right = false;
+  up = false;
+  down = false;
 }
 
 let calc_fps t0 t1 =
@@ -40,8 +46,20 @@ let update_loop canvas objs =
   in update_helper 0. canvas objs
 
 
-let keydown (evt) = 
-  match evt##keyCode with
-  | 38 | 32 -> print_endline  "Meow \n"; Js._true
-  | 39 -> Js._true
-  | _ -> Js._true
+let keydown evt = 
+  let () = match evt##keyCode with
+  | 38 | 32 -> pressed_keys.up <- true; print_endline  "Jump"
+  | 39 -> pressed_keys.right <- true; print_endline "Right"
+  | 37 -> pressed_keys.left <- true; print_endline "Left"
+  | 40 -> pressed_keys.down <- true; print_endline "Crouch"
+  | _ -> ()
+  in Js._true
+
+let keyup evt =
+  let () = match evt##keyCode with
+  | 38 | 32 -> pressed_keys.up <- false
+  | 39 -> pressed_keys.right <- false
+  | 37 -> pressed_keys.left <- false
+  | 40 -> pressed_keys.down <- false
+  | _ -> ()
+  in Js._true

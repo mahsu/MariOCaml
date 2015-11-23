@@ -10,13 +10,12 @@ let get_context canvas = canvas##getContext (Dom_html._2d_)
 let render obj = 
   let sprite = obj.sprite in
   let context = sprite.context in
-  let (sx, sy) = sprite.src_offset in
-  let (sw, sh) = sprite.frame_size in
+  let (sx, sy) = sprite.params.src_offset in
+  let (sw, sh) = sprite.params.frame_size in
   let (dx, dy) = (obj.pos.x,obj.pos.y) in
-  let (dw, dh) = sprite.frame_size in
+  let (dw, dh) = sprite.params.frame_size in
   let sx = sx +. (float_of_int !(sprite.frame)) *. sw in
   (*context##clearRect(0.,0.,sw, sh);*)
-  Printf.printf "xpos %f\n" sx;
   context##drawImage_full(sprite.img, sx, sy, sw, sh, dx, dy, dw, dh)
 
 

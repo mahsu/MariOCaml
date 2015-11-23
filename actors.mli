@@ -1,5 +1,5 @@
 type actor =
-  | Mario 
+  | Mario
   (* Enemies *)
   | Goomba
   | GKoopa
@@ -15,4 +15,8 @@ type actor =
   | Flower
   | Coin
 
-
+type player_state =
+  | Standing
+  | Jumping
+  | Running
+  | Crouching

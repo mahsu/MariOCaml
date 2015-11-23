@@ -54,7 +54,7 @@ let get_obj = function
   | Monster (_,_,o) | Item (_,_,o) | Block (_,_,o) -> o
 
 let get_aabb obj  =
-  let spr = get_sprite obj  in
+  let spr = ((get_sprite obj).params)  in
   let obj = get_obj obj in
   let (offx, offy) = spr.bbox_offset in
   let (box,boy) = (obj.pos.x+.offx,obj.pos.y+.offy) in
@@ -69,8 +69,7 @@ let update_vel obj = failwith "todo"
 let update_pos obj = failwith "todo"
 
 let check_collision o1 o2 =
-  let b1 = get_aabb o1 in
-  let b2 = get_aabb o2 in
+  let b1 = get_aabb o1 and b2 = get_aabb o2 in
   let o1 = get_obj o1 in
   let vx = (b1.center.x) -. (b2.center.x) in
   let vy = (b1.center.y) -. (b2.center.y) in
