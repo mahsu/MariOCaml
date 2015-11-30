@@ -41,18 +41,29 @@ let setup_sprite ?anim:(anim=Frame) ?loop:(loop=true)
     loop;
   }
 
-let make_player = function
-  | Standing -> failwith "todo"
-  | Jumping -> failwith "todo"
-  | Running -> failwith "todo"
-  | Crouching -> failwith "todo"
+let make_player (typ, dir) =
+  match dir with
+    | Left -> match typ with
+      (* 18x18 grid with 12x16 offset *)
+      | Standing -> setup_sprite "./sprites/mario-luigi.png" 1 0 (18.,18.) (12.,772.)
+      | Jumping -> failwith "todo"
+      | Running -> setup_sprite "./sprites/mario-luigi.png" 4 15 (18.,18.) (12.,772.)
+      | Crouching -> failwith "todo"
+    | Right -> match typ with
+      | Standing -> failwith "todo"
+      | Jumpint -> failwith "todo"
+      | Running -> failwith "todo"
+      | Crouching -> failwith "todo"
 
-let make_enemy = function
-  | Goomba -> failwith "todo" 
-  | GKoopa -> failwith "todo"
-  | RKoopa -> failwith "todo"
-  | GKoopaShell -> failwith "todo"
-  | RKoopaShell -> failwith "todo"
+let make_enemy (typ, dir) =
+  match (typ, dir) with
+      | (Goomba,_) -> failwith "todo" 
+      | (GKoopa,Left) -> failwith "todo"
+      | (GKoopa,Right) -> failwith "todo" 
+      | (RKoopa,Left) -> failwith "todo"
+      | (RKoopa,Right) -> failwith "todo"
+      | (GKoopaShell,_) -> failwith "todo"
+      | (RKoopaShell,_) -> failwith "todo"
 
 let make_item = function
   (* 18x18 grid with 11x8 offset *)
@@ -63,19 +74,21 @@ let make_item = function
 
 let make_block = function
   (* 18x18 grid with 11x8 offset *)
+  match typ with
   | Brick -> setup_sprite "./sprites/general.png" 5 15 (18.,18.) (299.,134.)
   | QBlock -> setup_sprite "./sprites/general.png" 4 15 (18.,18.) (299.,116.)
   | QBlockUsed -> setup_sprite "./sprites/general.png" 1 0 (18.,18.) (371.,116.)
   | UnBBlock -> failwith "todo"
 
-let make_type = function
-  | SPlayer t -> make_player t 
-  | SEnemy t -> make_enemy t
+let make_type typ dir =
+  match typ with 
+  | SPlayer t -> make_player (t,dir) 
+  | SEnemy t -> make_enemy (t,dir)
   | SItem t -> make_item t
   | SBlock t -> make_block t
       
-let make spawn context  =
-  let params = make_type spawn in
+let make spawn dir context  =
+  let params = make_type spawn dir in
   let img = (Dom_html.createImg Dom_html.document) in
   img##src <- (Js.string params.img_src) ;
   {
@@ -84,7 +97,6 @@ let make spawn context  =
     img;
     frame = ref 0;
     ticks = ref 0;
-    x_refl=0;
   }
 
 let reflect_sprite spr = failwith "todo"

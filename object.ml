@@ -6,7 +6,6 @@ type xy = {
   mutable y: float;
 }
 
-type direction = | Up | Down | Right | Left
 
 type aabb = {
   center: xy;
@@ -25,7 +24,7 @@ type obj = {
   vel: xy;
   jumping: bool;
   grounded: bool;
-  dir: direction;
+  dir: 1d_dir;
   invuln: int;
 }
 
@@ -69,7 +68,7 @@ let make_type = function
   | SBlock t -> make_block t
 
 let spawn spawnable context (posx, posy) =
-  let spr = Sprite.make spawnable context in
+  let spr = Sprite.make spawnable dir context in
   let params = make_type spawnable in 
   let obj = {
     params;

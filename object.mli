@@ -5,7 +5,6 @@ type xy = {
   mutable x: float;
   mutable y: float;
 }
-type direction = | Up | Down | Right | Left
 
 type aabb = {
   center: xy;
