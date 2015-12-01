@@ -28,7 +28,6 @@ type sprite =
     frame: int ref;
     ticks: int ref;
     img: Dom_html.imageElement Js.t;
-    x_refl: int;
   }
 
 
@@ -37,7 +36,7 @@ val setup_sprite : ?anim:animation_typ -> ?loop:bool -> string -> int -> int -> 
                           -> sprite_params 
 
 (* Creates a sprite given the actor type *)
-val make : Actors.spawn_typ -> Dom_html.canvasRenderingContext2D Js.t
+val make : Actors.spawn_typ -> Actors.dir_1d -> Dom_html.canvasRenderingContext2D Js.t
    -> sprite
 
 (* Updates the sprite's animation *)

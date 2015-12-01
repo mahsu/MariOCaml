@@ -2,8 +2,8 @@ open Sprite
 open Actors
 
 let friction = 0.8
-let gravity = 1
-let enemy_speed = 3
+let gravity = 1.
+let enemy_speed = 3.
 
 type xy = {
   mutable x: float;
@@ -18,18 +18,18 @@ type aabb = {
 
 type obj_params = {
   has_gravity: bool;
-  max_speed: bool;
+  speed: float;
 }
 
 type obj = {
   params: obj_params;
   pos: xy;
-  speed: float;
   vel: xy;
   mutable jumping: bool;
   mutable grounded: bool;
-  mutable dir: 1d_dir;
+  mutable dir: Actors.dir_1d;
   mutable invuln: int;
+  mutable kill: bool;
 }
 
 type collidable =
@@ -60,17 +60,18 @@ let make_enemy = function
   | RKoopaShell -> failwith "todo"
 
 let make_block = function
-  | QBlock -> failwith "todo"
+  | QBlock i -> failwith "todo"
   | QBlockUsed -> failwith "todo"
   | Brick -> failwith "todo"
   | UnBBlock -> failwith "todo"
 
-let make_type = function
+let make_type t= failwith "todo"
+ (*function 
   | SPlayer t -> make_player 
   | SEnemy t -> make_enemy t
   | SItem t -> make_item t
   | SBlock t -> make_block t
-
+*)
 let spawn spawnable context (posx, posy) =
   let spr = Sprite.make spawnable Left context in
   let params = make_type spawnable in 
@@ -78,23 +79,23 @@ let spawn spawnable context (posx, posy) =
     params;
     pos = {x=posx; y=posy};
     vel = {x=0.0;y=0.0};
-    speed = 0.0;
     jumping = false;
     grounded = false;
     dir = Left;
     invuln = 0;
+    kill = false;
   } in
   match spawnable with
-  | SPlayer t -> Player(t,spr,obj)
+  | SPlayer t -> Player(spr,obj)
   | SEnemy t -> Enemy(t,spr,obj)
   | SItem t -> Item(t,spr,obj)
   | SBlock t -> Block(t,spr,obj)
 
 let get_sprite = function
-  | Player (_,s,_) | Enemy (_,s, _) | Item (_,s, _) | Block (_,s, _)  -> s
+  | Player (s,_) | Enemy (_,s, _) | Item (_,s, _) | Block (_,s, _)  -> s
 
 let get_obj = function
-  | Player (_,_,o) 
+  | Player (_,o) 
   | Enemy (_,_,o) | Item (_,_,o) | Block (_,_,o) -> o
 
 let get_aabb obj  =
@@ -112,42 +113,47 @@ let update_player player dir context =
   let prev_jumping = player.jumping in
   let prev_dir = player.dir in
   let () = match dir with
-  | Left ->
-      if player.vel.x > -(player.speed) 
-      then player.vel.x <- player.vel.x -. 1.;
-  | Right ->
-      if player.vel.x < player.speed
+  | West ->
+      if player.vel.x > ~-.(player.params.speed) 
+      then player.vel.x <- player.vel.x -. 1.
+  | East ->
+      if player.vel.x < player.params.speed
       then player.vel.x <- player.vel.x +. 1.
-  | Up ->
+  | North ->
       if (not player.jumping) then begin
         player.jumping <- true;
-        player.vel.y <- -(player.speed)
+        player.vel.y <- ~-.(player.params.speed)
       end
-  | Down ->
+  | South ->
       if (not player.jumping) then print_endline "crouch"
   in
-  if not prev_jumping and player.jumping 
-  then Some (Sprite.make SPlayer(Jumping) player.dir context)
+  let () = player.vel.x <- (player.vel.x *. friction) in
+  if not prev_jumping && player.jumping 
+  then Some (Sprite.make (SPlayer Jumping) player.dir context)
   else if prev_dir <> player.dir
-  then Some (Sprite.make SPlayer(Running) player.dir context)
-  else if player.vel.y = 0 
-  then Some (Sprite.make SPlayer(Standing) player.dir context)
+  then Some (Sprite.make (SPlayer Running) player.dir context)
+  else if player.vel.y = 0. 
+  then Some (Sprite.make (SPlayer Standing) player.dir context)
   else None
 
 let update_vel obj = 
-  if obj.grounded then obj.vel.y <- 0
-  else if obj.params.has_gravity then obj.vel.y <- (obj.vel.y - gravity)
+  if obj.grounded then obj.vel.y <- 0.
+  else if obj.params.has_gravity then obj.vel.y <- (obj.vel.y -. gravity)
 
 let update_pos obj = 
-  obj.pos.x <- (obj.vel.x + obj.pos.x);
-  obj.pos.y <- (obj.vel.y + obj.pos.y);
+  obj.pos.x <- (obj.vel.x +. obj.pos.x);
+  obj.pos.y <- (obj.vel.y +. obj.pos.y)
 
-let process_obj col =
-  match col with
+let process_obj col context = col
+  (*match col with
   | Player(t,s,o) -> 
+
   | Enemy(t,s,o) ->
   | Item(t,s,o) ->
   | Block(t,s,o) ->
+*)
+
+let process_collision dir c1 c2 = failwith "todo"
 
 let check_collision o1 o2 =
   let b1 = get_aabb o1 and b2 = get_aabb o2 in
@@ -160,11 +166,11 @@ let check_collision o1 o2 =
   let oy = hheights -. abs_float vy in
   if abs_float vx < hwidths && abs_float vy < hheights then begin
     if ox >= oy then begin
-      if vy > 0. then (o1.pos.y <- o1.pos.y+.oy; Some Up) 
-      else (o1.pos.y <- o1.pos.y -. oy; Some Down)
+      if vy > 0. then (o1.pos.y <- o1.pos.y+.oy; Some North) 
+      else (o1.pos.y <- o1.pos.y -. oy; Some South)
     end else begin
-      if vx > 0. then (o1.pos.x <- o1.pos.x +.ox; Some Left)
-      else (o1.pos.x <- o1.pos.x -. ox; Some Right)
+      if vx > 0. then (o1.pos.x <- o1.pos.x +.ox; Some West)
+      else (o1.pos.x <- o1.pos.x -. ox; Some East)
     end
   end else None
   

@@ -2,20 +2,20 @@ type dir_1d = | Left | Right
 type dir_2d = | North | South | East | West
 
 
-type item_typ =
+type item_typ = 
   | Mushroom
   | FireFlower
   | Star
   | Coin
 
-type enemy_typ =
+type enemy_typ = 
   | Goomba
   | GKoopa
   | RKoopa
   | GKoopaShell
   | RKoopaShell
 
-type block_typ =
+type block_typ = 
   | QBlock of item_typ
   | QBlockUsed
   | Brick
@@ -27,7 +27,7 @@ type player_typ =
   | Running
   | Crouching
 
-type spawn_typ =
+type spawn_typ = 
   | SPlayer of player_typ
   | SEnemy of enemy_typ
   | SItem of item_typ

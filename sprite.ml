@@ -23,7 +23,6 @@ type sprite =
     frame: int ref;
     ticks: int ref;
     img: Dom_html.imageElement Js.t;
-    x_refl: int;
   }
 
   
@@ -45,16 +44,18 @@ let setup_sprite ?anim:(anim=Frame) ?loop:(loop=true)
 let make_player (typ, dir) =
   match dir with
     (* 16x16 grid with 0x0 offset*)
-    | Left -> match typ with
+    | Left -> begin match typ with
       | Standing -> setup_sprite "mario-small.png" 1 0 (16.,16.) (0.,0.)
       | Jumping -> setup_sprite "mario-small.png" 2 10 (16.,16.) (16.,16.)
       | Running -> setup_sprite "mario-small.png" 3 10 (16.,16.) (16.,0.)
       | Crouching -> setup_sprite "mario-small.png" 1 0 (16.,16.) (0.,64.)
-    | Right -> match typ with
+      end
+    | Right -> begin match typ with
       | Standing -> setup_sprite "mario-small.png" 1 0 (16.,16.) (0.,32.)
       | Jumping -> setup_sprite "mario-small.png" 2 0 (16.,16.) (16.,48.)
       | Running -> setup_sprite "mario-small.png" 3 10 (16.,16.) (16.,32.)
       | Crouching -> setup_sprite "mario-small.png" 1 0 (16.,16.) (0.,64.)
+      end
 
 let make_enemy (typ, dir) =
   match (typ, dir) with
@@ -75,13 +76,12 @@ let make_item = function
 
 let make_block = function
   (* 16x16 grid with 0x0 offset *)
-  match typ with
   | Brick -> setup_sprite "blocks.png" 5 15 (16.,16.) (0.,0.)
-  | QBlock -> setup_sprite "blocks.png" 4 15 (16.,16.) (0.,16.)
+  | QBlock _ -> setup_sprite "blocks.png" 4 15 (16.,16.) (0.,16.)
   | QBlockUsed -> setup_sprite "blocks.png" 1 0 (16.,16.) (0.,32.)
   | UnBBlock -> failwith "todo"
 
-let make_type typ dir =
+let make_type typ (dir : Actors.dir_1d) =
   match typ with 
   | SPlayer t -> make_player (t,dir) 
   | SEnemy t -> make_enemy (t,dir)

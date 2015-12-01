@@ -13,22 +13,21 @@ type aabb = {
 
 type obj_params = {
   has_gravity: bool;
-  max_speed: bool;
+  speed: float;
 }
 type obj = {
   params: obj_params;
   pos: xy;
-  speed: float;
   vel: xy;
   mutable jumping: bool;
   mutable grounded: bool;
-  mutable dir: direction;
+  mutable dir: Actors.dir_1d;
   mutable invuln: int;
   mutable kill: bool;
 }
 
 type collidable =
-  | Player of player_typ * sprite * obj
+  | Player of sprite * obj
   | Enemy of enemy_typ * sprite * obj
   | Item of item_typ * sprite * obj
   | Block of block_typ * sprite * obj
@@ -49,18 +48,18 @@ val spawn : Actors.spawn_typ  -> Dom_html.canvasRenderingContext2D Js.t
 (* Destroys the object, returning a list of destruction effect objects *)
 val kill : obj -> noncollidable list
 
-val process_obj : collidable -> collidable
+val process_obj : collidable -> Dom_html.canvasRenderingContext2D Js.t -> collidable
 
-val update_player : obj -> Actor.1d_dir -> sprite option
+val update_player : obj -> Actors.dir_2d -> Dom_html.canvasRenderingContext2D Js.t -> sprite option
 
 (* Updates the velocity of the object *)
-val update_vel : obj -> obj
+val update_vel : obj -> unit
 
 (* Updates the position of the object *)
-val update_pos : obj -> obj
+val update_pos : obj -> unit
 
 (* Checks whether a collision occured between two objects, returning the
  * direction of the collision if one occurred. *)
-val check_collision : collidable -> collidable -> Actors.2d_dir option
+val check_collision : collidable -> collidable -> Actors.dir_2d option
 
-val process_collision : Actors.2d_dir -> collidable -> unit
+val process_collision : Actors.dir_2d -> collidable -> collidable -> unit

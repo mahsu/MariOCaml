@@ -16,8 +16,8 @@ let pressed_keys = {
 
 let friction = 0.7
 let gravity = 0.6
-let collid_objs = ref [] in
-let last_time = ref 0. in
+let collid_objs = ref []
+let last_time = ref 0.
 
 let calc_fps t0 t1 =
   let delta = (t1 -. t0) /. 1000. in
@@ -31,9 +31,9 @@ let rec narrow_phase c cs =
   match cs with
   | [] -> ()
   | h::t ->
-      let () = begin match Object.check_collision c1 c2 with
+    let () = begin match Object.check_collision c h with
     | None -> ()
-    | Some dir -> Object.process_collision dir c1 c2
+    | Some dir -> Object.process_collision dir c h
     end in
       narrow_phase c cs
 
@@ -45,12 +45,13 @@ let update_collidable (collid:Object.collidable) all_collids canvas =
     let obj = Object.get_obj collid in
     let spr = Object.get_sprite collid in
     if not obj.kill then begin
-      let check_narrow = broad_phase collid all_collids in
-      Object.process_obj collid context
+      let _ = broad_phase collid in
+      let collid = Object.process_obj collid context in
       Draw.render spr (obj.pos.x,obj.pos.y);
       Sprite.update_animation spr; (* return bool * variant *)
       (* if bool *)
       if not obj.kill  then (collid_objs := collid::!collid_objs)
+    end
   
 
 let update_loop canvas objs = 
@@ -62,7 +63,7 @@ let update_loop canvas objs =
     broad_cache := objs;
     
     Draw.clear_canvas canvas;
-    List.iter (fun obj -> ignore (update_collidable canvas obj)) objs ;
+    List.iter (fun obj -> ignore (update_collidable obj objs canvas)) objs ;
 
     Draw.fps canvas fps;
     ignore Dom_html.window##requestAnimationFrame( 
