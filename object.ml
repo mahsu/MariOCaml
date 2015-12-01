@@ -142,6 +142,13 @@ let update_pos obj =
   obj.pos.x <- (obj.vel.x + obj.pos.x);
   obj.pos.y <- (obj.vel.y + obj.pos.y);
 
+let process_obj col =
+  match col with
+  | Player(t,s,o) -> 
+  | Enemy(t,s,o) ->
+  | Item(t,s,o) ->
+  | Block(t,s,o) ->
+
 let check_collision o1 o2 =
   let b1 = get_aabb o1 and b2 = get_aabb o2 in
   let o1 = get_obj o1 in

@@ -24,6 +24,7 @@ type obj = {
   mutable grounded: bool;
   mutable dir: direction;
   mutable invuln: int;
+  mutable kill: bool;
 }
 
 type collidable =
@@ -48,8 +49,9 @@ val spawn : Actors.spawn_typ  -> Dom_html.canvasRenderingContext2D Js.t
 (* Destroys the object, returning a list of destruction effect objects *)
 val kill : obj -> noncollidable list
 
+val process_obj : collidable -> collidable
 
-val update_player -> obj -> Actor.1d_dir -> sprite option
+val update_player : obj -> Actor.1d_dir -> sprite option
 
 (* Updates the velocity of the object *)
 val update_vel : obj -> obj
@@ -61,3 +63,4 @@ val update_pos : obj -> obj
  * direction of the collision if one occurred. *)
 val check_collision : collidable -> collidable -> Actors.2d_dir option
 
+val process_collision : Actors.2d_dir -> collidable -> unit
