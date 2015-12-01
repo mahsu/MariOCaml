@@ -5,7 +5,6 @@ type xy = {
   mutable x: float;
   mutable y: float;
 }
-type direction = | Up | Down | Right | Left
 
 type aabb = {
   center: xy;
@@ -21,10 +20,10 @@ type obj = {
   pos: xy;
   speed: float;
   vel: xy;
-  jumping: bool;
-  grounded: bool;
-  dir: direction;
-  invuln: int;
+  mutable jumping: bool;
+  mutable grounded: bool;
+  mutable dir: direction;
+  mutable invuln: int;
 }
 
 type collidable =
@@ -49,6 +48,9 @@ val spawn : Actors.spawn_typ  -> Dom_html.canvasRenderingContext2D Js.t
 (* Destroys the object, returning a list of destruction effect objects *)
 val kill : obj -> noncollidable list
 
+
+val update_player -> obj -> Actor.1d_dir -> sprite option
+
 (* Updates the velocity of the object *)
 val update_vel : obj -> obj
 
@@ -57,5 +59,5 @@ val update_pos : obj -> obj
 
 (* Checks whether a collision occured between two objects, returning the
  * direction of the collision if one occurred. *)
-val check_collision : collidable -> collidable -> direction option
+val check_collision : collidable -> collidable -> Actors.2d_dir option
 

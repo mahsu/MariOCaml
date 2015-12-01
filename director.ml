@@ -14,6 +14,9 @@ let pressed_keys = {
   down = false;
 }
 
+let friction = 0.7
+let gravity = 0.6
+
 let calc_fps t0 t1 =
   let delta = (t1 -. t0) /. 1000. in
   1. /. delta
@@ -46,7 +49,6 @@ let update_loop canvas objs =
     if false = false then (collid_objs := obj::!collid_objs)
   
   in update_helper 0. canvas objs
-
 
 let keydown evt = 
   let () = match evt##keyCode with

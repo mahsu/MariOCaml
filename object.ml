@@ -1,12 +1,15 @@
 open Sprite
 open Actors
 
+let friction = 0.8
+let gravity = 1
+let enemy_speed = 3
+
 type xy = {
   mutable x: float;
   mutable y: float;
 }
 
-type direction = | Up | Down | Right | Left
 
 type aabb = {
   center: xy;
@@ -23,14 +26,14 @@ type obj = {
   pos: xy;
   speed: float;
   vel: xy;
-  jumping: bool;
-  grounded: bool;
-  dir: direction;
-  invuln: int;
+  mutable jumping: bool;
+  mutable grounded: bool;
+  mutable dir: 1d_dir;
+  mutable invuln: int;
 }
 
 type collidable =
-  | Player of player_typ * sprite * obj
+  | Player of sprite * obj
   | Enemy of enemy_typ * sprite * obj
   | Item of item_typ * sprite * obj
   | Block of block_typ * sprite * obj
@@ -63,13 +66,13 @@ let make_block = function
   | UnBBlock -> failwith "todo"
 
 let make_type = function
-  | SPlayer t -> make_player t 
+  | SPlayer t -> make_player 
   | SEnemy t -> make_enemy t
   | SItem t -> make_item t
   | SBlock t -> make_block t
 
 let spawn spawnable context (posx, posy) =
-  let spr = Sprite.make spawnable context in
+  let spr = Sprite.make spawnable Left context in
   let params = make_type spawnable in 
   let obj = {
     params;
@@ -105,9 +108,39 @@ let get_aabb obj  =
     half = {x=sx/.2.;y=sy/.2.};
   }
 
-let update_vel obj = failwith "todo"
+let update_player player dir context =
+  let prev_jumping = player.jumping in
+  let prev_dir = player.dir in
+  let () = match dir with
+  | Left ->
+      if player.vel.x > -(player.speed) 
+      then player.vel.x <- player.vel.x -. 1.;
+  | Right ->
+      if player.vel.x < player.speed
+      then player.vel.x <- player.vel.x +. 1.
+  | Up ->
+      if (not player.jumping) then begin
+        player.jumping <- true;
+        player.vel.y <- -(player.speed)
+      end
+  | Down ->
+      if (not player.jumping) then print_endline "crouch"
+  in
+  if not prev_jumping and player.jumping 
+  then Some (Sprite.make SPlayer(Jumping) player.dir context)
+  else if prev_dir <> player.dir
+  then Some (Sprite.make SPlayer(Running) player.dir context)
+  else if player.vel.y = 0 
+  then Some (Sprite.make SPlayer(Standing) player.dir context)
+  else None
 
-let update_pos obj = failwith "todo"
+let update_vel obj = 
+  if obj.grounded then obj.vel.y <- 0
+  else if obj.params.has_gravity then obj.vel.y <- (obj.vel.y - gravity)
+
+let update_pos obj = 
+  obj.pos.x <- (obj.vel.x + obj.pos.x);
+  obj.pos.y <- (obj.vel.y + obj.pos.y);
 
 let check_collision o1 o2 =
   let b1 = get_aabb o1 and b2 = get_aabb o2 in
