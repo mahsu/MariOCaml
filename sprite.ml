@@ -29,6 +29,7 @@ type sprite =
   
 let setup_sprite ?anim:(anim=Frame) ?loop:(loop=true) 
                  img_src max_frames max_ticks frame_size src_offset = 
+  let img_src = "./sprites/" ^ img_src in
   {
     img_src;
     max_frames;
@@ -43,41 +44,41 @@ let setup_sprite ?anim:(anim=Frame) ?loop:(loop=true)
 
 let make_player (typ, dir) =
   match dir with
+    (* 16x16 grid with 0x0 offset*)
     | Left -> match typ with
-      (* 18x18 grid with 12x16 offset *)
-      | Standing -> setup_sprite "./sprites/mario-luigi.png" 1 0 (18.,18.) (12.,772.)
-      | Jumping -> failwith "todo"
-      | Running -> setup_sprite "./sprites/mario-luigi.png" 4 15 (18.,18.) (12.,772.)
-      | Crouching -> failwith "todo"
+      | Standing -> setup_sprite "mario-small.png" 1 0 (16.,16.) (0.,0.)
+      | Jumping -> setup_sprite "mario-small.png" 2 10 (16.,16.) (16.,16.)
+      | Running -> setup_sprite "mario-small.png" 3 10 (16.,16.) (16.,0.)
+      | Crouching -> setup_sprite "mario-small.png" 1 0 (16.,16.) (0.,64.)
     | Right -> match typ with
-      | Standing -> failwith "todo"
-      | Jumpint -> failwith "todo"
-      | Running -> failwith "todo"
-      | Crouching -> failwith "todo"
+      | Standing -> setup_sprite "mario-small.png" 1 0 (16.,16.) (0.,32.)
+      | Jumping -> setup_sprite "mario-small.png" 2 0 (16.,16.) (16.,48.)
+      | Running -> setup_sprite "mario-small.png" 3 10 (16.,16.) (16.,32.)
+      | Crouching -> setup_sprite "mario-small.png" 1 0 (16.,16.) (0.,64.)
 
 let make_enemy (typ, dir) =
   match (typ, dir) with
-      | (Goomba,_) -> failwith "todo" 
-      | (GKoopa,Left) -> failwith "todo"
-      | (GKoopa,Right) -> failwith "todo" 
-      | (RKoopa,Left) -> failwith "todo"
-      | (RKoopa,Right) -> failwith "todo"
-      | (GKoopaShell,_) -> failwith "todo"
-      | (RKoopaShell,_) -> failwith "todo"
+      | (Goomba,_) -> setup_sprite "enemies.png" 2 10 (16.,16.) (0.,128.) 
+      | (GKoopa,Left) -> setup_sprite "enemies.png" 2 10 (16.,27.) (0.,69.)
+      | (GKoopa,Right) -> setup_sprite "enemies.png" 2 10 (16.,27.) (32.,69.)
+      | (RKoopa,Left) -> setup_sprite "enemies.png" 2 10 (16.,27.) (0.,5.)
+      | (RKoopa,Right) -> setup_sprite "enemies.png" 2 10 (16.,27.) (32.,5.)
+      | (GKoopaShell,_) -> setup_sprite "enemies.png" 4 10 (16.,16.) (0.,96.)
+      | (RKoopaShell,_) -> setup_sprite "enemies.png" 4 10 (16.,16.) (0.,32.)
 
 let make_item = function
-  (* 18x18 grid with 11x8 offset *)
-  | Coin -> setup_sprite "./sprites/general.png" 3 15 (18.,18.) (299.,98.)
-  | FireFlower -> setup_sprite "./sprites/general.png" 1 0 (18.,18.) (335.,188.)
-  | Mushroom -> setup_sprite "./sprites/general.png" 1 0 (18.,18.) (299.,188.)
-  | Star -> setup_sprite "./sprites/general.png" 1 0 (18.,18.) (353.,206.)
+  (* 16x16 grid with 0x0 offset *)
+  | Coin -> setup_sprite "items.png" 3 15 (16.,16.) (0.,80.)
+  | FireFlower -> setup_sprite "items.png" 1 0 (16.,16.) (0.,188.)
+  | Mushroom -> setup_sprite "items.png" 1 0 (16.,16.) (0.,0.)
+  | Star -> setup_sprite "items.png" 1 0 (16.,16.) (16.,48.)
 
 let make_block = function
-  (* 18x18 grid with 11x8 offset *)
+  (* 16x16 grid with 0x0 offset *)
   match typ with
-  | Brick -> setup_sprite "./sprites/general.png" 5 15 (18.,18.) (299.,134.)
-  | QBlock -> setup_sprite "./sprites/general.png" 4 15 (18.,18.) (299.,116.)
-  | QBlockUsed -> setup_sprite "./sprites/general.png" 1 0 (18.,18.) (371.,116.)
+  | Brick -> setup_sprite "blocks.png" 5 15 (16.,16.) (0.,0.)
+  | QBlock -> setup_sprite "blocks.png" 4 15 (16.,16.) (0.,16.)
+  | QBlockUsed -> setup_sprite "blocks.png" 1 0 (16.,16.) (0.,32.)
   | UnBBlock -> failwith "todo"
 
 let make_type typ dir =
