@@ -3,7 +3,6 @@ open Actors
 
 let friction = 0.8
 let gravity = 1.
-let enemy_speed = 3.
 
 type xy = {
   mutable x: float;
@@ -42,36 +41,39 @@ type noncollidable =
   (*| Dead of dead_type * sprite*)
   | Scenery of sprite * obj
 
-let make_player = function
-  | _ -> failwith "todo"
+let setup_obj ?g:(has_gravity=true) ?spd:(speed=3.) () =
+  {
+    has_gravity;
+    speed;
+  }
 
+let make_player () = setup_obj ()
 
 let make_item = function
-  | Mushroom -> failwith "todo"
-  | FireFlower -> failwith "todo"
-  | Star -> failwith "todo"
-  | Coin -> failwith "todo"
+  | Mushroom -> setup_obj ()
+  | FireFlower -> setup_obj ()
+  | Star -> setup_obj ()
+  | Coin -> setup_obj ~g:false ()
 
 let make_enemy = function
-  | Goomba -> failwith "todo"
-  | GKoopa -> failwith "todo"
-  | RKoopa -> failwith "todo"
-  | GKoopaShell -> failwith "todo"
-  | RKoopaShell -> failwith "todo"
+  | Goomba -> setup_obj ()
+  | GKoopa -> setup_obj ()
+  | RKoopa -> setup_obj ()
+  | GKoopaShell -> setup_obj ()
+  | RKoopaShell -> setup_obj ()
 
 let make_block = function
-  | QBlock i -> failwith "todo"
-  | QBlockUsed -> failwith "todo"
-  | Brick -> failwith "todo"
-  | UnBBlock -> failwith "todo"
+  | QBlock i -> setup_obj ()
+  | QBlockUsed -> setup_obj ()
+  | Brick -> setup_obj ()
+  | UnBBlock -> setup_obj ()
 
-let make_type t= failwith "todo"
- (*function 
-  | SPlayer t -> make_player 
+let make_type = function 
+  | SPlayer t -> make_player ()
   | SEnemy t -> make_enemy t
   | SItem t -> make_item t
   | SBlock t -> make_block t
-*)
+
 let spawn spawnable context (posx, posy) =
   let spr = Sprite.make spawnable Left context in
   let params = make_type spawnable in 
