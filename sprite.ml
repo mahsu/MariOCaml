@@ -79,7 +79,7 @@ let make_block = function
   | Brick -> setup_sprite "blocks.png" 5 15 (16.,16.) (0.,0.)
   | QBlock _ -> setup_sprite "blocks.png" 4 15 (16.,16.) (0.,16.)
   | QBlockUsed -> setup_sprite "blocks.png" 1 0 (16.,16.) (0.,32.)
-  | UnBBlock -> failwith "todo"
+  | UnBBlock -> setup_sprite "blocks.png" 1 0 (16.,16.) (0.,48.)
 
 let make_type typ (dir : Actors.dir_1d) =
   match typ with 
@@ -107,6 +107,7 @@ let update_animation (spr: sprite) =
   let curr_ticks = !(spr.ticks) in
   if curr_ticks = spr.params.max_ticks then (
     spr.ticks := 0;
+    print_endline "next";
     match spr.params.anim with
     | Frame -> 
         if spr.params.loop then 

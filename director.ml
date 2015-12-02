@@ -50,24 +50,25 @@ let update_collidable (collid:Object.collidable) all_collids canvas =
       Draw.render spr (obj.pos.x,obj.pos.y);
       Sprite.update_animation spr; (* return bool * variant *)
       (* if bool *)
-      if not obj.kill  then (collid_objs := collid::!collid_objs)
+      if not obj.kill then (collid_objs := collid::!collid_objs)
     end
   
 
 let update_loop canvas objs = 
     let rec update_helper time canvas objs  = 
-     
-    let fps = calc_fps !last_time time in
-    last_time := time;
+      collid_objs := [];
 
-    broad_cache := objs;
-    
-    Draw.clear_canvas canvas;
-    List.iter (fun obj -> ignore (update_collidable obj objs canvas)) objs ;
+      let fps = calc_fps !last_time time in
+      last_time := time;
 
-    Draw.fps canvas fps;
-    ignore Dom_html.window##requestAnimationFrame( 
-        Js.wrap_callback (fun (t:float) -> update_helper t canvas !collid_objs))
+      broad_cache := objs;
+      
+      Draw.clear_canvas canvas;
+      List.iter (fun obj -> ignore (update_collidable obj objs canvas)) objs ;
+
+      Draw.fps canvas fps;
+      ignore Dom_html.window##requestAnimationFrame( 
+          Js.wrap_callback (fun (t:float) -> update_helper t canvas !collid_objs))
 
   in update_helper 0. canvas objs
 

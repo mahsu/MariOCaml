@@ -77,6 +77,7 @@ let make_type = function
 let spawn spawnable context (posx, posy) =
   let spr = Sprite.make spawnable Left context in
   let params = make_type spawnable in 
+  print_endline "spawn";
   let obj = {
     params;
     pos = {x=posx; y=posy};
