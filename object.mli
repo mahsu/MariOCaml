@@ -63,4 +63,4 @@ val update_player : obj -> Actors.controls list -> Dom_html.canvasRenderingConte
  * direction of the collision if one occurred. *)
 val check_collision : collidable -> collidable -> Actors.dir_2d option
 
-val process_collision : Actors.dir_2d -> collidable -> collidable -> unit
+val process_collision : Actors.dir_2d -> collidable -> collidable -> Dom_html.canvasRenderingContext2D Js.t -> unit

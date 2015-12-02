@@ -103,8 +103,7 @@ let get_sprite = function
   | Player (s,_) | Enemy (_,s, _) | Item (_,s, _) | Block (_,s, _)  -> s
 
 let get_obj = function
-  | Player (_,o)
-  | Enemy (_,_,o) | Item (_,_,o) | Block (_,_,o) -> o
+  | Player (_,o) | Enemy (_,_,o) | Item (_,_,o) | Block (_,_,o) -> o
 
 let is_player = function
   | Player(_,_) -> true
@@ -159,7 +158,8 @@ let update_pos obj =
 let process_obj col context = 
   let obj = get_obj col in
   update_vel obj;
-  update_pos obj 
+  update_pos obj
+  (*todo check bounds *) 
   (*match col with
   | Player(t,s,o) ->
 
@@ -193,19 +193,27 @@ let collide_block dir obj =
       obj.jumping <- false;
   | East | West-> obj.vel.x <- 0.
 
-let evolve_enemy typ spr obj = 
+let reverse_left_right obj =
+  obj.vel.x <- ~-.(obj.vel.x);
+  obj.dir <-
+    match obj.dir with
+    | Left -> Right
+    | Right -> Left
+
+let evolve_enemy typ spr obj context = 
   match typ with
-  | GKoopa -> failwith "todo"
+  | GKoopa -> 
+      let new_spr = Sprite.make (SEnemy GKoopaShell) obj.dir context in new_spr
   | RKoopa -> failwith "todo"
   | GKoopaShell -> failwith "todo"
   | RKoopaShell -> failwith "todo"
-  | _ -> obj.kill <- true 
+  | _ -> obj.kill <- true; failwith "todo" 
 
-let process_collision dir c1 c2 =
+let process_collision dir c1 c2 context =
   match (c1, c2, dir) with
   | (Player(s1,o1), Enemy(typ,s2,o2), North) -> 
       o1.jumping <- false;
-      evolve_enemy typ s2 o2
+      ignore (evolve_enemy typ s2 o2 context)
   | (Player(s1,o1), Enemy(t2,s2,o2), _) -> o1.kill <- true
   | (Player(s1,o1), Item(t2,s2,o2), _) -> 
       o2.kill <- true (*& stuff happens to player*)
@@ -218,8 +226,8 @@ let process_collision dir c1 c2 =
   | (Enemy(t1,s1,o1), Enemy(t2,s2,o2), dir) ->
       begin match dir with
       | West | East -> 
-          o1.vel.x <- ~-.(o1.vel.x); 
-          o2.vel.x <- ~-.(o2.vel.x)
+          reverse_left_right o1;
+          reverse_left_right o2
       | _ -> ()
       end
   | (Enemy(typ,s,obj), Block(typ2,s2,obj2), dir) -> collide_block dir obj 

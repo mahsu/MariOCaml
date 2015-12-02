@@ -15,8 +15,6 @@ let pressed_keys = {
   down = false;
 }
 
-let friction = 0.7
-let gravity = 0.6
 let collid_objs = ref []
 let last_time = ref 0.
 
@@ -28,27 +26,22 @@ let broad_cache = ref []
 let broad_phase collid = 
   !broad_cache
 
-let rec narrow_phase c cs =
+let rec narrow_phase c cs context =
   match cs with
   | [] -> ()
   | h::t ->
-    let () = if not (equals c h) then begin match Object.check_collision c h with
-    | None -> ()
-    | Some dir -> 
+    let () = if not (equals c h) then 
+      begin match Object.check_collision c h with
+      | None -> ()
+      | Some dir -> 
         if (get_obj h).id <> (get_obj c).id 
-        then Object.process_collision dir c h
-    end in narrow_phase c t
+        then Object.process_collision dir c h context
+    end in narrow_phase c t context
 
 let translate_keys () =
   let k = pressed_keys in
-  let controls = ref [] in
-  controls := 
-    if k.left then (CLeft::!controls) else
-    if k.right then (CRight::!controls) else
-    if k.up then (CUp::!controls) else
-    if k.down then (CDown::!controls)
-    else !controls
-    ; !controls
+  let ctrls = [(k.left,CLeft);(k.right,CRight);(k.up,CUp);(k.down,CDown)] in
+  List.fold_left (fun a x -> if fst x then (snd x)::a else a) [] ctrls
 
 let update_if_player collid context =
   match collid with
@@ -71,7 +64,7 @@ let update_collidable (collid:Object.collidable) all_collids canvas =
     obj.grounded <- false;
     let broad = broad_phase collid in
     Object.process_obj collid context;
-    narrow_phase collid broad;
+    narrow_phase collid broad context;
     Draw.render spr (obj.pos.x,obj.pos.y);
     Sprite.update_animation spr; (* return bool * variant *)
     if not obj.kill then (collid_objs := collid::!collid_objs)
