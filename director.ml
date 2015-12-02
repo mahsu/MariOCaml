@@ -63,10 +63,10 @@ let update_collidable (collid:Object.collidable) all_collids canvas =
   if not obj.kill then begin
     obj.grounded <- false;
     let broad = broad_phase collid in
-    Object.process_obj collid context;
+    Object.process_obj obj;
     narrow_phase collid broad context;
     Draw.render spr (obj.pos.x,obj.pos.y);
-    Sprite.update_animation spr; (* return bool * variant *)
+    if obj.vel.x <> 0. || not (is_enemy collid) then Sprite.update_animation spr;
     if not obj.kill then (collid_objs := collid::!collid_objs)
   end
   

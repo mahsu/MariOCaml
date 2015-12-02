@@ -49,13 +49,14 @@ val spawn : Actors.spawn_typ  -> Dom_html.canvasRenderingContext2D Js.t
 val equals : collidable -> collidable -> bool
 
 val is_player : collidable -> bool
+val is_enemy : collidable -> bool
 
 val normalize_origin : xy -> Sprite.sprite -> unit
 
 (* Destroys the object, returning a list of destruction effect objects *)
 val kill : obj -> noncollidable list
 
-val process_obj : collidable -> Dom_html.canvasRenderingContext2D Js.t -> unit
+val process_obj : obj -> unit
 
 val update_player : obj -> Actors.controls list -> Dom_html.canvasRenderingContext2D Js.t -> sprite option
 

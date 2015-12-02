@@ -44,7 +44,7 @@ type noncollidable =
   (*| Dead of dead_type * sprite*)
   | Scenery of sprite * obj
 
-let setup_obj ?g:(has_gravity=true) ?spd:(speed=3.) () =
+let setup_obj ?anim:(anim=true) ?g:(has_gravity=true) ?spd:(speed=3.) () =
   {
     has_gravity;
     speed;
@@ -62,8 +62,8 @@ let make_enemy = function
   | Goomba -> setup_obj ()
   | GKoopa -> setup_obj ()
   | RKoopa -> setup_obj ()
-  | GKoopaShell -> setup_obj ~spd:0. ()
-  | RKoopaShell -> setup_obj ~spd:0. ()
+  | GKoopaShell -> setup_obj ~spd:5. ()
+  | RKoopaShell -> setup_obj ~spd:5. ()
 
 let make_block = function
   | QBlock i -> setup_obj ~g:false ()
@@ -77,10 +77,10 @@ let make_type = function
   | SItem t -> make_item t
   | SBlock t -> make_block t
 
-let spawn spawnable context (posx, posy) =
-  let spr = Sprite.make spawnable Right context in
+let make ?dir:(dir=Left) spawnable context (posx, posy) = 
+  let spr = Sprite.make spawnable dir context in
   let params = make_type spawnable in
-  id_counter := !id_counter + 1;
+  id_counter := !id_counter +1;
   let obj = {
     params;
     pos = {x=posx; y=posy};
@@ -88,10 +88,14 @@ let spawn spawnable context (posx, posy) =
     id = !id_counter;
     jumping = false;
     grounded = false;
-    dir = Left;
+    dir = dir;
     invuln = 0;
     kill = false;
   } in
+  (spr,obj)
+
+let spawn spawnable context (posx, posy) =
+  let (spr,obj) = make spawnable context (posx, posy) in
   match spawnable with
   | SPlayer t -> Player(spr,obj)
   | SEnemy t -> Enemy(t,spr,obj)
@@ -107,6 +111,10 @@ let get_obj = function
 
 let is_player = function
   | Player(_,_) -> true
+  | _ -> false
+
+let is_enemy = function
+  | Enemy(_,_,_) -> true
   | _ -> false
 
 let equals col1 col2 = (get_obj col1).id = (get_obj col2).id
@@ -147,6 +155,14 @@ let update_player player keys context =
   then Some (Sprite.make (SPlayer Standing) player.dir context)
   else None
 
+(* Sets an object's x velocity to the speed specified in its params based on
+ * its direction *)
+let set_vel_to_speed obj =
+  let speed = obj.params.speed in
+  match obj.dir with
+  | Left -> obj.vel.x <- ~-.speed
+  | Right -> obj.vel.x <- speed
+
 let update_vel obj =
   if obj.grounded then obj.vel.y <- 0.
   else if obj.params.has_gravity then obj.vel.y <- (obj.vel.y +. gravity)
@@ -155,11 +171,10 @@ let update_pos obj =
   obj.pos.x <- (obj.vel.x +. obj.pos.x);
   if obj.params.has_gravity then obj.pos.y <- (obj.vel.y +. obj.pos.y)
 
-let process_obj col context = 
-  let obj = get_obj col in
+let process_obj obj = 
   update_vel obj;
   update_pos obj
-  (*todo check bounds *) 
+  (*todo kill if out of bounds *) 
   (*match col with
   | Player(t,s,o) ->
 
@@ -203,11 +218,17 @@ let reverse_left_right obj =
 let evolve_enemy typ spr obj context = 
   match typ with
   | GKoopa -> 
-      let new_spr = Sprite.make (SEnemy GKoopaShell) obj.dir context in new_spr
-  | RKoopa -> failwith "todo"
-  | GKoopaShell -> failwith "todo"
-  | RKoopaShell -> failwith "todo"
-  | _ -> obj.kill <- true; failwith "todo" 
+      let (new_spr,new_obj) = make ~dir:obj.dir (SEnemy GKoopaShell) context (obj.pos.x,obj.pos.y) in
+      normalize_pos new_obj.pos spr new_spr;
+      (GKoopaShell,new_spr,new_obj)
+  | RKoopa -> 
+      let (new_spr,new_obj) = make ~dir:obj.dir (SEnemy RKoopaShell) context (obj.pos.x,obj.pos.y) in
+      normalize_pos new_obj.pos spr new_spr;
+      (RKoopaShell,new_spr,new_obj)
+  | GKoopaShell |RKoopaShell -> 
+      if obj.vel.x <> 0. then obj.vel.x <- 0. else set_vel_to_speed obj;
+      (typ, spr, obj)
+  | _ -> obj.kill <- true; (typ, spr, obj)
 
 let process_collision dir c1 c2 context =
   match (c1, c2, dir) with
