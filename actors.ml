@@ -7,20 +7,20 @@ type controls =
   | CUp
   | CDown
 
-type item_typ = 
+type item_typ =
   | Mushroom
   | FireFlower
   | Star
   | Coin
 
-type enemy_typ = 
+type enemy_typ =
   | Goomba
   | GKoopa
   | RKoopa
   | GKoopaShell
   | RKoopaShell
 
-type block_typ = 
+type block_typ =
   | QBlock of item_typ
   | QBlockUsed
   | Brick
@@ -32,9 +32,15 @@ type player_typ =
   | Running
   | Crouching
 
-type spawn_typ = 
+(*type ground_typ =
+  | Wood
+  | Earth
+  | Brick*)
+
+type spawn_typ =
   | SPlayer of player_typ
   | SEnemy of enemy_typ
   | SItem of item_typ
   | SBlock of block_typ
+  (*| SGround of ground_typ*)
 

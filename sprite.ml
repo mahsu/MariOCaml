@@ -82,6 +82,12 @@ let make_block = function
   | QBlockUsed -> setup_sprite "blocks.png" 1 0 (16.,16.) (0.,32.)
   | UnBBlock -> setup_sprite "blocks.png" 1 0 (16.,16.) (0.,48.)
 
+(*let make_ground = function
+  (* 16x16 grid with 0x0 offset *)
+  | Wood -> setup_sprite "ground.png" 1 0 (16.,16.) (0, 32.)
+  | Earth -> setup_sprite "ground.png" 1 0 (16.,16.) (0, 96.)
+  | Brick -> setup_sprite "ground.png" 1 0 (16.,16.) (0, 128.) *)
+
 let make_type typ (dir : Actors.dir_1d) =
   match typ with
   | SPlayer t -> make_player (t,dir)
