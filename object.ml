@@ -66,10 +66,10 @@ let make_enemy = function
   | RKoopaShell -> setup_obj ()
 
 let make_block = function
-  | QBlock i -> setup_obj ()
-  | QBlockUsed -> setup_obj ()
-  | Brick -> setup_obj ()
-  | UnBBlock -> setup_obj ()
+  | QBlock i -> setup_obj ~g:false ()
+  | QBlockUsed -> setup_obj ~g:false ()
+  | Brick -> setup_obj ~g:false ()
+  | UnBBlock -> setup_obj ~g:false ()
 
 let make_type = function
   | SPlayer t -> make_player ()
