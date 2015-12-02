@@ -2,7 +2,7 @@ open Sprite
 open Actors
 
 let friction = 0.8
-let gravity = 1.
+let gravity = 0.01
 
 type xy = {
   mutable x: float;
@@ -20,10 +20,13 @@ type obj_params = {
   speed: float;
 }
 
+let id_counter = ref min_int
+
 type obj = {
   params: obj_params;
   pos: xy;
   vel: xy;
+  id: int;
   mutable jumping: bool;
   mutable grounded: bool;
   mutable dir: Actors.dir_1d;
@@ -63,10 +66,10 @@ let make_enemy = function
   | RKoopaShell -> setup_obj ()
 
 let make_block = function
-  | QBlock i -> setup_obj ()
-  | QBlockUsed -> setup_obj ()
-  | Brick -> setup_obj ()
-  | UnBBlock -> setup_obj ()
+  | QBlock i -> setup_obj ~g:false ()
+  | QBlockUsed -> setup_obj ~g:false ()
+  | Brick -> setup_obj ~g:false ()
+  | UnBBlock -> setup_obj ~g:false ()
 
 let make_type = function
   | SPlayer t -> make_player ()
@@ -75,12 +78,14 @@ let make_type = function
   | SBlock t -> make_block t
 
 let spawn spawnable context (posx, posy) =
-  let spr = Sprite.make spawnable Left context in
+  let spr = Sprite.make spawnable Right context in
   let params = make_type spawnable in
+  id_counter := !id_counter + 1;
   let obj = {
     params;
     pos = {x=posx; y=posy};
     vel = {x=0.0;y=0.0};
+    id = !id_counter;
     jumping = false;
     grounded = false;
     dir = Left;
@@ -128,7 +133,8 @@ let update_player_keys (player : obj) (controls : controls) : unit =
     player.dir <- Right
   | CUp ->
     if (not player.jumping) then begin
-      player.jumping <- true; player.grounded <- false;
+      player.jumping <- true; 
+      player.grounded <- false;
       player.vel.y <- ~-.(player.params.speed)
     end
   | CDown ->
@@ -141,21 +147,26 @@ let update_player player keys context =
   let () = player.vel.x <- (player.vel.x *. friction) in
   if not prev_jumping && player.jumping
   then Some (Sprite.make (SPlayer Jumping) player.dir context)
-  else if prev_dir <> player.dir
+  else if prev_dir <> player.dir && not player.jumping
   then Some (Sprite.make (SPlayer Running) player.dir context)
+  else if prev_dir <> player.dir && player.jumping && prev_jumping
+  then Some (Sprite.make (SPlayer Jumping) player.dir context)
   else if player.vel.y = 0.
   then Some (Sprite.make (SPlayer Standing) player.dir context)
   else None
 
 let update_vel obj =
   if obj.grounded then obj.vel.y <- 0.
-  else if obj.params.has_gravity then obj.vel.y <- (obj.vel.y -. gravity)
+  else if obj.params.has_gravity then obj.vel.y <- (obj.vel.y +. gravity)
 
 let update_pos obj =
   obj.pos.x <- (obj.vel.x +. obj.pos.x);
   obj.pos.y <- (obj.vel.y +. obj.pos.y)
 
-let process_obj col context = col
+let process_obj col context = 
+  let obj = get_obj col in
+  update_vel obj;
+  update_pos obj 
   (*match col with
   | Player(t,s,o) ->
 
@@ -171,27 +182,38 @@ let collide_block dir obj =
   | East -> obj.vel.x <- 0.
   | West -> obj.vel.x <- 0.
 
+let evolve_enemy typ spr obj = 
+  match typ with
+  |_ -> failwith "todo"
+
 let process_collision dir c1 c2 =
   match (c1, c2, dir) with
-  | (Player(s,obj), Enemy(typ,s2,obj2), North) -> obj2.kill <- true
-  | (Player(s,obj), Enemy(typ,s2,obj2), _) -> obj.kill <- true
-  | (Player(s,obj), Item(typ,s2,obj2), _) -> obj2.kill <- true (*& stuff happens to player*)
-  | (Player(s,obj), Block(typ,s2,obj2), dir) -> collide_block dir obj
-  | (Enemy(typ,s,obj), Player(s2,obj2), South) -> obj.kill <- true
-  | (Enemy(typ,s,obj), Player(s2,obj2), _) -> obj2.kill <- true
+  | (Player(s,obj), Enemy(typ,s2,obj2), North) -> 
+      obj2.kill <- true
+  | (Player(s,obj), Enemy(typ,s2,obj2), _) -> 
+      obj.kill <- true
+  | (Player(s,obj), Item(typ,s2,obj2), _) -> 
+      obj2.kill <- true (*& stuff happens to player*)
+  | (Player(s,obj), Block(typ,s2,obj2), dir) -> 
+      collide_block dir obj
+  | (Enemy(typ,s,obj), Player(s2,obj2), South) -> 
+      obj.kill <- true
+  | (Enemy(typ,s,obj), Player(s2,obj2), _) -> 
+      obj2.kill <- true
   | (Enemy(typ,s,obj), Enemy(typ2,s2,obj2), dir) ->
-    (match dir with
-    | North -> obj.vel.y <- ~-.(obj.vel.y); obj2.vel.y <- ~-.(obj.vel.y)
-    | South -> obj.vel.y <- ~-.(obj.vel.y); obj2.vel.y <- ~-.(obj.vel.y)
-    | West -> obj.vel.x <- ~-.(obj.vel.x); obj2.vel.x <- ~-.(obj.vel.x)
-    | East -> obj.vel.x <- ~-.(obj.vel.x); obj2.vel.x <- ~-.(obj.vel.x) )
-  | (Enemy(typ,s,obj), Block(typ2,s2,obj2), dir) -> collide_block dir obj
-  | (Item(typ,s,obj), Player(s2,obj2), _) -> obj.kill <- true (*& stuff happens to player*)
+      begin match dir with
+      | West | East -> 
+          obj.vel.x <- ~-.(obj.vel.x); 
+          obj2.vel.x <- ~-.(obj.vel.x)
+      | _ -> ()
+      end
+  | (Enemy(typ,s,obj), Block(typ2,s2,obj2), dir) -> collide_block dir obj 
   | (Item(typ,s,obj), Block(typ2,s2,obj2), dir) -> collide_block dir obj
+  | (Item(typ,s,obj), Player(s2,obj2), _) -> obj.kill <- true (*& stuff happens to player*)
   | (Block(typ,s,obj), Player(s2,obj2), dir) -> collide_block dir obj2
   | (Block(typ,s,obj), Enemy(typ2,s2,obj2), dir) -> collide_block dir obj2
   | (Block(typ,s,obj), Item(typ2,s2,obj2), dir) -> collide_block dir obj2
-  | (_, _, _) -> failwith "this shouldn't happen"
+  | (_, _, _) -> ()
 
 let check_collision o1 o2 =
   let b1 = get_aabb o1 and b2 = get_aabb o2 in
