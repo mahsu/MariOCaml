@@ -30,6 +30,8 @@ let fps canvas fps_val =
   let context = canvas##getContext (Dom_html._2d_) in
   ignore context##fillText (Js.string fps_str, 10.,10.)
 
+let draw_background_img canvas = failwith "todo"
+let draw_background_color canvas = failwith "todo"
 let debug f = Printf.ksprintf (fun s -> Firebug.console##log (jstr s)) f
 let alert f = Printf.ksprintf (fun s -> Dom_html.window##alert(Js.string s); failwith "poo") f
 
