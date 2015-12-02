@@ -171,6 +171,12 @@ let process_collision dir c1 c2 =
   | (Player(s,obj), Block(typ,s2,obj2), dir) -> collide_block dir obj
   | (Enemy(typ,s,obj), Player(s2,obj2), South) -> obj.kill <- true
   | (Enemy(typ,s,obj), Player(s2,obj2), _) -> obj2.kill <- true
+  | (Enemy(typ,s,obj), Enemy(typ2,s2,obj2), dir) ->
+    (match dir with
+    | North -> obj.vel.y <- ~-.(obj.vel.y); obj2.vel.y <- ~-.(obj.vel.y)
+    | South -> obj.vel.y <- ~-.(obj.vel.y); obj2.vel.y <- ~-.(obj.vel.y)
+    | West -> obj.vel.x <- ~-.(obj.vel.x); obj2.vel.x <- ~-.(obj.vel.x)
+    | East -> obj.vel.x <- ~-.(obj.vel.x); obj2.vel.x <- ~-.(obj.vel.x) )
   | (Enemy(typ,s,obj), Block(typ2,s2,obj2), dir) -> collide_block dir obj
   | (Item(typ,s,obj), Player(s2,obj2), _) -> obj.kill <- true (*& stuff happens to player*)
   | (Item(typ,s,obj), Block(typ2,s2,obj2), dir) -> collide_block dir obj
