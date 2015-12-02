@@ -32,9 +32,11 @@ let rec narrow_phase c cs =
   match cs with
   | [] -> ()
   | h::t ->
-    let () = begin match Object.check_collision c h with
+    let () = if not (equals c h) then begin match Object.check_collision c h with
     | None -> ()
-    | Some dir -> Object.process_collision dir c h
+    | Some dir -> 
+        if (get_obj h).id <> (get_obj c).id 
+        then Object.process_collision dir c h
     end in narrow_phase c t
 
 let translate_keys () =
@@ -66,8 +68,9 @@ let update_collidable (collid:Object.collidable) all_collids canvas =
   let obj = Object.get_obj collid in
   let spr = Object.get_sprite collid in
   if not obj.kill then begin
-    let _ = broad_phase collid in
+    let broad = broad_phase collid in
     Object.process_obj collid context;
+    narrow_phase collid broad;
     Draw.render spr (obj.pos.x,obj.pos.y);
     Sprite.update_animation spr; (* return bool * variant *)
     if not obj.kill then (collid_objs := collid::!collid_objs)

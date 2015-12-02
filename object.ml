@@ -2,7 +2,7 @@ open Sprite
 open Actors
 
 let friction = 0.8
-let gravity = 0.01
+let gravity = 0.05
 
 type xy = {
   mutable x: float;
@@ -98,6 +98,7 @@ let spawn spawnable context (posx, posy) =
   | SItem t -> Item(t,spr,obj)
   | SBlock t -> Block(t,spr,obj)
 
+  
 let get_sprite = function
   | Player (s,_) | Enemy (_,s, _) | Item (_,s, _) | Block (_,s, _)  -> s
 
@@ -109,17 +110,7 @@ let is_player = function
   | Player(_,_) -> true
   | _ -> false
 
-let get_aabb obj  =
-  let spr = ((get_sprite obj).params)  in
-  let obj = get_obj obj in
-  let (offx, offy) = spr.bbox_offset in
-  let (box,boy) = (obj.pos.x+.offx,obj.pos.y+.offy) in
-  let (sx,sy) = spr.bbox_size in
-  {
-    center = {x=(box+.sx)/.2.;y=(boy+.sy)/.2.};
-    half = {x=sx/.2.;y=sy/.2.};
-  }
-
+let equals col1 col2 = (get_obj col1).id = (get_obj col2).id
 
 let update_player_keys (player : obj) (controls : controls) : unit =
   match controls with
@@ -144,14 +135,16 @@ let update_player player keys context =
   let prev_jumping = player.jumping in
   let prev_dir = player.dir in
   List.iter (update_player_keys player) keys;
-  let () = player.vel.x <- (player.vel.x *. friction) in
+  let v = player.vel.x *. friction in
+  let vel_damped = if abs_float v < 0.1 then 0. else v in
+  let () = player.vel.x <- vel_damped in
   if not prev_jumping && player.jumping
   then Some (Sprite.make (SPlayer Jumping) player.dir context)
   else if prev_dir <> player.dir && not player.jumping
   then Some (Sprite.make (SPlayer Running) player.dir context)
   else if prev_dir <> player.dir && player.jumping && prev_jumping
   then Some (Sprite.make (SPlayer Jumping) player.dir context)
-  else if player.vel.y = 0.
+  else if player.vel.y = 0. && player.vel.x = 0.
   then Some (Sprite.make (SPlayer Standing) player.dir context)
   else None
 
@@ -178,9 +171,11 @@ let process_obj col context =
 let collide_block dir obj =
   match dir with
   | North -> obj.vel.y <- 0.
-  | South -> obj.vel.y <- 0.
-  | East -> obj.vel.x <- 0.
-  | West -> obj.vel.x <- 0.
+  | South -> 
+      obj.vel.y <- 0.;
+      obj.grounded <- true;
+      obj.jumping <- false;
+  | East | West-> obj.vel.x <- 0.
 
 let evolve_enemy typ spr obj = 
   match typ with
@@ -210,27 +205,40 @@ let process_collision dir c1 c2 =
   | (Enemy(typ,s,obj), Block(typ2,s2,obj2), dir) -> collide_block dir obj 
   | (Item(typ,s,obj), Block(typ2,s2,obj2), dir) -> collide_block dir obj
   | (Item(typ,s,obj), Player(s2,obj2), _) -> obj.kill <- true (*& stuff happens to player*)
-  | (Block(typ,s,obj), Player(s2,obj2), dir) -> collide_block dir obj2
+  (*| (Block(typ,s,obj), Player(s2,obj2), dir) -> collide_block dir obj2
   | (Block(typ,s,obj), Enemy(typ2,s2,obj2), dir) -> collide_block dir obj2
-  | (Block(typ,s,obj), Item(typ2,s2,obj2), dir) -> collide_block dir obj2
+  | (Block(typ,s,obj), Item(typ2,s2,obj2), dir) -> collide_block dir obj2*)
   | (_, _, _) -> ()
+
+let get_aabb obj  =
+  let spr = ((get_sprite obj).params)  in
+  let obj = get_obj obj in
+  let (offx, offy) = spr.bbox_offset in
+  let (box,boy) = (obj.pos.x+.offx,obj.pos.y+.offy) in
+  let (sx,sy) = spr.bbox_size in
+  {
+    center = {x=(box+.sx/.2.);y=(boy+.sy/.2.)};
+    half = {x=sx/.2.;y=sy/.2.};
+  }
 
 let check_collision o1 o2 =
   let b1 = get_aabb o1 and b2 = get_aabb o2 in
-  let o1 = get_obj o1 in
+  let o1 = get_obj o1 and o2 = get_obj o2 in
   let vx = (b1.center.x) -. (b2.center.x) in
   let vy = (b1.center.y) -. (b2.center.y) in
   let hwidths = (b1.half.x) +. (b2.half.x) in
   let hheights = (b1.half.y) +. (b2.half.y) in
-  let ox = hwidths -. abs_float vx in
-  let oy = hheights -. abs_float vy in
+  Printf.printf "%f %f (%f %f) (%f %f) \n" vx vy o1.pos.x o1.pos.y o2.pos.x o2.pos.y;
   if abs_float vx < hwidths && abs_float vy < hheights then begin
+    let ox = hwidths -. abs_float vx in
+    let oy = hheights -. abs_float vy in
+    Printf.printf "%f %f\n" ox oy;
     if ox >= oy then begin
-      if vy > 0. then (o1.pos.y <- o1.pos.y+.oy; Some North)
-      else (o1.pos.y <- o1.pos.y -. oy; Some South)
+      if vy > 0. then (o1.pos.y <- (o1.pos.y+.oy); print_endline "North"; Some North)
+      else (o1.pos.y <- (o1.pos.y -. oy); Printf.printf "%f %f" o1.pos.y oy; print_endline "South"; Some South)
     end else begin
-      if vx > 0. then (o1.pos.x <- o1.pos.x +.ox; Some West)
-      else (o1.pos.x <- o1.pos.x -. ox; Some East)
+      if vx > 0. then (o1.pos.x <- o1.pos.x +.ox; print_endline "West"; Some West)
+      else (o1.pos.x <- o1.pos.x -. ox; print_endline "East"; Some East)
     end
   end else None
 

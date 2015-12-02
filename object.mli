@@ -46,6 +46,8 @@ val get_obj : collidable -> obj
 val spawn : Actors.spawn_typ  -> Dom_html.canvasRenderingContext2D Js.t
           -> float*float -> collidable 
 
+val equals : collidable -> collidable -> bool
+
 val is_player : collidable -> bool
 
 (* Destroys the object, returning a list of destruction effect objects *)
