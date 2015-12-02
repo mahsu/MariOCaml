@@ -53,7 +53,7 @@ let make_player (typ, dir) =
       end
     | Right -> begin match typ with
       | Standing -> setup_sprite "mario-small.png" 1 0 (16.,16.) (0.,32.)
-      | Jumping -> setup_sprite "mario-small.png" 2 0 (16.,16.) (16.,48.)
+      | Jumping -> setup_sprite "mario-small.png" 2 10 (16.,16.) (16.,48.)
       | Running -> setup_sprite "mario-small.png" 3 10 (16.,16.) (16.,32.)
       | Crouching -> setup_sprite "mario-small.png" 1 0 (16.,16.) (0.,64.)
       end

@@ -19,6 +19,7 @@ type obj = {
   params: obj_params;
   pos: xy;
   vel: xy;
+  id: int;
   mutable jumping: bool;
   mutable grounded: bool;
   mutable dir: Actors.dir_1d;
@@ -50,15 +51,9 @@ val is_player : collidable -> bool
 (* Destroys the object, returning a list of destruction effect objects *)
 val kill : obj -> noncollidable list
 
-val process_obj : collidable -> Dom_html.canvasRenderingContext2D Js.t -> collidable
+val process_obj : collidable -> Dom_html.canvasRenderingContext2D Js.t -> unit
 
 val update_player : obj -> Actors.controls list -> Dom_html.canvasRenderingContext2D Js.t -> sprite option
-
-(* Updates the velocity of the object *)
-val update_vel : obj -> unit
-
-(* Updates the position of the object *)
-val update_pos : obj -> unit
 
 (* Checks whether a collision occured between two objects, returning the
  * direction of the collision if one occurred. *)
