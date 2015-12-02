@@ -62,8 +62,8 @@ let make_enemy = function
   | Goomba -> setup_obj ()
   | GKoopa -> setup_obj ()
   | RKoopa -> setup_obj ()
-  | GKoopaShell -> setup_obj ()
-  | RKoopaShell -> setup_obj ()
+  | GKoopaShell -> setup_obj ~spd:0. ()
+  | RKoopaShell -> setup_obj ~spd:0. ()
 
 let make_block = function
   | QBlock i -> setup_obj ~g:false ()
@@ -154,7 +154,7 @@ let update_vel obj =
 
 let update_pos obj =
   obj.pos.x <- (obj.vel.x +. obj.pos.x);
-  obj.pos.y <- (obj.vel.y +. obj.pos.y)
+  if obj.params.has_gravity then obj.pos.y <- (obj.vel.y +. obj.pos.y)
 
 let process_obj col context = 
   let obj = get_obj col in
@@ -168,6 +168,22 @@ let process_obj col context =
   | Block(t,s,o) ->
 *)
 
+(* Converts an origin based on the bottom left of the bounding box to the top
+ * right of the sprite, to make it easier to place objects flush with the ground.*)
+let normalize_origin pos (spr:Sprite.sprite) =
+  let p = spr.params in
+  let (box,boy) = p.bbox_offset and (_,bh) = p.bbox_size in
+  pos.x <- pos.x -. box;
+  pos.y <- pos.y -. (boy +. bh)
+
+let normalize_pos pos (oldspr:Sprite.sprite) (newspr:Sprite.sprite) =
+    let p1 = oldspr.params and p2 = newspr.params in
+    let (box1,boy1) = p1.bbox_offset and (box2,boy2) = p2.bbox_offset in
+    let (bw1,bh1) = p1.bbox_size and (bw2,bh2) = p2.bbox_size in
+    pos.x <- pos.x +. (bw2 +. box2) -. (bw1 +. box1);
+    pos.y <- pos.y +. (bh2 +. boy2) -. (bh1 +. boy1)
+
+
 let collide_block dir obj =
   match dir with
   | North -> obj.vel.y <- 0.
@@ -179,27 +195,31 @@ let collide_block dir obj =
 
 let evolve_enemy typ spr obj = 
   match typ with
-  |_ -> failwith "todo"
+  | GKoopa -> failwith "todo"
+  | RKoopa -> failwith "todo"
+  | GKoopaShell -> failwith "todo"
+  | RKoopaShell -> failwith "todo"
+  | _ -> obj.kill <- true 
 
 let process_collision dir c1 c2 =
   match (c1, c2, dir) with
-  | (Player(s,obj), Enemy(typ,s2,obj2), North) -> 
-      obj2.kill <- true
-  | (Player(s,obj), Enemy(typ,s2,obj2), _) -> 
-      obj.kill <- true
-  | (Player(s,obj), Item(typ,s2,obj2), _) -> 
-      obj2.kill <- true (*& stuff happens to player*)
-  | (Player(s,obj), Block(typ,s2,obj2), dir) -> 
-      collide_block dir obj
-  | (Enemy(typ,s,obj), Player(s2,obj2), South) -> 
-      obj.kill <- true
-  | (Enemy(typ,s,obj), Player(s2,obj2), _) -> 
-      obj2.kill <- true
-  | (Enemy(typ,s,obj), Enemy(typ2,s2,obj2), dir) ->
+  | (Player(s1,o1), Enemy(typ,s2,o2), North) -> 
+      o1.jumping <- false;
+      evolve_enemy typ s2 o2
+  | (Player(s1,o1), Enemy(t2,s2,o2), _) -> o1.kill <- true
+  | (Player(s1,o1), Item(t2,s2,o2), _) -> 
+      o2.kill <- true (*& stuff happens to player*)
+  | (Player(s1,o1), Block(t2,s2,o2), dir) -> 
+      collide_block dir o1
+  | (Enemy(t1,s1,o1), Player(s2,o2), South) -> 
+      o1.kill <- true
+  | (Enemy(t1,s1,o1), Player(s2,o2), _) -> 
+      o2.kill <- true
+  | (Enemy(t1,s1,o1), Enemy(t2,s2,o2), dir) ->
       begin match dir with
       | West | East -> 
-          obj.vel.x <- ~-.(obj.vel.x); 
-          obj2.vel.x <- ~-.(obj.vel.x)
+          o1.vel.x <- ~-.(o1.vel.x); 
+          o2.vel.x <- ~-.(o2.vel.x)
       | _ -> ()
       end
   | (Enemy(typ,s,obj), Block(typ2,s2,obj2), dir) -> collide_block dir obj 

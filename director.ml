@@ -68,6 +68,7 @@ let update_collidable (collid:Object.collidable) all_collids canvas =
   let obj = Object.get_obj collid in
   let spr = Object.get_sprite collid in
   if not obj.kill then begin
+    obj.grounded <- false;
     let broad = broad_phase collid in
     Object.process_obj collid context;
     narrow_phase collid broad;
