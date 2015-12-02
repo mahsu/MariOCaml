@@ -76,8 +76,12 @@ let make_type = function
 
 let spawn spawnable context (posx, posy) =
   let spr = Sprite.make spawnable Left context in
+<<<<<<< HEAD
   let params = make_type spawnable in
   print_endline "spawn";
+=======
+  let params = make_type spawnable in
+>>>>>>> 22fc5f21a13275438ba40f326600d9e540c765a3
   let obj = {
     params;
     pos = {x=posx; y=posy};
@@ -101,6 +105,10 @@ let get_obj = function
   | Player (_,o)
   | Enemy (_,_,o) | Item (_,_,o) | Block (_,_,o) -> o
 
+let is_player = function
+  | Player(_,_) -> true
+  | _ -> false
+
 let get_aabb obj  =
   let spr = ((get_sprite obj).params)  in
   let obj = get_obj obj in
@@ -112,24 +120,29 @@ let get_aabb obj  =
     half = {x=sx/.2.;y=sy/.2.};
   }
 
-let update_player player dir context =
+
+let update_player_keys (player : obj) (controls : controls) : unit =
+  match controls with
+  | CLeft ->
+    if player.vel.x > ~-.(player.params.speed)
+    then player.vel.x <- player.vel.x -. 1.;
+    player.dir <- Left
+  | CRight ->
+    if player.vel.x < player.params.speed
+    then player.vel.x <- player.vel.x +. 1.;
+    player.dir <- Right
+  | CUp ->
+    if (not player.jumping) then begin
+      player.jumping <- true; player.grounded <- false;
+      player.vel.y <- ~-.(player.params.speed)
+    end
+  | CDown ->
+    if (not player.jumping) then print_endline "crouch"
+
+let update_player player keys context =
   let prev_jumping = player.jumping in
   let prev_dir = player.dir in
-  let () = match dir with
-  | West ->
-      if player.vel.x > ~-.(player.params.speed)
-      then player.vel.x <- player.vel.x -. 1.
-  | East ->
-      if player.vel.x < player.params.speed
-      then player.vel.x <- player.vel.x +. 1.
-  | North ->
-      if (not player.jumping) then begin
-        player.jumping <- true;
-        player.vel.y <- ~-.(player.params.speed)
-      end
-  | South ->
-      if (not player.jumping) then print_endline "crouch"
-  in
+  List.iter (update_player_keys player) keys;
   let () = player.vel.x <- (player.vel.x *. friction) in
   if not prev_jumping && player.jumping
   then Some (Sprite.make (SPlayer Jumping) player.dir context)

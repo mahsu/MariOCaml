@@ -1,4 +1,11 @@
 
+type keys = {
+  mutable left: bool;
+  mutable right: bool;
+  mutable up: bool;
+  mutable down: bool;
+}
+
 (* Initiates the main game loop *)
 val update_loop : Dom_html.canvasElement Js.t -> (Object.collidable list) -> unit
 

@@ -45,12 +45,14 @@ val get_obj : collidable -> obj
 val spawn : Actors.spawn_typ  -> Dom_html.canvasRenderingContext2D Js.t
           -> float*float -> collidable 
 
+val is_player : collidable -> bool
+
 (* Destroys the object, returning a list of destruction effect objects *)
 val kill : obj -> noncollidable list
 
 val process_obj : collidable -> Dom_html.canvasRenderingContext2D Js.t -> collidable
 
-val update_player : obj -> Actors.dir_2d -> Dom_html.canvasRenderingContext2D Js.t -> sprite option
+val update_player : obj -> Actors.controls list -> Dom_html.canvasRenderingContext2D Js.t -> sprite option
 
 (* Updates the velocity of the object *)
 val update_vel : obj -> unit

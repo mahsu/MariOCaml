@@ -1,4 +1,5 @@
 open Object
+open Actors
 
 type keys = {
   mutable left: bool;
@@ -35,23 +36,43 @@ let rec narrow_phase c cs =
     | None -> ()
     | Some dir -> Object.process_collision dir c h
     end in
-      narrow_phase c cs
+      narrow_phase c t
 
-  
+let translate_keys () =
+  let k = pressed_keys in
+  let controls = ref [] in
+  controls := 
+    if k.left then (CLeft::!controls) else
+    if k.right then (CRight::!controls) else
+    if k.up then (CUp::!controls) else
+    if k.down then (CDown::!controls)
+    else !controls
+    ; !controls
+
+let update_if_player collid context =
+  match collid with
+  | Player(s,o) as p ->
+      let keys = translate_keys () in
+      begin match Object.update_player o keys context with
+      | None -> p
+      | Some new_spr -> Player(new_spr,o)
+      end
+  | _ as col -> col
+
 
 let update_collidable (collid:Object.collidable) all_collids canvas = 
  (* TODO: optimize. Draw static elements only once *)
-    let context = canvas##getContext (Dom_html._2d_) in
-    let obj = Object.get_obj collid in
-    let spr = Object.get_sprite collid in
-    if not obj.kill then begin
-      let _ = broad_phase collid in
-      let collid = Object.process_obj collid context in
-      Draw.render spr (obj.pos.x,obj.pos.y);
-      Sprite.update_animation spr; (* return bool * variant *)
-      (* if bool *)
-      if not obj.kill then (collid_objs := collid::!collid_objs)
-    end
+  let context = canvas##getContext (Dom_html._2d_) in
+  let collid = update_if_player collid context in
+  let obj = Object.get_obj collid in
+  let spr = Object.get_sprite collid in
+  if not obj.kill then begin
+    let _ = broad_phase collid in
+    let collid = Object.process_obj collid context in
+    Draw.render spr (obj.pos.x,obj.pos.y);
+    Sprite.update_animation spr; (* return bool * variant *)
+    if not obj.kill then (collid_objs := collid::!collid_objs)
+  end
   
 
 let update_loop canvas objs = 

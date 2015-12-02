@@ -27,6 +27,7 @@ type sprite =
 
   
 let setup_sprite ?anim:(anim=Frame) ?loop:(loop=true) 
+         ?bb_off:(bbox_offset=(0.,0.))
                  img_src max_frames max_ticks frame_size src_offset = 
   let img_src = "./sprites/" ^ img_src in
   {
@@ -35,7 +36,7 @@ let setup_sprite ?anim:(anim=Frame) ?loop:(loop=true)
     max_ticks;
     frame_size;
     src_offset;
-    bbox_offset = (0.,0.);
+    bbox_offset;
     bbox_size = frame_size;
     anim;
     loop;
@@ -107,7 +108,6 @@ let update_animation (spr: sprite) =
   let curr_ticks = !(spr.ticks) in
   if curr_ticks = spr.params.max_ticks then (
     spr.ticks := 0;
-    print_endline "next";
     match spr.params.anim with
     | Frame -> 
         if spr.params.loop then 

@@ -32,7 +32,7 @@ type sprite =
 
 
 (* Sets up a sprite to create *)
-val setup_sprite : ?anim:animation_typ -> ?loop:bool -> string -> int -> int -> xy -> xy 
+val setup_sprite : ?anim:animation_typ -> ?loop:bool -> ?bb_off:float*float-> string -> int -> int -> xy -> xy 
                           -> sprite_params 
 
 (* Creates a sprite given the actor type *)
