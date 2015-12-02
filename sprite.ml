@@ -13,22 +13,22 @@ type sprite_params =
     bbox_offset: xy;
     bbox_size: xy;
     anim: animation_typ;
-    loop: bool; 
+    loop: bool;
   }
 
-type sprite = 
+type sprite =
   {
     params: sprite_params;
-    context: Dom_html.canvasRenderingContext2D Js.t; 
+    context: Dom_html.canvasRenderingContext2D Js.t;
     frame: int ref;
     ticks: int ref;
     img: Dom_html.imageElement Js.t;
   }
 
-  
-let setup_sprite ?anim:(anim=Frame) ?loop:(loop=true) 
+
+let setup_sprite ?anim:(anim=Frame) ?loop:(loop=true)
          ?bb_off:(bbox_offset=(0.,0.))
-                 img_src max_frames max_ticks frame_size src_offset = 
+                 img_src max_frames max_ticks frame_size src_offset =
   let img_src = "./sprites/" ^ img_src in
   {
     img_src;
@@ -60,7 +60,7 @@ let make_player (typ, dir) =
 
 let make_enemy (typ, dir) =
   match (typ, dir) with
-      | (Goomba,_) -> setup_sprite "enemies.png" 2 10 (16.,16.) (0.,128.) 
+      | (Goomba,_) -> setup_sprite "enemies.png" 2 10 (16.,16.) (0.,128.)
       | (GKoopa,Left) -> setup_sprite "enemies.png" 2 10 (16.,27.) (0.,69.)
       | (GKoopa,Right) -> setup_sprite "enemies.png" 2 10 (16.,27.) (32.,69.)
       | (RKoopa,Left) -> setup_sprite "enemies.png" 2 10 (16.,27.) (0.,5.)
@@ -83,12 +83,12 @@ let make_block = function
   | UnBBlock -> setup_sprite "blocks.png" 1 0 (16.,16.) (0.,48.)
 
 let make_type typ (dir : Actors.dir_1d) =
-  match typ with 
-  | SPlayer t -> make_player (t,dir) 
+  match typ with
+  | SPlayer t -> make_player (t,dir)
   | SEnemy t -> make_enemy (t,dir)
   | SItem t -> make_item t
   | SBlock t -> make_block t
-      
+
 let make spawn dir context  =
   let params = make_type spawn dir in
   let img = (Dom_html.createImg Dom_html.document) in
@@ -109,8 +109,8 @@ let update_animation (spr: sprite) =
   if curr_ticks = spr.params.max_ticks then (
     spr.ticks := 0;
     match spr.params.anim with
-    | Frame -> 
-        if spr.params.loop then 
+    | Frame ->
+        if spr.params.loop then
         spr.frame := (!(spr.frame) + 1) mod spr.params.max_frames
     | Reflect -> reflect_sprite spr
   ) else spr.ticks := curr_ticks + 1

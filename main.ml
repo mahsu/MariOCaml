@@ -8,12 +8,12 @@ let imgsToLoad = 4
 
 let load _ =
   let canvas_id = "canvas" in
-  let canvas = 
-    Js.Opt.get 
-      (Js.Opt.bind ( Dom_html.document##getElementById(Js.string canvas_id)) 
-        Dom_html.CoerceTo.canvas) 
-      (fun () -> 
-        Printf.printf "cant find canvas %s \n" canvas_id; 
+  let canvas =
+    Js.Opt.get
+      (Js.Opt.bind ( Dom_html.document##getElementById(Js.string canvas_id))
+        Dom_html.CoerceTo.canvas)
+      (fun () ->
+        Printf.printf "cant find canvas %s \n" canvas_id;
         failwith "fail"
       ) in
   (*let () = Graphics_js.open_canvas canvas in*)
@@ -24,10 +24,11 @@ let load _ =
   let player = Object.spawn (SPlayer Standing) context (32.,32.) in
   let obj_c1 = Object.spawn (SItem Coin) context (0.0,0.0) in
   let obj_c2 = Object.spawn (SItem Coin) context (200.0,300.0) in
-  Director.update_loop canvas [player; obj_c1; obj_c2] ;
+  let brick1 = Object.spawn (SBlock Brick) context (200.0,200.0) in
+  Director.update_loop canvas [player; obj_c1; obj_c2; brick1] ;
   ()
 
-let inc_counter _ = 
+let inc_counter _ =
   loadCount := !loadCount + 1;
   if !loadCount = imgsToLoad then load() else ()
 
@@ -38,7 +39,7 @@ let preload _ =
     let img_src = root_dir ^ img_src in
     let img = (Dom_html.createImg Dom_html.document) in
     img##src <- (Js.string img_src) ;
-    ignore(Html.addEventListener  img Dom_html.Event.load 
+    ignore(Html.addEventListener  img Dom_html.Event.load
     (Html.handler (fun ev ->  inc_counter(); Js._true)) Js._true)) imgs
 
 
