@@ -120,23 +120,24 @@ let update_player_keys (player : obj) (controls : controls) : unit =
   match controls with  
   | CLeft ->
     if player.vel.x > ~-.(player.params.speed) 
-    then player.vel.x <- player.vel.x -. 1.
+    then player.vel.x <- player.vel.x -. 1.;
+    player.dir <- Left
   | CRight ->
     if player.vel.x < player.params.speed
-    then player.vel.x <- player.vel.x +. 1.
+    then player.vel.x <- player.vel.x +. 1.;
+    player.dir <- Right
   | CUp ->
     if (not player.jumping) then begin
-      player.jumping <- true;
+      player.jumping <- true; player.grounded <- false;
       player.vel.y <- ~-.(player.params.speed)
     end
   | CDown ->
     if (not player.jumping) then print_endline "crouch"
 
 let update_player player keys context =
-  List.iter (update_player_keys player) keys;
   let prev_jumping = player.jumping in
   let prev_dir = player.dir in
-  
+  List.iter (update_player_keys player) keys;
   let () = player.vel.x <- (player.vel.x *. friction) in
   if not prev_jumping && player.jumping 
   then Some (Sprite.make (SPlayer Jumping) player.dir context)
