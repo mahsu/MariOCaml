@@ -42,6 +42,7 @@ let setup_sprite ?anim:(anim=Frame) ?loop:(loop=true)
     loop;
   }
 
+  
 let make_player (typ, dir) =
   match dir with
     (* 16x16 grid with 0x0 offset*)
@@ -105,8 +106,7 @@ let make_type typ (dir : Actors.dir_1d) =
   | SItem t -> make_item t
   | SBlock t -> make_block t
 
-let make spawn dir context  =
-  let params = make_type spawn dir in
+let make_from_params params context =
   let img = (Dom_html.createImg Dom_html.document) in
   img##src <- (Js.string params.img_src) ;
   {
@@ -116,6 +116,14 @@ let make spawn dir context  =
     frame = ref 0;
     ticks = ref 0;
   }
+
+let make spawn dir context  =
+  let params = make_type spawn dir in
+  make_from_params params context
+
+let make_bgd context = 
+  let params = setup_sprite "bgd-1.png" 1 0 (512.,256.) (0.,0.) in
+  make_from_params params context
 
 let transform_enemy enemy_typ spr dir =
   let params = make_enemy  (enemy_typ,dir) in

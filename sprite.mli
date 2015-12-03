@@ -39,6 +39,8 @@ val setup_sprite : ?anim:animation_typ -> ?loop:bool -> ?bb_off:float*float-> st
 val make : Actors.spawn_typ -> Actors.dir_1d -> Dom_html.canvasRenderingContext2D Js.t
    -> sprite
 
+val make_bgd : Dom_html.canvasRenderingContext2D Js.t  -> sprite
+
 val transform_enemy : Actors.enemy_typ -> sprite -> Actors.dir_1d -> unit
 
 (* Updates the sprite's animation *)
