@@ -43,47 +43,47 @@ let setup_sprite ?anim:(anim=Frame) ?loop:(loop=true)
     loop;
   }
 
-
-let make_player (typ, dir) =
+  
+let make_small_player (typ, dir) =
   match dir with
     (* 16x16 grid with 0x0 offset*)
     | Left -> begin match typ with
-      | Standing -> setup_sprite "mario-small.png" ~bb_off:(1.,1.) ~bb_sz:(14.,14.) 1 0 (16.,16.) (0.,0.)
-      | Jumping -> setup_sprite "mario-small.png" ~bb_off:(1.,1.) ~bb_sz:(14.,14.) 2 10 (16.,16.) (16.,16.)
-      | Running -> setup_sprite "mario-small.png" ~bb_off:(1.,1.) ~bb_sz:(14.,14.) 3 10 (16.,16.) (16.,0.)
-      | Crouching -> setup_sprite "mario-small.png" ~bb_off:(1.,1.) ~bb_sz:(14.,14.) 1 0 (16.,16.) (0.,64.)
+      | Standing -> setup_sprite "mario-small.png" ~bb_off:(3.,1.) ~bb_sz:(11.,15.) 1 0 (16.,16.) (0.,0.)
+      | Jumping -> setup_sprite "mario-small.png" ~bb_off:(2.,1.) ~bb_sz:(13.,15.) 2 10 (16.,16.) (16.,16.)
+      | Running -> setup_sprite "mario-small.png" ~bb_off:(2.,1.) ~bb_sz:(12.,15.) 3 10 (16.,16.) (16.,0.)
+      | Crouching -> setup_sprite "mario-small.png" ~bb_off:(1.,5.) ~bb_sz:(14.,10.) 1 0 (16.,16.) (0.,64.)
       end
     | Right -> begin match typ with
-      | Standing -> setup_sprite "mario-small.png" ~bb_off:(1.,1.) ~bb_sz:(14.,14.) 1 0 (16.,16.) (0.,32.)
-      | Jumping -> setup_sprite "mario-small.png" ~bb_off:(1.,1.) ~bb_sz:(14.,14.) 2 10 (16.,16.) (16.,48.)
-      | Running -> setup_sprite "mario-small.png" ~bb_off:(1.,1.) ~bb_sz:(14.,14.) 3 10 (16.,16.) (16.,32.)
-      | Crouching -> setup_sprite "mario-small.png" ~bb_off:(1.,1.) ~bb_sz:(14.,14.) 1 0 (16.,16.) (0.,64.)
+      | Standing -> setup_sprite "mario-small.png" ~bb_off:(1.,1.) ~bb_sz:(11.,15.) 1 0 (16.,16.) (0.,32.)
+      | Jumping -> setup_sprite "mario-small.png" ~bb_off:(2.,1.) ~bb_sz:(13.,15.) 2 10 (16.,16.) (16.,48.)
+      | Running -> setup_sprite "mario-small.png" ~bb_off:(2.,1.) ~bb_sz:(12.,15.) 3 10 (16.,16.) (16.,32.)
+      | Crouching -> setup_sprite "mario-small.png" ~bb_off:(1.,5.) ~bb_sz:(14.,10.) 1 0 (16.,16.) (0.,64.)
       end
 
-let make_bigplayer (typ, dir) =
+let make_big_player (typ, dir) =
   match dir with
   | Left -> begin match typ with
-    | Standing -> setup_sprite "mario-big.png"
-    | Jumping -> setup_sprite "mario-big.png"
-    | Running -> setup_sprite "mario-big.png"
-    | Crouching -> setup_sprite "mario-big.png"
+    | Standing -> setup_sprite "mario-big.png" 1 0 ~bb_off:(2.,1.) ~bb_sz:(13.,24.) (16.,27.) (16.,5.)
+    | Jumping -> setup_sprite "mario-big.png" 1 0 ~bb_off:(2.,1.) ~bb_sz:(2.,23.) (16.,26.) (48.,6.)
+    | Running -> setup_sprite "mario-big.png" 4 10 ~bb_off:(2.,1.) ~bb_sz:(13.,24.) (16.,27.)(0.,37.)
+    | Crouching -> setup_sprite "mario-big.png" 1 0 ~bb_off:(2.,1.) ~bb_sz:(12.,17.) (16.,18.) (32.,14.)
     end
   | Right -> begin match typ with
-    | Standing -> setup_sprite "mario-big.png"
-    | Jumping -> setup_sprite "mario-big.png"
-    | Running -> setup_sprite "mario-big.png"
-    | Crouching -> setup_sprite "mario-big.png"
+    | Standing -> setup_sprite "mario-big.png" 1 0 ~bb_off:(1.,1.) ~bb_sz:(13.,14.) (16.,26.) (16.,69.)
+    | Jumping -> setup_sprite "mario-big.png" 1 0 ~bb_off:(2.,1.) ~bb_sz:(2.,23.) (16.,26.) (48.,70.)
+    | Running -> setup_sprite "mario-big.png" 4 10 ~bb_off:(2.,1.) ~bb_sz:(13.,24.) (16.,27.) (0.,101.)
+    | Crouching -> setup_sprite "mario-big.png" 1 0 ~bb_off:(2.,1.) ~bb_sz:(12.,17.) (16.,18.) (32.,78.)
     end
 
 let make_enemy (typ, dir) =
   match (typ, dir) with
       | (Goomba,_) -> setup_sprite "enemies.png" ~bb_off:(1.,1.) ~bb_sz:(14.,14.) 2 10 (16.,16.) (0.,128.)
       | (GKoopa,Left) -> setup_sprite "enemies.png" ~bb_off:(4.,8.) ~bb_sz:(11.,18.) 2 10 (16.,27.) (0.,69.)
-      | (GKoopa,Right) -> setup_sprite "enemies.png" ~bb_off:(4.,8.) ~bb_sz:(11.,18.) 2 10 (16.,27.) (32.,69.)
+      | (GKoopa,Right) -> setup_sprite "enemies.png" ~bb_off:(1.,8.) ~bb_sz:(11.,18.) 2 10 (16.,27.) (32.,69.)
       | (RKoopa,Left) -> setup_sprite "enemies.png" ~bb_off:(4.,8.) ~bb_sz:(11.,18.) 2 10 (16.,27.) (0.,5.)
-      | (RKoopa,Right) -> setup_sprite "enemies.png" ~bb_off:(4.,8.) ~bb_sz:(11.,18.) 2 10 (16.,27.) (32.,5.)
-      | (GKoopaShell,_) -> setup_sprite "enemies.png" ~bb_off:(2.,2.) ~bb_sz:(12.,12.) 4 10 (16.,16.) (0.,96.)
-      | (RKoopaShell,_) -> setup_sprite "enemies.png" ~bb_off:(2.,2.) ~bb_sz:(12.,12.) 4 10 (16.,16.) (0.,32.)
+      | (RKoopa,Right) -> setup_sprite "enemies.png" ~bb_off:(1.,8.) ~bb_sz:(11.,18.) 2 10 (16.,27.) (32.,5.)
+      | (GKoopaShell,_) -> setup_sprite "enemies.png" ~bb_off:(2.,2.) ~bb_sz:(12.,13.) 4 10 (16.,16.) (0.,96.)
+      | (RKoopaShell,_) -> setup_sprite "enemies.png" ~bb_off:(2.,2.) ~bb_sz:(12.,13.) 4 10 (16.,16.) (0.,32.)
 
 let make_item = function
   (* 16x16 grid with 0x0 offset *)
@@ -99,10 +99,14 @@ let make_block = function
   | QBlockUsed -> setup_sprite "blocks.png" 1 0 (16.,16.) (0.,32.)
   | UnBBlock -> setup_sprite "blocks.png" 1 0 (16.,16.) (0.,48.)
 
+let make_player pt spr_type = 
+  match pt with
+  | BigM -> make_big_player spr_type
+  | SmallM -> make_small_player spr_type
+
 let make_type typ (dir : Actors.dir_1d) =
   match typ with
-  | SPlayer t -> make_player (t,dir)
-  (* | SBigPlayer t -> make_bigplayer (t,dir) *)
+  | SPlayer(pt,st) -> make_player pt (st,dir)
   | SEnemy t -> make_enemy (t,dir)
   | SItem t -> make_item t
   | SBlock t -> make_block t

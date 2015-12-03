@@ -3,9 +3,9 @@ open Actors
 
 let friction = 0.8
 let gravity = 0.1
-let player_speed = 3.
+let player_speed = 2.5
 let dampen_jump = 2.
-let invuln = 40
+let invuln = 60
 
 type xy = {
   mutable x: float;
@@ -84,7 +84,7 @@ let make_block = function
   | UnBBlock -> setup_obj ~g:false ()
 
 let make_type = function
-  | SPlayer t -> make_player ()
+  | SPlayer(pt,t) -> make_player ()
   | SEnemy t -> make_enemy t
   | SItem t -> make_item t
   | SBlock t -> make_block t
@@ -117,7 +117,7 @@ let make ?id:(id=None) ?dir:(dir=Left) spawnable context (posx, posy) =
 let spawn spawnable context (posx, posy) =
   let (spr,obj) = make spawnable context (posx, posy) in
   match spawnable with
-  | SPlayer t -> Player(SmallM,spr,obj)
+  | SPlayer(typ,t) -> Player(typ,spr,obj)
   | SEnemy t ->
       set_vel_to_speed obj;
       Enemy(t,spr,obj)
@@ -166,27 +166,17 @@ let update_player player keys context =
   List.iter (update_player_keys player) keys;
   let v = player.vel.x *. friction in
   let vel_damped = if abs_float v < 0.1 then 0. else v in
-  let () = player.vel.x <- vel_damped in
-  if player.health <= 1 then
-  ( if not prev_jumping && player.jumping
-  then Some (SmallM, (Sprite.make (SPlayer Jumping) player.dir context))
+  player.vel.x <- vel_damped;
+  let pl_typ = if player.health <= 1 then SmallM else BigM in
+  if not prev_jumping && player.jumping
+  then Some (pl_typ, (Sprite.make (SPlayer(pl_typ,Jumping)) player.dir context))
   else if prev_dir <> player.dir && not player.jumping
-  then Some (SmallM, (Sprite.make (SPlayer Running) player.dir context))
+  then Some (pl_typ, (Sprite.make (SPlayer(pl_typ,Running)) player.dir context))
   else if prev_dir <> player.dir && player.jumping && prev_jumping
-  then Some (SmallM, (Sprite.make (SPlayer Jumping) player.dir context))
+  then Some (pl_typ, (Sprite.make (SPlayer(pl_typ,Jumping)) player.dir context))
   else if player.vel.y = 0. && player.vel.x = 0.
-  then Some (SmallM, (Sprite.make (SPlayer Standing) player.dir context))
-  else None )
-  else
-  ( if not prev_jumping && player.jumping
-  then Some (BigM, (Sprite.make (SPlayer Jumping) player.dir context)) (*TODO CHANGE TO SBigPlayer*)
-  else if prev_dir <> player.dir && not player.jumping
-  then Some (BigM, (Sprite.make (SPlayer Running) player.dir context))
-  else if prev_dir <> player.dir && player.jumping && prev_jumping
-  then Some (BigM, (Sprite.make (SPlayer Jumping) player.dir context))
-  else if player.vel.y = 0. && player.vel.x = 0.
-  then Some (BigM, (Sprite.make (SPlayer Standing) player.dir context))
-  else None )
+  then Some (pl_typ, (Sprite.make (SPlayer(pl_typ,Standing)) player.dir context))
+  else None
 
 
 let update_vel obj =
@@ -201,13 +191,6 @@ let process_obj obj =
   update_vel obj;
   update_pos obj
   (*todo kill if out of bounds *)
-  (*match col with
-  | Player(t,s,o) ->
-
-  | Enemy(t,s,o) ->
-  | Item(t,s,o) ->
-  | Block(t,s,o) ->
-*)
 
 (* Converts an origin based on the bottom left of the bounding box to the top
  * right of the sprite, to make it easier to place objects flush with the ground.*)
@@ -217,12 +200,11 @@ let normalize_origin pos (spr:Sprite.sprite) =
   pos.x <- pos.x -. box;
   pos.y <- pos.y -. (boy +. bh)
 
-let normalize_pos pos (oldspr:Sprite.sprite) (newspr:Sprite.sprite) =
-    let p1 = oldspr.params and p2 = newspr.params in
+let normalize_pos pos (p1:Sprite.sprite_params) (p2:Sprite.sprite_params) =
     let (box1,boy1) = p1.bbox_offset and (box2,boy2) = p2.bbox_offset in
     let (bw1,bh1) = p1.bbox_size and (bw2,bh2) = p2.bbox_size in
     pos.x <- pos.x -. (bw2 +. box2) +. (bw1 +. box1);
-    pos.y <- pos.y -. (bh2 +. boy2) +. (bh1 +. boy1) -. 1.
+    pos.y <- pos.y -. (bh2 +. boy2) +. (bh1 +. boy1)
 
 let collide_block ?check_x:(check_x=true) dir obj =
   match dir with
@@ -233,22 +215,24 @@ let collide_block ?check_x:(check_x=true) dir obj =
       obj.jumping <- false;
   | East | West -> if check_x then obj.vel.x <- 0.
 
+let opposite_dir dir =
+  match dir with
+  | Left -> Right
+  | Right -> Left
+
 let reverse_left_right obj =
   obj.vel.x <- ~-.(obj.vel.x);
-  obj.dir <-
-    match obj.dir with
-    | Left -> Right
-    | Right -> Left
+  obj.dir <- opposite_dir obj.dir
 
-let evolve_enemy player_dir typ spr obj context =
+let evolve_enemy player_dir typ (spr:Sprite.sprite) obj context =
   match typ with
   | GKoopa ->
       let (new_spr,new_obj) = make ~dir:obj.dir (SEnemy GKoopaShell) context (obj.pos.x,obj.pos.y) in
-      normalize_pos new_obj.pos spr new_spr;
+      normalize_pos new_obj.pos spr.params new_spr.params;
       Some(Enemy(GKoopaShell,new_spr,new_obj))
   | RKoopa ->
       let (new_spr,new_obj) = make ~dir:obj.dir (SEnemy RKoopaShell) context (obj.pos.x,obj.pos.y) in
-      normalize_pos new_obj.pos spr new_spr;
+      normalize_pos new_obj.pos spr.params new_spr.params;
       Some(Enemy(RKoopaShell,new_spr,new_obj))
   | GKoopaShell |RKoopaShell ->
       obj.dir <- player_dir;
@@ -256,12 +240,11 @@ let evolve_enemy player_dir typ spr obj context =
       None
   | _ -> obj.kill <- true; None
 
-let reverse_direction o1 o2 t1 t2 s1 s2 =
-  reverse_left_right o1;
-  reverse_left_right o2;
-  Sprite.transform_enemy t1 s1 o1.dir;
-  Sprite.transform_enemy t2 s2 o2.dir;
-  (None, None)
+let rev_dir o t (s:sprite) =
+  reverse_left_right o;
+  let old_params = s.params in
+  Sprite.transform_enemy t s o.dir;
+  normalize_pos o.pos old_params s.params
 
 let dec_health obj =
   let health = obj.health - 1 in
@@ -273,10 +256,6 @@ let evolve_block obj context =
   let (new_spr,new_obj) = make (SBlock QBlockUsed) context (obj.pos.x, obj.pos.y) in
   Block(QBlockUsed,new_spr,new_obj)
 
-let opposite_dir dir =
-  match dir with
-  | Left -> Right
-  | Right -> Left
 
 let spawn_above player_dir obj typ context =
   let item = spawn (SItem typ) context (obj.pos.x, obj.pos.y) in
@@ -286,6 +265,10 @@ let spawn_above player_dir obj typ context =
   set_vel_to_speed item_obj;
   item
 
+let player_attack_enemy ()= failwith "todo refactor"
+let enemy_attack_player ()= failwith "todo refactor"
+let col_enemy_enemy () = failwith "todo refactor"
+
 let process_collision dir c1 c2 context =
   match (c1, c2, dir) with
   | (Player(_,s1,o1), Enemy(typ,s2,o2), South)
@@ -294,14 +277,16 @@ let process_collision dir c1 c2 context =
       begin match typ with
       | GKoopaShell | RKoopaShell ->
           let r2 = evolve_enemy o1.dir typ s2 o2 context in
-          ( o1.vel.y <- ~-. dampen_jump; o1.pos.y <- o1.pos.y -. 5.; (None,r2) )
+          o1.vel.y <- ~-. dampen_jump;
+          o1.pos.y <- o1.pos.y -. 5.;
+          (None,r2)
       | _ ->
-      (   o1.jumping <- false;
+          o1.jumping <- false;
           dec_health o2;
           o1.grounded <- true;
           o1.invuln <- invuln;
           o1.vel.y <- ~-. dampen_jump;
-      (None,(evolve_enemy o1.dir typ s2 o2 context)) )
+          (None,(evolve_enemy o1.dir typ s2 o2 context)) 
       end
   | (Player(_,s1,o1), Enemy(t2,s2,o2), _)
   | (Enemy(t2,s2,o2), Player(_,s1,o1), _) ->
@@ -321,34 +306,38 @@ let process_collision dir c1 c2 context =
       | (GKoopaShell, GKoopaShell)
       | (GKoopaShell, RKoopaShell)
       | (RKoopaShell, RKoopaShell)
-      | (RKoopaShell, GKoopaShell) -> dec_health o1;
+      | (RKoopaShell, GKoopaShell) -> 
+          dec_health o1;
           dec_health o2;
           (None,None)
-      | (RKoopaShell, _) | (GKoopaShell, _) -> if o1.vel.x = 0. then
-          ( reverse_left_right o2;
-          Sprite.transform_enemy t2 s2 o2.dir;
+      | (RKoopaShell, _) | (GKoopaShell, _) -> if o1.vel.x = 0. then 
+          (rev_dir o2 t2 s2;
           (None,None) )
           else ( dec_health o2; (None,None) )
       | (_, RKoopaShell) | (_, GKoopaShell) -> if o2.vel.x = 0. then
-          ( reverse_left_right o1;
-          Sprite.transform_enemy t1 s1 o1.dir;
+          (rev_dir o1 t1 s1;
           (None,None) )
           else ( dec_health o1; (None,None) )
       | (_, _) ->
           begin match dir with
-          | West | East -> reverse_direction o1 o2 t1 t2 s1 s2
+          | West | East -> 
+              rev_dir o1 t1 s1;
+              rev_dir o2 t2 s2;
+              (None,None)
           | _ -> (None,None)
           end
       end
   | (Enemy(t,s1,o1), Block(typ2,s2,o2), East)
   | (Enemy(t,s1,o1), Block(typ2,s2,o2), West)->
     begin match (t,typ2) with
-    | (RKoopaShell, Brick) | (GKoopaShell, Brick) -> (dec_health o2; reverse_left_right o1; (None,None))
+    | (RKoopaShell, Brick) | (GKoopaShell, Brick) -> 
+        dec_health o2;
+        reverse_left_right o1;
+        (None,None)
     (*TODO: spawn item when block is of type qblock*)
     | (_,_) ->
-      ( reverse_left_right o1;
-      Sprite.transform_enemy t s1 o1.dir;
-      (None,None) )
+        rev_dir o1 t s1;
+      (None,None)
     end
   | (Item(_,s1,o1), Block(typ2,s2,o2), East)
   | (Item(_,s1,o1), Block(typ2,s2,o2), West) ->
@@ -365,6 +354,7 @@ let process_collision dir c1 c2 context =
           let spawned_item = spawn_above o1.dir o2 typ context in
           collide_block dir o1;
           (Some spawned_item, Some updated_block)
+      (* TODO: Big mario and brick breaks break *)
       | _ -> collide_block dir o1; (None,None)
       end
   | (Player(_,s1,o1), Block(t,s2,o2), _) ->
