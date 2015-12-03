@@ -1,3 +1,4 @@
+open Sprite
 open Object
 open Actors
 
@@ -6,6 +7,10 @@ type keys = {
   mutable right: bool;
   mutable up: bool;
   mutable down: bool;
+}
+
+type st = {
+  bgd: sprite;
 }
 
 let pressed_keys = {
@@ -77,7 +82,7 @@ let check_collisions collid context =
     let broad = broad_phase collid in
     narrow_phase collid broad context
 
-    let update_collidable (collid:Object.collidable) all_collids canvas = 
+let update_collidable (collid:Object.collidable) all_collids canvas = 
  (* TODO: optimize. Draw static elements only once *)
   let context = canvas##getContext (Dom_html._2d_) in
   let collid = update_if_player collid context in
@@ -96,7 +101,11 @@ let check_collisions collid context =
   
 
 let update_loop canvas objs = 
-    let rec update_helper time canvas objs  = 
+  let context = canvas##getContext (Dom_html._2d_) in
+  let state = {
+      bgd = Sprite.make_bgd context;
+  } in
+  let rec update_helper time canvas objs  = 
       collid_objs := [];
 
       let fps = calc_fps !last_time time in
@@ -105,6 +114,7 @@ let update_loop canvas objs =
       broad_cache := objs;
       
       Draw.clear_canvas canvas;
+      Draw.draw_bgd state.bgd;
       List.iter (fun obj -> ignore (update_collidable obj objs canvas)) objs ;
 
       Draw.fps canvas fps;
