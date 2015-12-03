@@ -73,8 +73,8 @@ let make_enemy = function
   | Goomba -> setup_obj ()
   | GKoopa -> setup_obj ()
   | RKoopa -> setup_obj ()
-  | GKoopaShell -> setup_obj ~spd:5. ()
-  | RKoopaShell -> setup_obj ~spd:5. ()
+  | GKoopaShell -> setup_obj ~spd:3. ()
+  | RKoopaShell -> setup_obj ~spd:3. ()
 
 let make_block = function
   | QBlock i -> setup_obj ~g:false ()
@@ -207,7 +207,7 @@ let normalize_pos pos (oldspr:Sprite.sprite) (newspr:Sprite.sprite) =
     let p1 = oldspr.params and p2 = newspr.params in
     let (box1,boy1) = p1.bbox_offset and (box2,boy2) = p2.bbox_offset in
     let (bw1,bh1) = p1.bbox_size and (bw2,bh2) = p2.bbox_size in
-    pos.x <- pos.x -. (bw2 +. box2) +. (bw1 +. box1) +. 0.2;
+    pos.x <- pos.x -. (bw2 +. box2) +. (bw1 +. box1);
     pos.y <- pos.y -. (bh2 +. boy2) +. (bh1 +. boy1) -. 1.
 
 let collide_block ?check_x:(check_x=true) dir obj =
@@ -256,9 +256,8 @@ let process_collision dir c1 c2 context =
       o1.invuln <- invuln;
       begin match typ with
       | GKoopaShell | RKoopaShell ->
-          let r2 = if o2.vel.x = 0. then evolve_enemy o1.dir typ s2 o2 context
-                  else (o1.kill <- true; None) in
-          (None,r2)
+          let r2 = evolve_enemy o1.dir typ s2 o2 context in
+          ( o1.vel.y <- ~-. dampen_jump; o1.pos.y <- o1.pos.y -. 5.; (None,r2) )
       | _ ->
       (   o1.jumping <- false; 
           o2.kill <- true;
@@ -333,7 +332,8 @@ let get_aabb obj  =
 
 let check_collision o1 o2 =
   let b1 = get_aabb o1 and b2 = get_aabb o2 in
-  let o1 = get_obj o1 in
+  let o1 = get_obj o1 and o2 = get_obj o2 in
+  if o1.kill || o2.kill then None else
   let vx = (b1.center.x) -. (b2.center.x) in
   let vy = (b1.center.y) -. (b2.center.y) in
   let hwidths = (b1.half.x) +. (b2.half.x) in
