@@ -115,7 +115,7 @@ let spawn spawnable context (posx, posy) =
   let (spr,obj) = make spawnable context (posx, posy) in
   match spawnable with
   | SPlayer t -> Player(spr,obj)
-  | SEnemy t -> 
+  | SEnemy t ->
       set_vel_to_speed obj;
       Enemy(t,spr,obj)
   | SItem t -> Item(t,spr,obj)
@@ -250,7 +250,8 @@ let process_collision dir c1 c2 context =
       o1.grounded <- true; o1.jumping <- false;
       o1.vel.y <- o1.vel.y -. dampen_jump;
       (None,(evolve_enemy o1.dir typ s2 o2 context))
-  | (Player(s1,o1), Enemy(t2,s2,o2), _) ->
+  | (Player(s1,o1), Enemy(t2,s2,o2), _)
+  | (Enemy(t2,s2,o2), Player(s1,o1), _) ->
       begin match t2 with
       | GKoopaShell |RKoopaShell ->
           let r2 = if o2.vel.x = 0. then evolve_enemy o1.dir t2 s2 o2 context
@@ -258,11 +259,12 @@ let process_collision dir c1 c2 context =
           (None,r2)
       | _ -> o1.kill <- true; (None, None)
       end
-  | (Player(s1,o1), Item(t2,s2,o2), _) ->
+  | (Player(s1,o1), Item(t2,s2,o2), _)
+  | (Item t2,s2,o2), Player(s1,o1), _) ->
       o2.kill <- true; (None,None)(*& stuff happens to player*)
   | (Player(s1,o1), Block(t2,s2,o2), dir) ->
       collide_block dir o1; (None,None)
-   | (Enemy(t1,s1,o1), Enemy(t2,s2,o2), dir) ->
+  | (Enemy(t1,s1,o1), Enemy(t2,s2,o2), dir) ->
       begin match dir with
       | West | East ->
           reverse_left_right o1;
