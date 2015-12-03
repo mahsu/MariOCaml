@@ -324,9 +324,13 @@ let process_collision dir c1 c2 context =
       end
   | (Enemy(t,s1,o1), Block(typ2,s2,o2), East)
   | (Enemy(t,s1,o1), Block(typ2,s2,o2), West)->
-      reverse_left_right o1;
+    begin match t with
+    | RKoopaShell | GKoopaShell -> (dec_health o2; reverse_left_right o1; (None,None))
+    | _ ->
+      ( reverse_left_right o1;
       Sprite.transform_enemy t s1 o1.dir;
-      (None,None)
+      (None,None) )
+    end
   | (Item(_,s1,o1), Block(typ2,s2,o2), East)
   | (Item(_,s1,o1), Block(typ2,s2,o2), West) ->
       reverse_left_right o1;
