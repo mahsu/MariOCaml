@@ -207,10 +207,8 @@ let normalize_pos pos (oldspr:Sprite.sprite) (newspr:Sprite.sprite) =
     let p1 = oldspr.params and p2 = newspr.params in
     let (box1,boy1) = p1.bbox_offset and (box2,boy2) = p2.bbox_offset in
     let (bw1,bh1) = p1.bbox_size and (bw2,bh2) = p2.bbox_size in
-    Printf.printf " %f %f " pos.x pos.y;
-    pos.x <- pos.x -. (bw2 +. box2) +. (bw1 +. box1) -.1.;
-    pos.y <- pos.y -. (bh2 +. boy2) +. (bh1 +. boy1) -.1.;
-    Printf.printf " %f %f \n" pos.x pos.y
+    pos.x <- pos.x -. (bw2 +. box2) +. (bw1 +. box1) +. 0.2;
+    pos.y <- pos.y -. (bh2 +. boy2) +. (bh1 +. boy1) -. 1.
 
 let collide_block ?check_x:(check_x=true) dir obj =
   match dir with
@@ -244,16 +242,31 @@ let evolve_enemy player_dir typ spr obj context =
       None
   | _ -> obj.kill <- true; None
 
+let reverse_direction o1 o2 t1 t2 s1 s2 =
+  reverse_left_right o1;
+  reverse_left_right o2;
+  Sprite.transform_enemy t1 s1 o1.dir;
+  Sprite.transform_enemy t2 s2 o2.dir;
+  (None, None)
+
 let process_collision dir c1 c2 context =
   match (c1, c2, dir) with
   | (Player(s1,o1), Enemy(typ,s2,o2), South)
   | (Enemy(typ,s2,o2),Player(s1,o1), North) ->
       o1.invuln <- invuln;
-      o1.jumping <- false; 
-      o2.kill <- true;
-      o1.grounded <- true;
-      o1.vel.y <- ~-. dampen_jump;
-      (None,(evolve_enemy o1.dir typ s2 o2 context))
+      begin match typ with
+      | GKoopaShell | RKoopaShell ->
+          let r2 = if o2.vel.x = 0. then evolve_enemy o1.dir typ s2 o2 context
+                  else (o1.kill <- true; None) in
+          (None,r2)
+      | _ ->
+      (   o1.jumping <- false; 
+          o2.kill <- true;
+          o1.grounded <- true;
+          o1.invuln <- invuln;
+          o1.vel.y <- ~-. dampen_jump;
+      (None,(evolve_enemy o1.dir typ s2 o2 context)) )
+      end
   | (Player(s1,o1), Enemy(t2,s2,o2), _)
   | (Enemy(t2,s2,o2), Player(s1,o1), _) ->
       o1.invuln <- invuln;
@@ -268,14 +281,28 @@ let process_collision dir c1 c2 context =
   | (Item(t2,s2,o2), Player(s1,o1), _) ->
       o2.kill <- true; (None,None)(*& stuff happens to player*)
   | (Enemy(t1,s1,o1), Enemy(t2,s2,o2), dir) ->
-      begin match dir with
-      | West | East ->
-          reverse_left_right o1;
-          reverse_left_right o2;
-          Sprite.transform_enemy t1 s1 o1.dir;
-          Sprite.transform_enemy t2 s2 o2.dir;
+      begin match (t1, t2) with
+      | (GKoopaShell, GKoopaShell)
+      | (GKoopaShell, RKoopaShell)
+      | (RKoopaShell, RKoopaShell)
+      | (RKoopaShell, GKoopaShell) -> o1.kill <- true;
+          o2.kill <- true;
           (None,None)
-      | _ -> (None,None)
+      | (RKoopaShell, _) | (GKoopaShell, _) -> if o1.vel.x = 0. then
+          ( reverse_left_right o2;
+          Sprite.transform_enemy t2 s2 o2.dir;
+          (None,None) )
+          else ( o2.kill <- true; (None,None) )
+      | (_, RKoopaShell) | (_, GKoopaShell) -> if o2.vel.x = 0. then
+          ( reverse_left_right o1;
+          Sprite.transform_enemy t1 s1 o1.dir;
+          (None,None) )
+          else ( o1.kill <- true; (None,None) )
+      | (_, _) ->
+          begin match dir with
+          | West | East -> reverse_direction o1 o2 t1 t2 s1 s2
+          | _ -> (None,None)
+          end
       end
   | (Enemy(t,s1,o1), Block(typ2,s2,o2), East)
   | (Enemy(t,s1,o1), Block(typ2,s2,o2), West)->
