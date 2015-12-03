@@ -18,6 +18,10 @@ let pressed_keys = {
 let collid_objs = ref []
 let last_time = ref 0.
 
+let end_game () =
+  Dom_html.window##alert (Js.string "Game over!");
+  failwith "Game over."
+ 
 let calc_fps t0 t1 =
   let delta = (t1 -. t0) /. 1000. in
   1. /. delta
@@ -27,16 +31,25 @@ let broad_phase collid =
   !broad_cache
 
 let rec narrow_phase c cs context =
-  match cs with
-  | [] -> ()
-  | h::t ->
-    let () = if not (equals c h) then 
-      begin match Object.check_collision c h with
-      | None -> ()
-      | Some dir -> 
-        if (get_obj h).id <> (get_obj c).id 
-        then Object.process_collision dir c h context
-    end in narrow_phase c t context
+  let rec narrow_helper c cs context acc =
+    match cs with
+    | [] -> acc
+    | h::t ->
+      let new_objs = if not (equals c h) then 
+        begin match Object.check_collision c h with
+        | None -> (None,None)
+        | Some dir -> 
+          if (get_obj h).id <> (get_obj c).id 
+          then Object.process_collision dir c h context
+          else (None,None)
+      end else (None,None) in
+      let acc = match new_objs with
+        | (None, Some o) -> o::acc
+        | (Some o, None) -> o::acc
+        | (Some o1, Some o2) -> o1::o2::acc
+        | (None, None) -> acc
+      in narrow_helper c t context acc
+  in narrow_helper c cs context []
 
 let translate_keys () =
   let k = pressed_keys in
@@ -62,12 +75,14 @@ let update_collidable (collid:Object.collidable) all_collids canvas =
   let spr = Object.get_sprite collid in
   if not obj.kill then begin
     obj.grounded <- false;
+    (* Run collision detection *)
     let broad = broad_phase collid in
     Object.process_obj obj;
-    narrow_phase collid broad context;
+    let evolved = narrow_phase collid broad context in
+    (* Render and update animation *)
     Draw.render spr (obj.pos.x,obj.pos.y);
     if obj.vel.x <> 0. || not (is_enemy collid) then Sprite.update_animation spr;
-    if not obj.kill then (collid_objs := collid::!collid_objs)
+    if not obj.kill then (collid_objs := collid::(!collid_objs@evolved))
   end
   
 
