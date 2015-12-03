@@ -23,7 +23,7 @@ let load _ =
   let _ = Html.addEventListener Html.document Html.Event.keyup (Html.handler Director.keyup) Js._true in
   let player = Object.spawn (SPlayer Standing) context (200.,32.) in
   let obj_c1 = Object.spawn (SItem Coin) context (0.0,0.0) in
-  let obj_c2 = Object.spawn (SItem Coin) context (200.0,300.0) in
+  let obj_c2 = Object.spawn (SItem Coin) context (200.0,300.0) in 
   let brick1 = Object.spawn (SBlock Brick) context (200.0,200.0) in
   let brick2 = Object.spawn (SBlock Brick) context (216.0,200.0) in
   let brick3 = Object.spawn (SBlock Brick) context (232.0,200.0) in
@@ -41,7 +41,7 @@ let load _ =
   let enemy2 = Object.spawn (SEnemy GKoopa) context (280.0,160.0) in
 
   Director.update_loop canvas [player; obj_c1; obj_c2; brick1; brick2; brick3; brick4; brick5; enemy1;
-                              brick6; brick7; brick8; brick9; brick10; brick11; brick12; brick13; enemy2] ;
+                              brick6; brick7; brick8; brick9; brick10; brick11; brick12; brick13; enemy2; ] ;
   ()
 
 let inc_counter _ =
