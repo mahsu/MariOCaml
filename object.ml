@@ -2,9 +2,9 @@ open Sprite
 open Actors
 
 let friction = 0.8
-let gravity = 0.3
+let gravity = 0.1
 let player_speed = 3.
-let dampen_jump = 4.
+let dampen_jump = 2.
 
 type xy = {
   mutable x: float;
@@ -152,7 +152,7 @@ let update_player_keys (player : obj) (controls : controls) : unit =
     if (not player.jumping && player.grounded) then begin
       player.jumping <- true;
       player.grounded <- false;
-      player.vel.y <- ~-.(player.params.speed)
+      player.vel.y <- player.vel.y -.(player.params.speed)
     end
   | CDown ->
     if (not player.jumping) then print_endline "crouch"
@@ -221,11 +221,11 @@ let collide_block ?check_x:(check_x=true) dir obj =
 
 let reverse_left_right obj =
   obj.vel.x <- ~-.(obj.vel.x);
-  obj.dir <-
+  obj.dir <-  
     match obj.dir with
     | Left -> Right
     | Right -> Left
-
+  
 let evolve_enemy player_dir typ spr obj context =
   match typ with
   | GKoopa ->
@@ -248,7 +248,7 @@ let process_collision dir c1 c2 context =
   | (Enemy(typ,s2,o2),Player(s1,o1), North) ->
       o1.jumping <- false; o2.kill <- true;
       o1.grounded <- true; o1.jumping <- false;
-      o1.vel.y <- o1.vel.y -. dampen_jump;
+      o1.vel.y <- ~-. dampen_jump;
       (None,(evolve_enemy o1.dir typ s2 o2 context))
   | (Player(s1,o1), Enemy(t2,s2,o2), _)
   | (Enemy(t2,s2,o2), Player(s1,o1), _) ->
@@ -264,14 +264,19 @@ let process_collision dir c1 c2 context =
       o2.kill <- true; (None,None)(*& stuff happens to player*)
   | (Enemy(t1,s1,o1), Enemy(t2,s2,o2), dir) ->
       begin match dir with
-      | West | East ->
+      | West | East -> 
           reverse_left_right o1;
           reverse_left_right o2;
+          Sprite.transform_enemy t1 s1 o1.dir;
+          Sprite.transform_enemy t2 s2 o2.dir;
           (None,None)
       | _ -> (None,None)
       end
-  | (Enemy(_,s1,o1), Block(typ2,s2,o2), East)
-  | (Enemy(_,s1,o1), Block(typ2,s2,o2), West)
+  | (Enemy(t,s1,o1), Block(typ2,s2,o2), East)
+  | (Enemy(t,s1,o1), Block(typ2,s2,o2), West)->
+      reverse_left_right o1;
+      Sprite.transform_enemy t s1 o1.dir;
+      (None,None)
   | (Item(_,s1,o1), Block(typ2,s2,o2), East)
   | (Item(_,s1,o1), Block(typ2,s2,o2), West) ->
       reverse_left_right o1;
@@ -296,22 +301,20 @@ let get_aabb obj  =
 
 let check_collision o1 o2 =
   let b1 = get_aabb o1 and b2 = get_aabb o2 in
-  let o1 = get_obj o1 and o2 = get_obj o2 in
+  let o1 = get_obj o1 in
   let vx = (b1.center.x) -. (b2.center.x) in
   let vy = (b1.center.y) -. (b2.center.y) in
   let hwidths = (b1.half.x) +. (b2.half.x) in
   let hheights = (b1.half.y) +. (b2.half.y) in
-  Printf.printf "%f %f (%f %f) (%f %f) \n" vx vy o1.pos.x o1.pos.y o2.pos.x o2.pos.y;
   if abs_float vx < hwidths && abs_float vy < hheights then begin
     let ox = hwidths -. abs_float vx in
     let oy = hheights -. abs_float vy in
-    Printf.printf "%f %f\n" ox oy;
     if ox >= oy then begin
-      if vy > 0. then (o1.pos.y <- (o1.pos.y+.oy); print_endline "North"; Some North)
-      else (o1.pos.y <- (o1.pos.y -. oy); Printf.printf "%f %f" o1.pos.y oy; print_endline "South"; Some South)
+      if vy > 0. then (o1.pos.y <- (o1.pos.y+.oy);  Some North)
+      else (o1.pos.y <- (o1.pos.y -. oy);  Some South)
     end else begin
-      if vx > 0. then (o1.pos.x <- o1.pos.x +.ox; print_endline "West"; Some West)
-      else (o1.pos.x <- o1.pos.x -. ox; print_endline "East"; Some East)
+      if vx > 0. then (o1.pos.x <- o1.pos.x +.ox; Some West)
+      else (o1.pos.x <- o1.pos.x -. ox;  Some East)
     end
   end else None
 

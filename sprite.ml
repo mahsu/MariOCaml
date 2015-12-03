@@ -18,11 +18,11 @@ type sprite_params =
 
 type sprite =
   {
-    params: sprite_params;
+    mutable params: sprite_params;
     context: Dom_html.canvasRenderingContext2D Js.t;
     frame: int ref;
     ticks: int ref;
-    img: Dom_html.imageElement Js.t;
+    mutable img: Dom_html.imageElement Js.t;
   }
 
 
@@ -101,12 +101,19 @@ let make spawn dir context  =
     ticks = ref 0;
   }
 
+let transform_enemy enemy_typ spr dir =
+  let params = make_enemy  (enemy_typ,dir) in
+  let img = (Dom_html.createImg Dom_html.document) in
+  img##src <- (Js.string params.img_src) ;
+  spr.params <- params;
+  spr.img <- img
+
 let reflect_sprite spr = failwith "todo"
 
 let update_animation (spr: sprite) =
   (* Only advance frame when ticked *)
   let curr_ticks = !(spr.ticks) in
-  if curr_ticks = spr.params.max_ticks then (
+  if curr_ticks >= spr.params.max_ticks then (
     spr.ticks := 0;
     match spr.params.anim with
     | Frame ->

@@ -23,11 +23,11 @@ type sprite_params =
 (* Concrete sprite created to visually represent an object *)
 type sprite = 
   {
-    params: sprite_params;
+    mutable params: sprite_params;
     context: Dom_html.canvasRenderingContext2D Js.t; 
     frame: int ref;
     ticks: int ref;
-    img: Dom_html.imageElement Js.t;
+    mutable img: Dom_html.imageElement Js.t;
   }
 
 
@@ -38,6 +38,8 @@ val setup_sprite : ?anim:animation_typ -> ?loop:bool -> ?bb_off:float*float-> st
 (* Creates a sprite given the actor type *)
 val make : Actors.spawn_typ -> Actors.dir_1d -> Dom_html.canvasRenderingContext2D Js.t
    -> sprite
+
+val transform_enemy : Actors.enemy_typ -> sprite -> Actors.dir_1d -> unit
 
 (* Updates the sprite's animation *)
 val update_animation : sprite -> unit
