@@ -77,11 +77,11 @@ let make_type = function
   | SItem t -> make_item t
   | SBlock t -> make_block t
 
-let new_id () = 
+let new_id () =
   id_counter := !id_counter + 1;
   !id_counter
 
-let make ?id:(id=None) ?dir:(dir=Left) spawnable context (posx, posy) = 
+let make ?id:(id=None) ?dir:(dir=Left) spawnable context (posx, posy) =
   let spr = Sprite.make spawnable dir context in
   let params = make_type spawnable in
   let id = match id with
@@ -109,7 +109,7 @@ let spawn spawnable context (posx, posy) =
   | SItem t -> Item(t,spr,obj)
   | SBlock t -> Block(t,spr,obj)
 
-  
+
 let get_sprite = function
   | Player (s,_) | Enemy (_,s, _) | Item (_,s, _) | Block (_,s, _)  -> s
 
@@ -138,7 +138,7 @@ let update_player_keys (player : obj) (controls : controls) : unit =
     player.dir <- Right
   | CUp ->
     if (not player.jumping && player.grounded) then begin
-      player.jumping <- true; 
+      player.jumping <- true;
       player.grounded <- false;
       player.vel.y <- ~-.(player.params.speed)
     end
@@ -178,10 +178,10 @@ let update_pos obj =
   obj.pos.x <- (obj.vel.x +. obj.pos.x);
   if obj.params.has_gravity then obj.pos.y <- (obj.vel.y +. obj.pos.y)
 
-let process_obj obj = 
+let process_obj obj =
   update_vel obj;
   update_pos obj
-  (*todo kill if out of bounds *) 
+  (*todo kill if out of bounds *)
   (*match col with
   | Player(t,s,o) ->
 
@@ -209,7 +209,7 @@ let normalize_pos pos (oldspr:Sprite.sprite) (newspr:Sprite.sprite) =
 let collide_block dir obj =
   match dir with
   | North -> obj.vel.y <- 0.
-  | South -> 
+  | South ->
       obj.vel.y <- 0.;
       obj.grounded <- true;
       obj.jumping <- false;
@@ -222,13 +222,13 @@ let reverse_left_right obj =
     | Left -> Right
     | Right -> Left
 
-let evolve_enemy player_dir typ spr obj context = 
+let evolve_enemy player_dir typ spr obj context =
   match typ with
-  | GKoopa -> 
+  | GKoopa ->
       let (new_spr,new_obj) = make ~dir:obj.dir (SEnemy GKoopaShell) context (obj.pos.x,obj.pos.y) in
       normalize_pos new_obj.pos spr new_spr;
       Some(Enemy(GKoopaShell,new_spr,new_obj))
-  | RKoopa -> 
+  | RKoopa ->
       let (new_spr,new_obj) = make ~dir:obj.dir (SEnemy RKoopaShell) context (obj.pos.x,obj.pos.y) in
       normalize_pos new_obj.pos spr new_spr;
       Some(Enemy(RKoopaShell,new_spr,new_obj))
@@ -240,33 +240,33 @@ let evolve_enemy player_dir typ spr obj context =
 
 let process_collision dir c1 c2 context =
   match (c1, c2, dir) with
-  | (Player(s1,o1), Enemy(typ,s2,o2), North) -> 
-      o1.jumping <- false;
+  | (Player(s1,o1), Enemy(typ,s2,o2), South) ->
+      o1.jumping <- false; o2.kill <- true;
       (None,(evolve_enemy o1.dir typ s2 o2 context))
-  | (Player(s1,o1), Enemy(t2,s2,o2), _) -> 
+  | (Player(s1,o1), Enemy(t2,s2,o2), _) ->
       begin match t2 with
       | GKoopaShell |RKoopaShell ->
-          let r2 = if o2.vel.x = 0. then evolve_enemy o1.dir t2 s2 o2 context 
+          let r2 = if o2.vel.x = 0. then evolve_enemy o1.dir t2 s2 o2 context
                   else (o1.kill <- true; None) in
           (None,r2)
       | _ -> o1.kill <- true; (None, None)
       end
-  | (Player(s1,o1), Item(t2,s2,o2), _) -> 
+  | (Player(s1,o1), Item(t2,s2,o2), _) ->
       o2.kill <- true; (None,None)(*& stuff happens to player*)
-  | (Player(s1,o1), Block(t2,s2,o2), dir) -> 
+  | (Player(s1,o1), Block(t2,s2,o2), dir) ->
       collide_block dir o1; (None,None)
    | (Enemy(t1,s1,o1), Enemy(t2,s2,o2), dir) ->
-      begin match dir with 
-      | West | East -> 
+      begin match dir with
+      | West | East ->
           reverse_left_right o1;
           reverse_left_right o2;
           (None,None)
       | _ -> (None,None)
       end
-  | (Enemy(typ,s,obj), Block(typ2,s2,obj2), dir) -> 
+  | (Enemy(typ,s,obj), Block(typ2,s2,obj2), dir) ->
       collide_block dir obj;
-      (None, None) 
-  | (Item(typ,s,obj), Block(typ2,s2,obj2), dir) -> 
+      (None, None)
+  | (Item(typ,s,obj), Block(typ2,s2,obj2), dir) ->
       collide_block dir obj;
       (None, None)
   (*| (Block(typ,s,obj), Player(s2,obj2), dir) -> collide_block dir obj2

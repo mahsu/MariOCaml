@@ -25,7 +25,12 @@ let load _ =
   let obj_c1 = Object.spawn (SItem Coin) context (0.0,0.0) in
   let obj_c2 = Object.spawn (SItem Coin) context (200.0,300.0) in
   let brick1 = Object.spawn (SBlock Brick) context (200.0,200.0) in
-  Director.update_loop canvas [player; obj_c1; obj_c2; brick1] ;
+  let brick2 = Object.spawn (SBlock Brick) context (216.0,200.0) in
+  let brick3 = Object.spawn (SBlock Brick) context (232.0,200.0) in
+  let brick4 = Object.spawn (SBlock Brick) context (248.0,200.0) in
+  let brick5 = Object.spawn (SBlock Brick) context (264.0,200.0) in
+  let enemy1 = Object.spawn (SEnemy Goomba) context (248.0,160.0) in
+  Director.update_loop canvas [player; obj_c1; obj_c2; brick1; brick2; brick3; brick4; brick5; enemy1] ;
   ()
 
 let inc_counter _ =
