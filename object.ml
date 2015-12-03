@@ -2,7 +2,9 @@ open Sprite
 open Actors
 
 let friction = 0.8
-let gravity = 0.05
+let gravity = 0.3
+let player_speed = 3.
+let dampen_jump = 4.
 
 type xy = {
   mutable x: float;
@@ -44,13 +46,21 @@ type noncollidable =
   (*| Dead of dead_type * sprite*)
   | Scenery of sprite * obj
 
-let setup_obj ?anim:(anim=true) ?g:(has_gravity=true) ?spd:(speed=3.) () =
+let setup_obj ?anim:(anim=true) ?g:(has_gravity=true) ?spd:(speed=1.) () =
   {
     has_gravity;
     speed;
   }
 
-let make_player () = setup_obj ()
+(* Sets an object's x velocity to the speed specified in its params based on
+ * its direction *)
+let set_vel_to_speed obj =
+  let speed = obj.params.speed in
+  match obj.dir with
+  | Left -> obj.vel.x <- ~-.speed
+  | Right -> obj.vel.x <- speed
+
+let make_player () = setup_obj ~spd:player_speed ()
 
 let make_item = function
   | Mushroom -> setup_obj ()
@@ -105,7 +115,9 @@ let spawn spawnable context (posx, posy) =
   let (spr,obj) = make spawnable context (posx, posy) in
   match spawnable with
   | SPlayer t -> Player(spr,obj)
-  | SEnemy t -> Enemy(t,spr,obj)
+  | SEnemy t -> 
+      set_vel_to_speed obj;
+      Enemy(t,spr,obj)
   | SItem t -> Item(t,spr,obj)
   | SBlock t -> Block(t,spr,obj)
 
@@ -161,14 +173,6 @@ let update_player player keys context =
   else if player.vel.y = 0. && player.vel.x = 0.
   then Some (Sprite.make (SPlayer Standing) player.dir context)
   else None
-
-(* Sets an object's x velocity to the speed specified in its params based on
- * its direction *)
-let set_vel_to_speed obj =
-  let speed = obj.params.speed in
-  match obj.dir with
-  | Left -> obj.vel.x <- ~-.speed
-  | Right -> obj.vel.x <- speed
 
 let update_vel obj =
   if obj.grounded then obj.vel.y <- 0.
@@ -242,6 +246,8 @@ let process_collision dir c1 c2 context =
   match (c1, c2, dir) with
   | (Player(s1,o1), Enemy(typ,s2,o2), South) ->
       o1.jumping <- false; o2.kill <- true;
+      o1.grounded <- true; o1.jumping <- false;
+      o1.vel.y <- o1.vel.y -. dampen_jump;
       (None,(evolve_enemy o1.dir typ s2 o2 context))
   | (Player(s1,o1), Enemy(t2,s2,o2), _) ->
       begin match t2 with
