@@ -210,14 +210,14 @@ let normalize_pos pos (oldspr:Sprite.sprite) (newspr:Sprite.sprite) =
     pos.y <- pos.y +. (bh2 +. boy2) -. (bh1 +. boy1)
 
 
-let collide_block dir obj =
+let collide_block ?check_x:(check_x=true) dir obj =
   match dir with
   | North -> obj.vel.y <- 0.
   | South ->
       obj.vel.y <- 0.;
       obj.grounded <- true;
       obj.jumping <- false;
-  | East | West-> obj.vel.x <- 0.
+  | East | West -> if check_x then obj.vel.x <- 0.
 
 let reverse_left_right obj =
   obj.vel.x <- ~-.(obj.vel.x);
@@ -244,7 +244,8 @@ let evolve_enemy player_dir typ spr obj context =
 
 let process_collision dir c1 c2 context =
   match (c1, c2, dir) with
-  | (Player(s1,o1), Enemy(typ,s2,o2), South) ->
+  | (Player(s1,o1), Enemy(typ,s2,o2), South)
+  | (Enemy(typ,s2,o2),Player(s1,o1), North) ->
       o1.jumping <- false; o2.kill <- true;
       o1.grounded <- true; o1.jumping <- false;
       o1.vel.y <- o1.vel.y -. dampen_jump;
@@ -269,15 +270,16 @@ let process_collision dir c1 c2 context =
           (None,None)
       | _ -> (None,None)
       end
-  | (Enemy(typ,s,obj), Block(typ2,s2,obj2), dir) ->
-      collide_block dir obj;
+  | (Enemy(_,s1,o1), Block(typ2,s2,o2), East)
+  | (Enemy(_,s1,o1), Block(typ2,s2,o2), West)
+  | (Item(_,s1,o1), Block(typ2,s2,o2), East)
+  | (Item(_,s1,o1), Block(typ2,s2,o2), West) ->
+      reverse_left_right o1;
       (None, None)
-  | (Item(typ,s,obj), Block(typ2,s2,obj2), dir) ->
-      collide_block dir obj;
+  | (Enemy(_,s1,o1), Block(typ2,s2,o2), _)
+  | (Item(_,s1,o1), Block(typ2,s2,o2), _) ->
+      collide_block dir o1;
       (None, None)
-  (*| (Block(typ,s,obj), Player(s2,obj2), dir) -> collide_block dir obj2
-  | (Block(typ,s,obj), Enemy(typ2,s2,obj2), dir) -> collide_block dir obj2
-  | (Block(typ,s,obj), Item(typ2,s2,obj2), dir) -> collide_block dir obj2*)
   | (_, _, _) -> (None,None)
 
 let get_aabb obj  =
