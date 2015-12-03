@@ -35,10 +35,11 @@ type obj = {
   mutable dir: Actors.dir_1d;
   mutable invuln: int;
   mutable kill: bool;
+  mutable health: int;
 }
 
 type collidable =
-  | Player of sprite * obj
+  | Player of pl_typ * sprite * obj
   | Enemy of enemy_typ * sprite * obj
   | Item of item_typ * sprite * obj
   | Block of block_typ * sprite * obj
@@ -109,13 +110,14 @@ let make ?id:(id=None) ?dir:(dir=Left) spawnable context (posx, posy) =
     dir;
     invuln = 0;
     kill = false;
+    health = 1;
   } in
   (spr,obj)
 
 let spawn spawnable context (posx, posy) =
   let (spr,obj) = make spawnable context (posx, posy) in
   match spawnable with
-  | SPlayer t -> Player(spr,obj)
+  | SPlayer t -> Player(SmallM,spr,obj)
   | SEnemy t ->
       set_vel_to_speed obj;
       Enemy(t,spr,obj)
@@ -124,13 +126,13 @@ let spawn spawnable context (posx, posy) =
 
 
 let get_sprite = function
-  | Player (s,_) | Enemy (_,s, _) | Item (_,s, _) | Block (_,s, _)  -> s
+  | Player (_,s,_) | Enemy (_,s, _) | Item (_,s, _) | Block (_,s, _)  -> s
 
 let get_obj = function
-  | Player (_,o) | Enemy (_,_,o) | Item (_,_,o) | Block (_,_,o) -> o
+  | Player (_,_,o) | Enemy (_,_,o) | Item (_,_,o) | Block (_,_,o) -> o
 
 let is_player = function
-  | Player(_,_) -> true
+  | Player(_,_,_) -> true
   | _ -> false
 
 let is_enemy = function
@@ -143,11 +145,11 @@ let update_player_keys (player : obj) (controls : controls) : unit =
   match controls with
   | CLeft ->
     if player.vel.x > ~-.(player.params.speed)
-    then player.vel.x <- player.vel.x;
+    then player.vel.x <- player.vel.x -. 1.;
     player.dir <- Left
   | CRight ->
     if player.vel.x < player.params.speed
-    then player.vel.x <- player.vel.x;
+    then player.vel.x <- player.vel.x +. 1.;
     player.dir <- Right
   | CUp ->
     if (not player.jumping && player.grounded) then begin
@@ -165,15 +167,27 @@ let update_player player keys context =
   let v = player.vel.x *. friction in
   let vel_damped = if abs_float v < 0.1 then 0. else v in
   let () = player.vel.x <- vel_damped in
-  if not prev_jumping && player.jumping
-  then Some (Sprite.make (SPlayer Jumping) player.dir context)
+  if player.health <= 1 then
+  ( if not prev_jumping && player.jumping
+  then Some (SmallM, (Sprite.make (SPlayer Jumping) player.dir context))
   else if prev_dir <> player.dir && not player.jumping
-  then Some (Sprite.make (SPlayer Running) player.dir context)
+  then Some (SmallM, (Sprite.make (SPlayer Running) player.dir context))
   else if prev_dir <> player.dir && player.jumping && prev_jumping
-  then Some (Sprite.make (SPlayer Jumping) player.dir context)
+  then Some (SmallM, (Sprite.make (SPlayer Jumping) player.dir context))
   else if player.vel.y = 0. && player.vel.x = 0.
-  then Some (Sprite.make (SPlayer Standing) player.dir context)
-  else None
+  then Some (SmallM, (Sprite.make (SPlayer Standing) player.dir context))
+  else None )
+  else
+  ( if not prev_jumping && player.jumping
+  then Some (BigM, (Sprite.make (SPlayer Jumping) player.dir context)) (*TODO CHANGE TO SBigPlayer*)
+  else if prev_dir <> player.dir && not player.jumping
+  then Some (BigM, (Sprite.make (SPlayer Running) player.dir context))
+  else if prev_dir <> player.dir && player.jumping && prev_jumping
+  then Some (BigM, (Sprite.make (SPlayer Jumping) player.dir context))
+  else if player.vel.y = 0. && player.vel.x = 0.
+  then Some (BigM, (Sprite.make (SPlayer Standing) player.dir context))
+  else None )
+
 
 let update_vel obj =
   if obj.grounded then obj.vel.y <- 0.
@@ -249,54 +263,59 @@ let reverse_direction o1 o2 t1 t2 s1 s2 =
   Sprite.transform_enemy t2 s2 o2.dir;
   (None, None)
 
+let dec_health obj =
+  let health = obj.health - 1 in
+  if health = 0 then obj.kill <- true else
+  obj.health <- health
+
 let process_collision dir c1 c2 context =
   match (c1, c2, dir) with
-  | (Player(s1,o1), Enemy(typ,s2,o2), South)
-  | (Enemy(typ,s2,o2),Player(s1,o1), North) ->
+  | (Player(_,s1,o1), Enemy(typ,s2,o2), South)
+  | (Enemy(typ,s2,o2),Player(_,s1,o1), North) ->
       o1.invuln <- invuln;
       begin match typ with
       | GKoopaShell | RKoopaShell ->
           let r2 = evolve_enemy o1.dir typ s2 o2 context in
           ( o1.vel.y <- ~-. dampen_jump; o1.pos.y <- o1.pos.y -. 5.; (None,r2) )
       | _ ->
-      (   o1.jumping <- false; 
-          o2.kill <- true;
+      (   o1.jumping <- false;
+          dec_health o2;
           o1.grounded <- true;
           o1.invuln <- invuln;
           o1.vel.y <- ~-. dampen_jump;
       (None,(evolve_enemy o1.dir typ s2 o2 context)) )
       end
-  | (Player(s1,o1), Enemy(t2,s2,o2), _)
-  | (Enemy(t2,s2,o2), Player(s1,o1), _) ->
+  | (Player(_,s1,o1), Enemy(t2,s2,o2), _)
+  | (Enemy(t2,s2,o2), Player(_,s1,o1), _) ->
       o1.invuln <- invuln;
       begin match t2 with
       | GKoopaShell |RKoopaShell ->
           let r2 = if o2.vel.x = 0. then evolve_enemy o1.dir t2 s2 o2 context
-                  else (o1.kill <- true; None) in
+                  else (dec_health o1; None) in
           (None,r2)
-      | _ -> o1.kill <- true; (None, None)
+      | _ -> dec_health o1; (None, None)
       end
-  | (Player(s1,o1), Item(t2,s2,o2), _)
-  | (Item(t2,s2,o2), Player(s1,o1), _) ->
-      o2.kill <- true; (None,None)(*& stuff happens to player*)
+  | (Player(_,s1,o1), Item(t2,s2,o2), _)
+  | (Item(t2,s2,o2), Player(_,s1,o1), _) ->
+      dec_health o2; (None,None)(*& stuff happens to player*)
   | (Enemy(t1,s1,o1), Enemy(t2,s2,o2), dir) ->
       begin match (t1, t2) with
       | (GKoopaShell, GKoopaShell)
       | (GKoopaShell, RKoopaShell)
       | (RKoopaShell, RKoopaShell)
-      | (RKoopaShell, GKoopaShell) -> o1.kill <- true;
-          o2.kill <- true;
+      | (RKoopaShell, GKoopaShell) -> dec_health o1;
+          dec_health o2;
           (None,None)
       | (RKoopaShell, _) | (GKoopaShell, _) -> if o1.vel.x = 0. then
           ( reverse_left_right o2;
           Sprite.transform_enemy t2 s2 o2.dir;
           (None,None) )
-          else ( o2.kill <- true; (None,None) )
+          else ( dec_health o2; (None,None) )
       | (_, RKoopaShell) | (_, GKoopaShell) -> if o2.vel.x = 0. then
           ( reverse_left_right o1;
           Sprite.transform_enemy t1 s1 o1.dir;
           (None,None) )
-          else ( o1.kill <- true; (None,None) )
+          else ( dec_health o1; (None,None) )
       | (_, _) ->
           begin match dir with
           | West | East -> reverse_direction o1 o2 t1 t2 s1 s2
@@ -313,7 +332,7 @@ let process_collision dir c1 c2 context =
       reverse_left_right o1;
       (None, None)
   | (Enemy(_,s1,o1), Block(typ2,s2,o2), _)
-  | (Player(s1,o1), Block(typ2,s2,o2), _)
+  | (Player(_,s1,o1), Block(typ2,s2,o2), _)
   | (Item(_,s1,o1), Block(typ2,s2,o2), _) ->
       collide_block dir o1;
       (None, None)

@@ -25,10 +25,11 @@ type obj = {
   mutable dir: Actors.dir_1d;
   mutable invuln: int;
   mutable kill: bool;
+  mutable health: int;
 }
 
 type collidable =
-  | Player of sprite * obj
+  | Player of pl_typ * sprite * obj
   | Enemy of enemy_typ * sprite * obj
   | Item of item_typ * sprite * obj
   | Block of block_typ * sprite * obj
@@ -44,7 +45,7 @@ val get_obj : collidable -> obj
 (* Creates a new object with a given
  * actor type on the the canvas at a given position *)
 val spawn : Actors.spawn_typ  -> Dom_html.canvasRenderingContext2D Js.t
-          -> float*float -> collidable 
+          -> float*float -> collidable
 
 val equals : collidable -> collidable -> bool
 
@@ -58,7 +59,7 @@ val kill : obj -> noncollidable list
 
 val process_obj : obj -> unit
 
-val update_player : obj -> Actors.controls list -> Dom_html.canvasRenderingContext2D Js.t -> sprite option
+val update_player : obj -> Actors.controls list -> Dom_html.canvasRenderingContext2D Js.t -> (pl_typ * sprite) option
 
 (* Checks whether a collision occured between two objects, returning the
  * direction of the collision if one occurred. *)
