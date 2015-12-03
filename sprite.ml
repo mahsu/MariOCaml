@@ -94,7 +94,7 @@ let make_item = function
 
 let make_block = function
   (* 16x16 grid with 0x0 offset *)
-  | Brick -> setup_sprite "blocks.png" 5 15 (16.,16.) (0.,0.)
+  | Brick -> setup_sprite "blocks.png" 5 10 (16.,16.) (0.,0.)
   | QBlock _ -> setup_sprite "blocks.png" 4 15 (16.,16.) (0.,16.)
   | QBlockUsed -> setup_sprite "blocks.png" 1 0 (16.,16.) (0.,32.)
   | UnBBlock -> setup_sprite "blocks.png" 1 0 (16.,16.) (0.,48.)

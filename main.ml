@@ -21,7 +21,7 @@ let load _ =
   let context = canvas##getContext (Dom_html._2d_) in
   let _ = Html.addEventListener Html.document Html.Event.keydown (Html.handler Director.keydown) Js._true in
   let _ = Html.addEventListener Html.document Html.Event.keyup (Html.handler Director.keyup) Js._true in
-  let player = Object.spawn (SPlayer(SmallM,Standing)) context (200.,32.) in
+  
   let obj_c1 = Object.spawn (SItem Coin) context (0.0,0.0) in
   let obj_c2 = Object.spawn (SItem Coin) context (200.0,300.0) in
   let brick1 = Object.spawn (SBlock Brick) context (200.0,200.0) in
@@ -41,7 +41,7 @@ let load _ =
   let enemy2 = Object.spawn (SEnemy GKoopa) context (280.0,160.0) in
   let qblock = Object.spawn (SBlock (QBlock(Mushroom))) context (248.0,140.0) in
 
-  Director.update_loop canvas [player; obj_c1; obj_c2; brick1; brick2; brick3; brick4; brick5; enemy1;
+  Director.update_loop canvas [obj_c1; obj_c2; brick1; brick2; brick3; brick4; brick5; enemy1;
                               brick6; brick7; brick8; brick9; brick10; brick11; brick12; brick13; enemy2; qblock] ;
   ()
 

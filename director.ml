@@ -60,21 +60,6 @@ let rec narrow_phase c cs context =
       narrow_helper c t context acc
   in narrow_helper c cs context []
 
-let translate_keys () =
-  let k = pressed_keys in
-  let ctrls = [(k.left,CLeft);(k.right,CRight);(k.up,CUp);(k.down,CDown)] in
-  List.fold_left (fun a x -> if fst x then (snd x)::a else a) [] ctrls
-
-let update_if_player collid context =
-  match collid with
-  | Player(t,s,o) as p ->
-      let keys = translate_keys () in
-      begin match Object.update_player o keys context with
-      | None -> p
-      | Some (new_typ, new_spr) -> Player(new_typ,new_spr,o)
-      end
-  | _ as col -> col
-
 let check_collisions collid context =
   match collid with
   | Block(_,_,_) -> []
@@ -82,10 +67,8 @@ let check_collisions collid context =
     let broad = broad_phase collid in
     narrow_phase collid broad context
 
-let update_collidable (collid:Object.collidable) all_collids canvas =
+let update_collidable (collid:Object.collidable) all_collids context =
  (* TODO: optimize. Draw static elements only once *)
-  let context = canvas##getContext (Dom_html._2d_) in
-  let collid = update_if_player collid context in
   let obj = Object.get_obj collid in
   let spr = Object.get_sprite collid in
   if not obj.kill then begin
@@ -96,15 +79,40 @@ let update_collidable (collid:Object.collidable) all_collids canvas =
     (* Render and update animation *)
     Draw.render spr (obj.pos.x,obj.pos.y);
     if obj.vel.x <> 0. || not (is_enemy collid) then Sprite.update_animation spr;
-    if not obj.kill then (collid_objs := collid::(!collid_objs@evolved))
-  end
+    evolved
+  end else []
+
+let translate_keys () =
+  let k = pressed_keys in
+  let ctrls = [(k.left,CLeft);(k.right,CRight);(k.up,CUp);(k.down,CDown)] in
+  List.fold_left (fun a x -> if fst x then (snd x)::a else a) [] ctrls
+
+let run_update collid all_collids canvas =
+  let context = canvas##getContext (Dom_html._2d_) in
+  match collid with
+  | Player(t,s,o) as p ->
+      let keys = translate_keys () in
+      let player = begin match Object.update_player o keys context with
+        | None -> p
+        | Some (new_typ, new_spr) -> Player(new_typ,new_spr,o)
+      end in
+      let evolved = update_collidable player all_collids context in
+      collid_objs := !collid_objs @ evolved;
+      player
+  | _ ->
+      let obj = get_obj collid in 
+      let evolved = update_collidable collid all_collids context in
+      if not obj.kill then (collid_objs := collid::(!collid_objs@evolved));
+      collid
+
 
 let update_loop canvas objs =
   let context = canvas##getContext (Dom_html._2d_) in
+  let player = Object.spawn (SPlayer(SmallM,Standing)) context (200.,32.) in
   let state = {
       bgd = Sprite.make_bgd context;
   } in
-  let rec update_helper time canvas objs  =
+  let rec update_helper time canvas player objs  =
       collid_objs := [];
 
       let fps = calc_fps !last_time time in
@@ -114,13 +122,14 @@ let update_loop canvas objs =
 
       Draw.clear_canvas canvas;
       Draw.draw_bgd state.bgd;
-      List.iter (fun obj -> ignore (update_collidable obj objs canvas)) objs ;
+      let player = run_update player objs canvas in
+      List.iter (fun obj -> ignore (run_update obj objs canvas)) objs ;
 
       Draw.fps canvas fps;
       ignore Dom_html.window##requestAnimationFrame(
-          Js.wrap_callback (fun (t:float) -> update_helper t canvas !collid_objs))
+          Js.wrap_callback (fun (t:float) -> update_helper t canvas player !collid_objs))
 
-  in update_helper 0. canvas objs
+  in update_helper 0. canvas player objs
 
 let keydown evt =
   let () = match evt##keyCode with

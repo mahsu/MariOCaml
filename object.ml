@@ -3,8 +3,8 @@ open Actors
 
 let friction = 0.8
 let gravity = 0.1
-let player_speed = 2.5
-let dampen_jump = 2.
+let player_speed = 2.7
+let dampen_jump = 2.5
 let invuln = 60
 
 type xy = {
@@ -142,14 +142,15 @@ let is_enemy = function
 let equals col1 col2 = (get_obj col1).id = (get_obj col2).id
 
 let update_player_keys (player : obj) (controls : controls) : unit =
+  let lr_acc = player.vel.x *. 0.2 in
   match controls with
   | CLeft ->
     if player.vel.x > ~-.(player.params.speed)
-    then player.vel.x <- player.vel.x -. 1.;
+    then player.vel.x <- player.vel.x -. (0.5 -. lr_acc);
     player.dir <- Left
   | CRight ->
     if player.vel.x < player.params.speed
-    then player.vel.x <- player.vel.x +. 1.;
+    then player.vel.x <- player.vel.x +. (0.5 +. lr_acc);
     player.dir <- Right
   | CUp ->
     if (not player.jumping && player.grounded) then begin
@@ -162,7 +163,7 @@ let update_player_keys (player : obj) (controls : controls) : unit =
 
 let update_player player keys context =
   let prev_jumping = player.jumping in
-  let prev_dir = player.dir and prev_vx = player.vel.x in
+  let prev_dir = player.dir and prev_vx = abs_float player.vel.x in
   List.iter (update_player_keys player) keys;
   let v = player.vel.x *. friction in
   let vel_damped = if abs_float v < 0.1 then 0. else v in
@@ -170,7 +171,7 @@ let update_player player keys context =
   let pl_typ = if player.health <= 1 then SmallM else BigM in
   if not prev_jumping && player.jumping
   then Some (pl_typ, (Sprite.make (SPlayer(pl_typ,Jumping)) player.dir context))
-  else if prev_dir<>player.dir || (prev_vx=0. && player.vel.x > 0.) && not player.jumping
+  else if prev_dir<>player.dir || (prev_vx=0. && (abs_float player.vel.x) > 0.) && not player.jumping
   then Some (pl_typ, (Sprite.make (SPlayer(pl_typ,Running)) player.dir context))
   else if prev_dir <> player.dir && player.jumping && prev_jumping
   then Some (pl_typ, (Sprite.make (SPlayer(pl_typ,Jumping)) player.dir context))
@@ -208,7 +209,7 @@ let normalize_pos pos (p1:Sprite.sprite_params) (p2:Sprite.sprite_params) =
 
 let collide_block ?check_x:(check_x=true) dir obj =
   match dir with
-  | North -> obj.vel.y <- 0.
+  | North -> obj.vel.y <- -0.001
   | South ->
       obj.vel.y <- 0.;
       obj.grounded <- true;
