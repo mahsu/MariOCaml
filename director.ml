@@ -35,11 +35,13 @@ let rec narrow_phase c cs context =
     match cs with
     | [] -> acc
     | h::t ->
-      let new_objs = if not (equals c h) then 
+      let c_obj = get_obj c in
+      let invuln = c_obj.invuln in
+      let new_objs = if not (equals c h) && invuln <= 0 then 
         begin match Object.check_collision c h with
         | None -> (None,None)
         | Some dir -> 
-          if (get_obj h).id <> (get_obj c).id 
+          if (get_obj h).id <> c_obj.id 
           then Object.process_collision dir c h context
           else (None,None)
       end else (None,None) in
@@ -48,7 +50,9 @@ let rec narrow_phase c cs context =
         | (Some o, None) -> o::acc
         | (Some o1, Some o2) -> o1::o2::acc
         | (None, None) -> acc
-      in narrow_helper c t context acc
+      in 
+      c_obj.invuln <- if invuln > 0 then invuln-1 else invuln; 
+      narrow_helper c t context acc
   in narrow_helper c cs context []
 
 let translate_keys () =

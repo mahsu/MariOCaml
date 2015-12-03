@@ -5,6 +5,7 @@ let friction = 0.8
 let gravity = 0.1
 let player_speed = 3.
 let dampen_jump = 2.
+let invuln = 20
 
 type xy = {
   mutable x: float;
@@ -142,11 +143,11 @@ let update_player_keys (player : obj) (controls : controls) : unit =
   match controls with
   | CLeft ->
     if player.vel.x > ~-.(player.params.speed)
-    then player.vel.x <- player.vel.x -. 1.;
+    then player.vel.x <- player.vel.x;
     player.dir <- Left
   | CRight ->
     if player.vel.x < player.params.speed
-    then player.vel.x <- player.vel.x +. 1.;
+    then player.vel.x <- player.vel.x;
     player.dir <- Right
   | CUp ->
     if (not player.jumping && player.grounded) then begin
@@ -209,7 +210,6 @@ let normalize_pos pos (oldspr:Sprite.sprite) (newspr:Sprite.sprite) =
     pos.x <- pos.x -. (bw2 +. box2) +. (bw1 +. box1);
     pos.y <- pos.y -. (bh2 +. boy2) +. (bh1 +. boy1) -. 1.
 
-
 let collide_block ?check_x:(check_x=true) dir obj =
   match dir with
   | North -> obj.vel.y <- 0.
@@ -253,18 +253,22 @@ let process_collision dir c1 c2 context =
   match (c1, c2, dir) with
   | (Player(s1,o1), Enemy(typ,s2,o2), South)
   | (Enemy(typ,s2,o2),Player(s1,o1), North) ->
+      o1.invuln <- invuln;
       begin match typ with
       | GKoopaShell | RKoopaShell ->
           let r2 = evolve_enemy o1.dir typ s2 o2 context in
           ( o1.vel.y <- ~-. dampen_jump; o1.pos.y <- o1.pos.y -. 5.; (None,r2) )
       | _ ->
-      ( o1.jumping <- false; o2.kill <- true;
-      o1.grounded <- true; o1.jumping <- false;
-      o1.vel.y <- ~-. dampen_jump;
+      (   o1.jumping <- false; 
+          o2.kill <- true;
+          o1.grounded <- true;
+          o1.invuln <- invuln;
+          o1.vel.y <- ~-. dampen_jump;
       (None,(evolve_enemy o1.dir typ s2 o2 context)) )
       end
   | (Player(s1,o1), Enemy(t2,s2,o2), _)
   | (Enemy(t2,s2,o2), Player(s1,o1), _) ->
+      o1.invuln <- invuln;
       begin match t2 with
       | GKoopaShell |RKoopaShell ->
           let r2 = if o2.vel.x = 0. then evolve_enemy o1.dir t2 s2 o2 context
