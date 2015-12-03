@@ -27,8 +27,9 @@ type sprite =
 
 
 let setup_sprite ?anim:(anim=Frame) ?loop:(loop=true)
-         ?bb_off:(bbox_offset=(0.,0.))
+         ?bb_off:(bbox_offset=(0.,0.)) ?bb_sz:(bbox_size=(0.,0.))
                  img_src max_frames max_ticks frame_size src_offset =
+  let bbox_size = if bbox_size = (0.,0.) then frame_size else bbox_size in
   let img_src = "./sprites/" ^ img_src in
   {
     img_src;
@@ -37,7 +38,7 @@ let setup_sprite ?anim:(anim=Frame) ?loop:(loop=true)
     frame_size;
     src_offset;
     bbox_offset;
-    bbox_size = frame_size;
+    bbox_size;
     anim;
     loop;
   }
@@ -47,19 +48,19 @@ let make_player (typ, dir) =
   match dir with
     (* 16x16 grid with 0x0 offset*)
     | Left -> begin match typ with
-      | Standing -> setup_sprite "mario-small.png" 1 0 (16.,16.) (0.,0.)
-      | Jumping -> setup_sprite "mario-small.png" 2 10 (16.,16.) (16.,16.)
-      | Running -> setup_sprite "mario-small.png" 3 10 (16.,16.) (16.,0.)
-      | Crouching -> setup_sprite "mario-small.png" 1 0 (16.,16.) (0.,64.)
+      | Standing -> setup_sprite "mario-small.png" ~bb_off:(1.,1.) ~bb_sz:(14.,14.) 1 0 (16.,16.) (0.,0.)
+      | Jumping -> setup_sprite "mario-small.png" ~bb_off:(1.,1.) ~bb_sz:(14.,14.) 2 10 (16.,16.) (16.,16.)
+      | Running -> setup_sprite "mario-small.png" ~bb_off:(1.,1.) ~bb_sz:(14.,14.) 3 10 (16.,16.) (16.,0.)
+      | Crouching -> setup_sprite "mario-small.png" ~bb_off:(1.,1.) ~bb_sz:(14.,14.) 1 0 (16.,16.) (0.,64.)
       end
     | Right -> begin match typ with
-      | Standing -> setup_sprite "mario-small.png" 1 0 (16.,16.) (0.,32.)
-      | Jumping -> setup_sprite "mario-small.png" 2 10 (16.,16.) (16.,48.)
-      | Running -> setup_sprite "mario-small.png" 3 10 (16.,16.) (16.,32.)
-      | Crouching -> setup_sprite "mario-small.png" 1 0 (16.,16.) (0.,64.)
+      | Standing -> setup_sprite "mario-small.png" ~bb_off:(1.,1.) ~bb_sz:(14.,14.) 1 0 (16.,16.) (0.,32.)
+      | Jumping -> setup_sprite "mario-small.png" ~bb_off:(1.,1.) ~bb_sz:(14.,14.) 2 10 (16.,16.) (16.,48.)
+      | Running -> setup_sprite "mario-small.png" ~bb_off:(1.,1.) ~bb_sz:(14.,14.) 3 10 (16.,16.) (16.,32.)
+      | Crouching -> setup_sprite "mario-small.png" ~bb_off:(1.,1.) ~bb_sz:(14.,14.) 1 0 (16.,16.) (0.,64.)
       end
 
-(* let make_bigplayer (typ, dir) =
+let make_bigplayer (typ, dir) =
   match dir with
   | Left -> begin match typ with
     | Standing -> setup_sprite "mario-big.png"
@@ -72,21 +73,21 @@ let make_player (typ, dir) =
     | Jumping -> setup_sprite "mario-big.png"
     | Running -> setup_sprite "mario-big.png"
     | Crouching -> setup_sprite "mario-big.png"
-    end *)
+    end
 
 let make_enemy (typ, dir) =
   match (typ, dir) with
-      | (Goomba,_) -> setup_sprite "enemies.png" 2 10 (16.,16.) (0.,128.)
-      | (GKoopa,Left) -> setup_sprite "enemies.png" 2 10 (16.,27.) (0.,69.)
-      | (GKoopa,Right) -> setup_sprite "enemies.png" 2 10 (16.,27.) (32.,69.)
-      | (RKoopa,Left) -> setup_sprite "enemies.png" 2 10 (16.,27.) (0.,5.)
-      | (RKoopa,Right) -> setup_sprite "enemies.png" 2 10 (16.,27.) (32.,5.)
-      | (GKoopaShell,_) -> setup_sprite "enemies.png" 4 10 (16.,16.) (0.,96.)
-      | (RKoopaShell,_) -> setup_sprite "enemies.png" 4 10 (16.,16.) (0.,32.)
+      | (Goomba,_) -> setup_sprite "enemies.png" ~bb_off:(1.,1.) ~bb_sz:(14.,14.) 2 10 (16.,16.) (0.,128.)
+      | (GKoopa,Left) -> setup_sprite "enemies.png" ~bb_off:(4.,8.) ~bb_sz:(11.,18.) 2 10 (16.,27.) (0.,69.)
+      | (GKoopa,Right) -> setup_sprite "enemies.png" ~bb_off:(4.,8.) ~bb_sz:(11.,18.) 2 10 (16.,27.) (32.,69.)
+      | (RKoopa,Left) -> setup_sprite "enemies.png" ~bb_off:(4.,8.) ~bb_sz:(11.,18.) 2 10 (16.,27.) (0.,5.)
+      | (RKoopa,Right) -> setup_sprite "enemies.png" ~bb_off:(4.,8.) ~bb_sz:(11.,18.) 2 10 (16.,27.) (32.,5.)
+      | (GKoopaShell,_) -> setup_sprite "enemies.png" ~bb_off:(2.,2.) ~bb_sz:(12.,12.) 4 10 (16.,16.) (0.,96.)
+      | (RKoopaShell,_) -> setup_sprite "enemies.png" ~bb_off:(2.,2.) ~bb_sz:(12.,12.) 4 10 (16.,16.) (0.,32.)
 
 let make_item = function
   (* 16x16 grid with 0x0 offset *)
-  | Coin -> setup_sprite "items.png" 3 15 (16.,16.) (0.,80.)
+  | Coin -> setup_sprite "items.png" ~bb_off:(3.,0.) ~bb_sz:(12.,0.) 3 15 (16.,16.) (0.,80.)
   | FireFlower -> setup_sprite "items.png" 1 0 (16.,16.) (0.,188.)
   | Mushroom -> setup_sprite "items.png" 1 0 (16.,16.) (0.,0.)
   | Star -> setup_sprite "items.png" 1 0 (16.,16.) (16.,48.)

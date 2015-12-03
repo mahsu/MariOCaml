@@ -5,7 +5,7 @@ let friction = 0.8
 let gravity = 0.1
 let player_speed = 3.
 let dampen_jump = 2.
-let invuln = 20
+let invuln = 40
 
 type xy = {
   mutable x: float;
