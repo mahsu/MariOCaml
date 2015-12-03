@@ -162,7 +162,7 @@ let update_player_keys (player : obj) (controls : controls) : unit =
 
 let update_player player keys context =
   let prev_jumping = player.jumping in
-  let prev_dir = player.dir in
+  let prev_dir = player.dir and prev_vx = player.vel.x in
   List.iter (update_player_keys player) keys;
   let v = player.vel.x *. friction in
   let vel_damped = if abs_float v < 0.1 then 0. else v in
@@ -170,7 +170,7 @@ let update_player player keys context =
   let pl_typ = if player.health <= 1 then SmallM else BigM in
   if not prev_jumping && player.jumping
   then Some (pl_typ, (Sprite.make (SPlayer(pl_typ,Jumping)) player.dir context))
-  else if prev_dir <> player.dir && not player.jumping
+  else if prev_dir<>player.dir || (prev_vx=0. && player.vel.x > 0.) && not player.jumping
   then Some (pl_typ, (Sprite.make (SPlayer(pl_typ,Running)) player.dir context))
   else if prev_dir <> player.dir && player.jumping && prev_jumping
   then Some (pl_typ, (Sprite.make (SPlayer(pl_typ,Jumping)) player.dir context))
