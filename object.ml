@@ -206,8 +206,8 @@ let normalize_pos pos (oldspr:Sprite.sprite) (newspr:Sprite.sprite) =
     let p1 = oldspr.params and p2 = newspr.params in
     let (box1,boy1) = p1.bbox_offset and (box2,boy2) = p2.bbox_offset in
     let (bw1,bh1) = p1.bbox_size and (bw2,bh2) = p2.bbox_size in
-    pos.x <- pos.x +. (bw2 +. box2) -. (bw1 +. box1);
-    pos.y <- pos.y +. (bh2 +. boy2) -. (bh1 +. boy1)
+    pos.x <- pos.x -. (bw2 +. box2) +. (bw1 +. box1);
+    pos.y <- pos.y -. (bh2 +. boy2) +. (bh1 +. boy1)
 
 
 let collide_block ?check_x:(check_x=true) dir obj =
@@ -221,11 +221,11 @@ let collide_block ?check_x:(check_x=true) dir obj =
 
 let reverse_left_right obj =
   obj.vel.x <- ~-.(obj.vel.x);
-  obj.dir <-  
+  obj.dir <-
     match obj.dir with
     | Left -> Right
     | Right -> Left
-  
+
 let evolve_enemy player_dir typ spr obj context =
   match typ with
   | GKoopa ->
@@ -264,7 +264,7 @@ let process_collision dir c1 c2 context =
       o2.kill <- true; (None,None)(*& stuff happens to player*)
   | (Enemy(t1,s1,o1), Enemy(t2,s2,o2), dir) ->
       begin match dir with
-      | West | East -> 
+      | West | East ->
           reverse_left_right o1;
           reverse_left_right o2;
           Sprite.transform_enemy t1 s1 o1.dir;
