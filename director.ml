@@ -66,8 +66,14 @@ let update_if_player collid context =
       end
   | _ as col -> col
 
+let check_collisions collid context =
+  match collid with
+  | Block(_,_,_) -> []
+  | _ -> 
+    let broad = broad_phase collid in
+    narrow_phase collid broad context
 
-let update_collidable (collid:Object.collidable) all_collids canvas = 
+    let update_collidable (collid:Object.collidable) all_collids canvas = 
  (* TODO: optimize. Draw static elements only once *)
   let context = canvas##getContext (Dom_html._2d_) in
   let collid = update_if_player collid context in
@@ -75,10 +81,9 @@ let update_collidable (collid:Object.collidable) all_collids canvas =
   let spr = Object.get_sprite collid in
   if not obj.kill then begin
     obj.grounded <- false;
-    (* Run collision detection *)
-    let broad = broad_phase collid in
     Object.process_obj obj;
-    let evolved = narrow_phase collid broad context in
+    (* Run collision detection if moving object*)
+    let evolved = check_collisions collid context in
     (* Render and update animation *)
     Draw.render spr (obj.pos.x,obj.pos.y);
     if obj.vel.x <> 0. || not (is_enemy collid) then Sprite.update_animation spr;
