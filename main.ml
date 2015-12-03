@@ -29,8 +29,17 @@ let load _ =
   let brick3 = Object.spawn (SBlock Brick) context (232.0,200.0) in
   let brick4 = Object.spawn (SBlock Brick) context (248.0,200.0) in
   let brick5 = Object.spawn (SBlock Brick) context (264.0,200.0) in
+  let brick6 = Object.spawn (SBlock Brick) context (280.0,200.0) in
+  let brick7 = Object.spawn (SBlock Brick) context (296.0,200.0) in
+  let brick8 = Object.spawn (SBlock Brick) context (312.0,200.0) in
+  let brick9 = Object.spawn (SBlock Brick) context (312.0,184.0) in
+  let brick10 = Object.spawn (SBlock Brick) context (184.0,200.0) in
+  let brick11 = Object.spawn (SBlock Brick) context (168.0,200.0) in
+  let brick12 = Object.spawn (SBlock Brick) context (152.0,200.0) in
+  let brick13 = Object.spawn (SBlock Brick) context (152.0,184.0) in
   let enemy1 = Object.spawn (SEnemy Goomba) context (248.0,160.0) in
-  Director.update_loop canvas [player; obj_c1; obj_c2; brick1; brick2; brick3; brick4; brick5; enemy1] ;
+  Director.update_loop canvas [player; obj_c1; obj_c2; brick1; brick2; brick3; brick4; brick5; enemy1;
+                              brick6; brick7; brick8; brick9; brick10; brick11; brick12; brick13] ;
   ()
 
 let inc_counter _ =
