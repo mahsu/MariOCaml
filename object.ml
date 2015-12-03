@@ -268,6 +268,24 @@ let dec_health obj =
   if health = 0 then obj.kill <- true else
   obj.health <- health
 
+let evolve_block obj context =
+  dec_health obj;
+  let (new_spr,new_obj) = make (SBlock QBlockUsed) context (obj.pos.x, obj.pos.y) in
+  Block(QBlockUsed,new_spr,new_obj)
+
+let opposite_dir dir =
+  match dir with
+  | Left -> Right
+  | Right -> Left
+
+let spawn_above player_dir obj typ context =
+  let item = spawn (SItem typ) context (obj.pos.x, obj.pos.y) in
+  let item_obj = get_obj item in
+  item_obj.pos.y <- item_obj.pos.y -. (snd (get_sprite item).params.frame_size);
+  item_obj.dir <- opposite_dir player_dir;
+  set_vel_to_speed item_obj;
+  item
+
 let process_collision dir c1 c2 context =
   match (c1, c2, dir) with
   | (Player(_,s1,o1), Enemy(typ,s2,o2), South)
@@ -337,10 +355,21 @@ let process_collision dir c1 c2 context =
       reverse_left_right o1;
       (None, None)
   | (Enemy(_,s1,o1), Block(typ2,s2,o2), _)
-  | (Player(_,s1,o1), Block(typ2,s2,o2), _)
   | (Item(_,s1,o1), Block(typ2,s2,o2), _) ->
       collide_block dir o1;
       (None, None)
+  | (Player(_,s1,o1), Block(t,s2,o2), North) ->
+      begin match t with
+      | QBlock typ ->
+          let updated_block = evolve_block o2 context in
+          let spawned_item = spawn_above o1.dir o2 typ context in
+          collide_block dir o1;
+          (Some spawned_item, Some updated_block)
+      | _ -> collide_block dir o1; (None,None)
+      end
+  | (Player(_,s1,o1), Block(t,s2,o2), _) ->
+    collide_block dir o1;
+    (None, None)
   | (_, _, _) -> (None,None)
 
 let get_aabb obj  =
@@ -354,10 +383,18 @@ let get_aabb obj  =
     half = {x=sx/.2.;y=sy/.2.};
   }
 
-let check_collision o1 o2 =
-  let b1 = get_aabb o1 and b2 = get_aabb o2 in
-  let o1 = get_obj o1 and o2 = get_obj o2 in
-  if o1.kill || o2.kill then None else
+let collision_cond c1 c2 =
+  let o1 = get_obj c1 and o2 = get_obj c2 in
+  let ctypes = match(c1,c2) with
+  | (Item(_,_,_), Enemy(_,_,_))
+  | (Enemy(_,_,_), Item(_,_,_)) -> true
+  | _ -> false
+  in o1.kill || o2.kill || ctypes
+
+let check_collision c1 c2 =
+  let b1 = get_aabb c1 and b2 = get_aabb c2 in
+  let o1 = get_obj c1 in
+  if collision_cond c1 c2 then None else
   let vx = (b1.center.x) -. (b2.center.x) in
   let vy = (b1.center.y) -. (b2.center.y) in
   let hwidths = (b1.half.x) +. (b2.half.x) in

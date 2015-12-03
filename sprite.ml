@@ -42,7 +42,7 @@ let setup_sprite ?anim:(anim=Frame) ?loop:(loop=true)
     loop;
   }
 
-  
+
 let make_player (typ, dir) =
   match dir with
     (* 16x16 grid with 0x0 offset*)
@@ -121,7 +121,7 @@ let make spawn dir context  =
   let params = make_type spawn dir in
   make_from_params params context
 
-let make_bgd context = 
+let make_bgd context =
   let params = setup_sprite "bgd-1.png" 1 0 (512.,256.) (0.,0.) in
   make_from_params params context
 
