@@ -8,6 +8,10 @@ type controls =
   | CUp
   | CDown
 
+type pl_typ =
+  | BigM
+  | SmallM
+
 type item_typ =
   | Mushroom
   | FireFlower

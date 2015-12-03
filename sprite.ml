@@ -59,6 +59,21 @@ let make_player (typ, dir) =
       | Crouching -> setup_sprite "mario-small.png" 1 0 (16.,16.) (0.,64.)
       end
 
+(* let make_bigplayer (typ, dir) =
+  match dir with
+  | Left -> begin match typ with
+    | Standing -> setup_sprite "mario-big.png"
+    | Jumping -> setup_sprite "mario-big.png"
+    | Running -> setup_sprite "mario-big.png"
+    | Crouching -> setup_sprite "mario-big.png"
+    end
+  | Right -> begin match typ with
+    | Standing -> setup_sprite "mario-big.png"
+    | Jumping -> setup_sprite "mario-big.png"
+    | Running -> setup_sprite "mario-big.png"
+    | Crouching -> setup_sprite "mario-big.png"
+    end *)
+
 let make_enemy (typ, dir) =
   match (typ, dir) with
       | (Goomba,_) -> setup_sprite "enemies.png" 2 10 (16.,16.) (0.,128.)
@@ -86,6 +101,7 @@ let make_block = function
 let make_type typ (dir : Actors.dir_1d) =
   match typ with
   | SPlayer t -> make_player (t,dir)
+  (* | SBigPlayer t -> make_bigplayer (t,dir) *)
   | SEnemy t -> make_enemy (t,dir)
   | SItem t -> make_item t
   | SBlock t -> make_block t
