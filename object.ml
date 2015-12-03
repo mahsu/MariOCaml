@@ -260,10 +260,8 @@ let process_collision dir c1 c2 context =
       | _ -> o1.kill <- true; (None, None)
       end
   | (Player(s1,o1), Item(t2,s2,o2), _)
-  | (Item t2,s2,o2), Player(s1,o1), _) ->
+  | (Item(t2,s2,o2), Player(s1,o1), _) ->
       o2.kill <- true; (None,None)(*& stuff happens to player*)
-  | (Player(s1,o1), Block(t2,s2,o2), dir) ->
-      collide_block dir o1; (None,None)
   | (Enemy(t1,s1,o1), Enemy(t2,s2,o2), dir) ->
       begin match dir with
       | West | East ->
@@ -279,6 +277,7 @@ let process_collision dir c1 c2 context =
       reverse_left_right o1;
       (None, None)
   | (Enemy(_,s1,o1), Block(typ2,s2,o2), _)
+  | (Player(s1,o1), Block(typ2,s2,o2), _)
   | (Item(_,s1,o1), Block(typ2,s2,o2), _) ->
       collide_block dir o1;
       (None, None)
