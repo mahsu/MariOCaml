@@ -9,7 +9,7 @@ let player_speed = 2.8
 let player_jump = 5.7
 let player_max_jump = -6.
 let dampen_jump = 4.
-let invuln = 30
+let invuln = 60
 
 type xy = {
   mutable x: float;
@@ -78,8 +78,8 @@ let make_enemy = function
   | Goomba -> setup_obj ()
   | GKoopa -> setup_obj ()
   | RKoopa -> setup_obj ()
-  | GKoopaShell -> setup_obj ~spd:3. ()
-  | RKoopaShell -> setup_obj ~spd:3. ()
+  | GKoopaShell -> setup_obj ~spd:3.2 ()
+  | RKoopaShell -> setup_obj ~spd:3.2 ()
 
 let make_block = function
   | QBlock i -> setup_obj ~g:false ()
@@ -193,6 +193,7 @@ let normalize_pos pos (p1:Sprite.sprite_params) (p2:Sprite.sprite_params) =
 (*Update plyaer is constantly being called to check for if big or small
  *Mario sprites/collidables should be used.*)
 let update_player player keys context =
+  Printf.printf "%i\n" player.invuln;
   let prev_jumping = player.jumping in
   let prev_dir = player.dir and prev_vx = abs_float player.vel.x in
   List.iter (update_player_keys player) keys;
@@ -287,7 +288,8 @@ let rev_dir o t (s:sprite) =
 let dec_health obj =
   let health = obj.health - 1 in
   if health = 0 then obj.kill <- true else
-  obj.health <- health
+  if obj.invuln = 0 then
+    obj.health <- health
 
 (*Used for deleting a block and replacing it with a used block*)
 let evolve_block obj context =
@@ -330,6 +332,7 @@ let collision_cond c1 c2 =
   | (Item(_,_,_), Enemy(_,_,_))
   | (Enemy(_,_,_), Item(_,_,_))
   | (Item(_,_,_), Item(_,_,_)) -> true
+  | (Player(_,_,o1), Enemy(_,_,_)) -> if o1.invuln > 0 then true else false
   | _ -> false
   in o1.kill || o2.kill || ctypes
 

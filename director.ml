@@ -76,7 +76,7 @@ let update_score state i =
  *case that the enemy is a shell. Invulnerability, jumping, and grounded
  *are used for fine tuning the movements.*)
 let player_attack_enemy s1 o1 typ s2 o2 state context =
-  o1.invuln <- invuln;
+  o1.invuln <- 10;
   o1.jumping <- false;
   o1.grounded <- true;
   begin match typ with
@@ -87,7 +87,6 @@ let player_attack_enemy s1 o1 typ s2 o2 state context =
       (None,r2)
   | _ ->
       dec_health o2;
-      o1.invuln <- invuln;
       o1.vel.y <- ~-. dampen_jump;
       if state.multiplier = 8 then begin
         update_score state 800;
@@ -104,13 +103,12 @@ let player_attack_enemy s1 o1 typ s2 o2 state context =
 
 (*enemy_attack_player is used when an enemy kills a player.*)
 let enemy_attack_player s1 (o1:Object.obj) t2 s2 (o2:Object.obj) context =
-  o1.invuln <- invuln;
   begin match t2 with
   | GKoopaShell |RKoopaShell ->
       let r2 = if o2.vel.x = 0. then evolve_enemy o1.dir t2 s2 o2 context
-              else (dec_health o1; None) in
+              else (dec_health o1; o1.invuln <- invuln; None) in
       (None,r2)
-  | _ -> dec_health o1; (None,None)
+  | _ -> dec_health o1; o1.invuln <- invuln; (None,None)
   end
 
 (*In the case that two enemies collide, they are to reverse directions. However,
@@ -185,20 +183,20 @@ let process_collision dir c1 c2  state =
       end
   | (Enemy(t1,s1,o1), Enemy(t2,s2,o2), dir) ->
       col_enemy_enemy t1 s1 o1 t2 s2 o2 dir
-  | (Enemy(t,s1,o1), Block(typ2,s2,o2), East)
-  | (Enemy(t,s1,o1), Block(typ2,s2,o2), West)->
-    begin match (t,typ2) with
+  | (Enemy(t1,s1,o1), Block(t2,s2,o2), East)
+  | (Enemy(t1,s1,o1), Block(t2,s2,o2), West)->
+    begin match (t1,t2) with
     | (RKoopaShell, Brick) | (GKoopaShell, Brick) ->
         dec_health o2;
         reverse_left_right o1;
         (None,None)
     | (RKoopaShell, QBlock typ) | (GKoopaShell, QBlock typ) ->
-        ( let updated_block = evolve_block o2 context in
+        let updated_block = evolve_block o2 context in
         let spawned_item = spawn_above o1.dir o2 typ context in
-        collide_block dir o1; rev_dir o1 t s1;
-        (Some updated_block, Some spawned_item) )
+        collide_block dir o1; rev_dir o1 t1 s1;
+        (Some updated_block, Some spawned_item)
     | (_,_) ->
-        rev_dir o1 t s1;
+        rev_dir o1 t1 s1;
       (None,None)
     end
   | (Item(_,s1,o1), Block(typ2,s2,o2), East)
@@ -245,8 +243,7 @@ let rec narrow_phase c cs state =
     | [] -> acc
     | h::t ->
       let c_obj = get_obj c in
-      let invuln = c_obj.invuln in
-      let new_objs = if not (equals c h) && invuln <= 0 then
+      let new_objs = if not (equals c h) then
         begin match Object.check_collision c h with
         | None -> (None,None)
         | Some dir ->
@@ -267,7 +264,6 @@ let rec narrow_phase c cs state =
         | (Some o1, Some o2) -> o1::o2::acc
         | (None, None) -> acc
       in
-      c_obj.invuln <- if invuln > 0 then invuln-1 else invuln;
       narrow_helper c t state acc
   in narrow_helper c cs state []
 
@@ -283,6 +279,7 @@ let update_collidable state (collid:Object.collidable) all_collids =
  (* TODO: optimize. Draw static elements only once *)
   let obj = Object.get_obj collid in
   let spr = Object.get_sprite collid in
+  obj.invuln <- if obj.invuln > 0 then obj.invuln-1 else 0;
   let viewport_filter = in_viewport state.vpt obj.pos || is_player collid ||
       out_of_viewport_below state.vpt obj.pos.y in
   if not obj.kill &&  viewport_filter then begin
@@ -293,6 +290,8 @@ let update_collidable state (collid:Object.collidable) all_collids =
     (* Render and update animation *)
     let vpt_adj_xy = coord_to_viewport state.vpt obj.pos in
     Draw.render spr (vpt_adj_xy.x,vpt_adj_xy.y);
+    Draw.render_bbox spr (vpt_adj_xy.x,vpt_adj_xy.y);
+
     if obj.vel.x <> 0. || not (is_enemy collid) then Sprite.update_animation spr;
     evolved
   end else []

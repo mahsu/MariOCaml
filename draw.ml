@@ -6,6 +6,13 @@ let jstr = Js.string
 
 let get_context canvas = canvas##getContext (Dom_html._2d_)
 
+let render_bbox sprite (posx,posy) =
+  let context = sprite.context in
+  let (bbox,bboy) = sprite.params.bbox_offset in
+  let (bbsx,bbsy) = sprite.params.bbox_size in
+  context##strokeStyle <- Js.string "#FF0000";
+  context##strokeRect(posx+.bbox,posy+.bboy,bbsx,bbsy)
+
 (*Draws a sprite onto the canvas.*)
 let render sprite (posx,posy) =
   let context = sprite.context in

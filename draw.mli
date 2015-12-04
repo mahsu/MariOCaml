@@ -7,6 +7,7 @@ val clear_canvas : Dom_html.canvasElement Js.t -> unit
 
 val draw_bgd : Sprite.sprite -> float -> unit
 
+val render_bbox : Sprite.sprite -> float * float -> unit
 (* Draws the fps on the canvas *)
 val fps : Dom_html.canvasElement Js.t -> float -> unit
 

@@ -136,7 +136,7 @@ let choose_block_pattern (blockw:float) (blockh: float) (cbx:float) (cby:float)
 let rec generate_enemies (blockw: float) (blockh: float) (cbx: float)
                     (cby: float) (acc: obj_coord list) =
   if(cbx > blockw) then []
-  else if (cby > (blockh-. 1.)) then
+  else if (cby > (blockh-. 1.)) ||  cbx < 10. then
     generate_enemies blockw blockh (cbx +. 1.) 0. acc
   else if(mem_loc (cbx, cby) acc || cby = 0.) then
     generate_enemies blockw blockh cbx (cby+.1.) acc
