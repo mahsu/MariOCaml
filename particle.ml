@@ -36,7 +36,7 @@ let make_params sprite rot lifetime =
 
 let make_type typ ctx =
   match typ with
-  | GoombaSquish as t -> make_params (Sprite.make_particle t ctx) 0. 120
+  | GoombaSquish as t -> make_params (Sprite.make_particle t ctx) 0. 30
   | BrickChunkL as t -> make_params (Sprite.make_particle t ctx) 0. 300
   | BrickChunkR as t -> make_params (Sprite.make_particle t ctx) 0. 300
 
@@ -61,7 +61,8 @@ let update_pos part =
   part.pos.x <- (part.vel.x +. part.pos.x);
   part.pos.y <- (part.vel.y +. part.pos.y)
   
-let process_particle part =
+let process part =
   part.life <- part.life - 1;
+  if part.life = 0 then (part.kill <- true);
   update_vel part;
   update_pos part 

@@ -24,4 +24,4 @@ type particle = {
 
 val make : ?vel:float*float -> ?acc:float*float -> Actors.part_typ -> float*float -> Dom_html.canvasRenderingContext2D Js.t -> particle
 
-val process_particle : particle -> unit
+val process : particle -> unit

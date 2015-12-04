@@ -49,9 +49,6 @@ type collidable =
   | Item of item_typ * sprite * obj
   | Block of block_typ * sprite * obj
 
-type noncollidable =
-  (*| Dead of dead_type * sprite*)
-  | Scenery of sprite * obj
 
 let setup_obj ?anim:(anim=true) ?g:(has_gravity=true) ?spd:(speed=1.) () =
   {
@@ -328,5 +325,15 @@ let check_collision c1 c2 =
     end
   end else None
 
-let kill = function
+let kill collid ctx = 
+  match collid with
+  | Enemy(t,s,o) -> 
+      begin match t with
+      | Goomba -> [Particle.make GoombaSquish (o.pos.x,o.pos.y) ctx]
+      | _ -> []
+      end
+  | Item(t,s,o) ->
+      begin match t with
+      | _ -> []
+      end
   | _ -> []
