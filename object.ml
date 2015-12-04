@@ -159,7 +159,7 @@ let update_player_keys (player : obj) (controls : controls) : unit =
     if (not player.jumping && player.grounded) then begin
       player.jumping <- true;
       player.grounded <- false;
-      player.vel.y <- 
+      player.vel.y <-
         max (player.vel.y -.(player_jump +. abs_float player.vel.x *. 0.25))
             player_max_jump
     end
@@ -292,7 +292,8 @@ let collision_cond c1 c2 =
   let o1 = get_obj c1 and o2 = get_obj c2 in
   let ctypes = match(c1,c2) with
   | (Item(_,_,_), Enemy(_,_,_))
-  | (Enemy(_,_,_), Item(_,_,_)) -> true
+  | (Enemy(_,_,_), Item(_,_,_))
+  | (Item(_,_,_), Item(_,_,_)) -> true
   | _ -> false
   in o1.kill || o2.kill || ctypes
 

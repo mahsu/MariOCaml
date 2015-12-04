@@ -6,7 +6,7 @@ let jstr = Js.string
 
 let get_context canvas = canvas##getContext (Dom_html._2d_)
 
-let render sprite (posx,posy) = 
+let render sprite (posx,posy) =
   let context = sprite.context in
   let (sx, sy) = sprite.params.src_offset in
   let (sw, sh) = sprite.params.frame_size in
@@ -18,12 +18,11 @@ let render sprite (posx,posy) =
   context##drawImage_full(sprite.img, sx, sy, sw, sh, dx, dy, dw, dh)
 
 let draw_bgd bgd off_x =
-  Printf.printf "%f\n" off_x; 
   render bgd (~-.off_x,0.);
   render bgd ((fst bgd.params.frame_size) -. off_x, 0.)
-  
-  
-let clear_canvas canvas = 
+
+
+let clear_canvas canvas =
   let context = canvas##getContext (Dom_html._2d_) in
   let cwidth = float_of_int canvas##width in
   let cheight = float_of_int canvas##height in

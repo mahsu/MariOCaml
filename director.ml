@@ -21,29 +21,30 @@ type st = {
   vpt: viewport;
   mutable score: int;
   mutable coins: int;
+  mutable multiplier: int;
 }
 
-let make_viewport (vx,vy) (mx,my) = 
+let make_viewport (vx,vy) (mx,my) =
   {
     pos = {x = 0.; y = 0.;};
     v_dim = {x = vx; y = vy};
     m_dim = {x = mx; y = my};
   }
 
-let calc_viewport_point cc vc mc = 
+let calc_viewport_point cc vc mc =
   let vc_half = vc /. 2. in
   min ( max (cc -. vc_half) 0. ) ( min (mc -. vc) (abs_float(cc -. vc_half)) )
 
-let in_viewport v pos = 
+let in_viewport v pos =
   let margin = 32. in
   let (v_min_x,v_max_x) = (v.pos.x -. margin, v.pos.x +. v.v_dim.x) in
   let (v_min_y,v_max_y) = (v.pos.y -. margin, v.pos.y +. v.v_dim.y) in
-  let (x,y) = (pos.x, pos.y) in 
+  let (x,y) = (pos.x, pos.y) in
   let test = x >= v_min_x && x <= v_max_x && y >= v_min_y && y<= v_max_y in
   test
 
-let coord_to_viewport viewport coord = 
-  { 
+let coord_to_viewport viewport coord =
+  {
     x = coord.x -. viewport.pos.x;
     y = coord.y -. viewport.pos.y;
   }
@@ -72,72 +73,87 @@ let calc_fps t0 t1 =
   let delta = (t1 -. t0) /. 1000. in
   1. /. delta
 
-let player_attack_enemy ()= failwith "todo refactor"
-let enemy_attack_player ()= failwith "todo refactor"
-let col_enemy_enemy () = failwith "todo refactor"
+let update_score state i =
+  state.score <- state.score + i
+
+let player_attack_enemy s1 o1 typ s2 o2 state context =
+  o1.invuln <- invuln;
+  o1.jumping <- false;
+  o1.grounded <- true;
+  Printf.printf "Multiplier: %d \n" state.multiplier;
+  Printf.printf "Score: %d \n" state.score;
+  begin match typ with
+  | GKoopaShell | RKoopaShell ->
+      let r2 = evolve_enemy o1.dir typ s2 o2 context in
+      o1.vel.y <- ~-. dampen_jump;
+      o1.pos.y <- o1.pos.y -. 5.;
+      (None,r2)
+  | _ ->
+      dec_health o2;
+      o1.invuln <- invuln;
+      o1.vel.y <- ~-. dampen_jump;
+      ( if state.multiplier = 16 then ( update_score state 1600; (None, evolve_enemy o1.dir typ s2 o2 context) )
+         else ( update_score state (100 * state.multiplier);
+              state.multiplier <- state.multiplier * 2;
+      (None,(evolve_enemy o1.dir typ s2 o2 context)) ))
+  end
+
+let enemy_attack_player s1 o1 t2 s2 o2 context =
+  o1.invuln <- invuln;
+  begin match t2 with
+  | GKoopaShell |RKoopaShell ->
+      let r2 = if o2.vel.x = 0. then evolve_enemy o1.dir t2 s2 o2 context
+              else (dec_health o1; None) in
+      (None,r2)
+  | _ -> dec_health o1; (None,None)
+  end
+
+let col_enemy_enemy t1 s1 o1 t2 s2 o2 dir =
+  begin match (t1, t2) with
+  | (GKoopaShell, GKoopaShell)
+  | (GKoopaShell, RKoopaShell)
+  | (RKoopaShell, RKoopaShell)
+  | (RKoopaShell, GKoopaShell) ->
+      dec_health o1;
+      dec_health o2;
+      (None,None)
+  | (RKoopaShell, _) | (GKoopaShell, _) -> if o1.vel.x = 0. then
+      (rev_dir o2 t2 s2;
+      (None,None) )
+      else ( dec_health o2; (None,None) )
+  | (_, RKoopaShell) | (_, GKoopaShell) -> if o2.vel.x = 0. then
+      (rev_dir o1 t1 s1;
+      (None,None) )
+      else ( dec_health o1; (None,None) )
+  | (_, _) ->
+      begin match dir with
+      | West | East ->
+          rev_dir o1 t1 s1;
+          rev_dir o2 t2 s2;
+          (None,None)
+      | _ -> (None,None)
+      end
+  end
 
 let process_collision dir c1 c2  state =
   let context = state.ctx in
   match (c1, c2, dir) with
   | (Player(_,s1,o1), Enemy(typ,s2,o2), South)
   | (Enemy(typ,s2,o2),Player(_,s1,o1), North) ->
-      o1.invuln <- invuln;
-      o1.jumping <- false;
-      o1.grounded <- true;
-      begin match typ with
-      | GKoopaShell | RKoopaShell ->
-          let r2 = evolve_enemy o1.dir typ s2 o2 context in
-          o1.vel.y <- ~-. dampen_jump;
-          o1.pos.y <- o1.pos.y -. 5.;
-          (None,r2)
-      | _ ->
-          dec_health o2;
-          o1.invuln <- invuln;
-          o1.vel.y <- ~-. dampen_jump;
-          (None,(evolve_enemy o1.dir typ s2 o2 context))
-      end
+      player_attack_enemy s1 o1 typ s2 o2 state context
   | (Player(_,s1,o1), Enemy(t2,s2,o2), _)
   | (Enemy(t2,s2,o2), Player(_,s1,o1), _) ->
-      o1.invuln <- invuln;
-      begin match t2 with
-      | GKoopaShell |RKoopaShell ->
-          let r2 = if o2.vel.x = 0. then evolve_enemy o1.dir t2 s2 o2 context
-                  else (dec_health o1; None) in
-          (None,r2)
-      | _ -> dec_health o1; (None, None)
-      end
+      enemy_attack_player s1 o1 t2 s2 o2 context
   | (Player(_,s1,o1), Item(t2,s2,o2), _)
   | (Item(t2,s2,o2), Player(_,s1,o1), _) ->
       begin match t2 with
       | Mushroom -> dec_health o2; o1.health <- o1.health + 1; (None, None)
+      | Coin -> state.coins <- state.coins + 1; dec_health o2;
+          Printf.printf "Coins: %d \n" state.coins; (None, None)
       | _ -> dec_health o2; (None, None)
       end
   | (Enemy(t1,s1,o1), Enemy(t2,s2,o2), dir) ->
-      begin match (t1, t2) with
-      | (GKoopaShell, GKoopaShell)
-      | (GKoopaShell, RKoopaShell)
-      | (RKoopaShell, RKoopaShell)
-      | (RKoopaShell, GKoopaShell) ->
-          dec_health o1;
-          dec_health o2;
-          (None,None)
-      | (RKoopaShell, _) | (GKoopaShell, _) -> if o1.vel.x = 0. then
-          (rev_dir o2 t2 s2;
-          (None,None) )
-          else ( dec_health o2; (None,None) )
-      | (_, RKoopaShell) | (_, GKoopaShell) -> if o2.vel.x = 0. then
-          (rev_dir o1 t1 s1;
-          (None,None) )
-          else ( dec_health o1; (None,None) )
-      | (_, _) ->
-          begin match dir with
-          | West | East ->
-              rev_dir o1 t1 s1;
-              rev_dir o2 t2 s2;
-              (None,None)
-          | _ -> (None,None)
-          end
-      end
+      col_enemy_enemy t1 s1 o1 t2 s2 o2 dir
   | (Enemy(t,s1,o1), Block(typ2,s2,o2), East)
   | (Enemy(t,s1,o1), Block(typ2,s2,o2), West)->
     begin match (t,typ2) with
@@ -165,12 +181,14 @@ let process_collision dir c1 c2  state =
           let spawned_item = spawn_above o1.dir o2 typ context in
           collide_block dir o1;
           (Some spawned_item, Some updated_block)
-      (* TODO: Big mario and brick breaks break *)
+      | Brick -> collide_block dir o1; dec_health o2; (None, None)
       | _ -> collide_block dir o1; (None,None)
       end
   | (Player(_,s1,o1), Block(t,s2,o2), _) ->
-    collide_block dir o1;
-    (None, None)
+    begin match dir with
+    | South -> state.multiplier <- 0 ; collide_block dir o1; (None, None)
+    | _ -> collide_block dir o1; (None, None)
+    end
   | (_, _, _) -> (None,None)
 
 let broad_cache = ref []
@@ -242,7 +260,7 @@ let run_update state collid all_collids =
       collid_objs := !collid_objs @ evolved;
       player
   | _ ->
-      let obj = get_obj collid in 
+      let obj = get_obj collid in
       let evolved = update_collidable state collid all_collids in
       if not obj.kill then (collid_objs := collid::(!collid_objs@evolved));
       collid
@@ -259,6 +277,7 @@ let update_loop canvas objs =
       ctx;
       score = 0;
       coins = 0;
+      multiplier = 1;
   } in
   let rec update_helper time state player objs  =
       collid_objs := [];
@@ -269,12 +288,12 @@ let update_loop canvas objs =
       broad_cache := objs;
 
       Draw.clear_canvas canvas;
-      
+
       (* Parallax background *)
       let vpos_x_int = int_of_float (state.vpt.pos.x /. 5.)  in
       let bgd_width = int_of_float (fst state.bgd.params.frame_size) in
       Draw.draw_bgd state.bgd (float_of_int (vpos_x_int mod bgd_width));
-      
+
       let player = run_update state player objs in
       let state = {state with vpt = update_viewport state.vpt (get_obj player).pos} in
       List.iter (fun obj -> ignore (run_update state obj objs)) objs ;

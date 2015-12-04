@@ -89,7 +89,7 @@ let make_item = function
   (* 16x16 grid with 0x0 offset *)
   | Coin -> setup_sprite "items.png" ~bb_off:(3.,0.) ~bb_sz:(12.,0.) 3 15 (16.,16.) (0.,80.)
   | FireFlower -> setup_sprite "items.png" 1 0 (16.,16.) (0.,188.)
-  | Mushroom -> setup_sprite "items.png" 1 0 (16.,16.) (0.,0.)
+  | Mushroom -> setup_sprite "items.png" ~bb_off:(2.,0.) ~bb_sz: (12.,16.) 1 0 (16.,16.) (0.,0.)
   | Star -> setup_sprite "items.png" 1 0 (16.,16.) (16.,48.)
 
 let make_block = function
