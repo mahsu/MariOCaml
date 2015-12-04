@@ -12,6 +12,7 @@ let level_height = (256./.16.) -. 1.
 let get_width () = level_width
 
 let load _ =
+  Random.self_init();
   let canvas_id = "canvas" in
   let canvas =
     Js.Opt.get
