@@ -91,7 +91,7 @@ let player_attack_enemy s1 o1 typ s2 o2 state context =
       o1.vel.y <- ~-. dampen_jump;
       if state.multiplier = 8 then begin
         update_score state 800;
-        o2.score <- 800; 
+        o2.score <- 800;
         (None, evolve_enemy o1.dir typ s2 o2 context)
       end else begin
         let score = 100 * state.multiplier in
@@ -337,7 +337,7 @@ let update_loop canvas pair =
   let ctx = canvas##getContext (Dom_html._2d_) in
   let cwidth = float_of_int canvas##width in
   let cheight = float_of_int canvas##height in
-  let viewport = Viewport.make (cwidth,cheight) (cwidth +. 1088.,cheight) in
+  let viewport = Viewport.make (cwidth,cheight) (cwidth +. 1600.,cheight) in
   let player = fst pair in
   let objs = snd pair in
   let state = {

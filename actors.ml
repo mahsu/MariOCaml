@@ -31,6 +31,7 @@ type block_typ =
   | UnBBlock
   | Cloud
   | Panel
+  | Ground
 
 type player_typ =
   | Standing
