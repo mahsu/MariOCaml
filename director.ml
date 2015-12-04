@@ -89,11 +89,17 @@ let player_attack_enemy s1 o1 typ s2 o2 state context =
       dec_health o2;
       o1.invuln <- invuln;
       o1.vel.y <- ~-. dampen_jump;
-      ( if state.multiplier = 16 then
-        (update_score state 1600; (None, evolve_enemy o1.dir typ s2 o2 context))
-        else ( update_score state (100 * state.multiplier);
-              state.multiplier <- state.multiplier * 2;
-      (None,(evolve_enemy o1.dir typ s2 o2 context)) ))
+      if state.multiplier = 16 then begin
+        update_score state 1600;
+        o2.score <- 1600; 
+        (None, evolve_enemy o1.dir typ s2 o2 context)
+      end else begin
+        let score = 100 * state.multiplier in
+        update_score state score;
+        o2.score <- score;
+        state.multiplier <- state.multiplier * 2;
+        (None,(evolve_enemy o1.dir typ s2 o2 context))
+      end
   end
 
 (*enemy_attack_player is used when an enemy kills a player.*)
@@ -202,7 +208,7 @@ let process_collision dir c1 c2  state =
     | Panel -> game_over state
     | _ ->
         begin match dir with
-        | South -> state.multiplier <- 0 ; collide_block dir o1; (None, None)
+        | South -> state.multiplier <- 1 ; collide_block dir o1; (None, None)
         | _ -> collide_block dir o1; (None, None)
         end
     end

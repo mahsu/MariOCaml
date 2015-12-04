@@ -39,7 +39,15 @@ let make_type typ ctx =
   | GoombaSquish as t -> make_params (Sprite.make_particle t ctx) 0. 30
   | BrickChunkL as t -> make_params (Sprite.make_particle t ctx) 0. 300
   | BrickChunkR as t -> make_params (Sprite.make_particle t ctx) 0. 300
-
+  | Score100 as t -> make_params (Sprite.make_particle t ctx) 0. 30
+  | Score200 as t -> make_params (Sprite.make_particle t ctx) 0. 30
+  | Score400 as t -> make_params (Sprite.make_particle t ctx) 0. 30
+  | Score800 as t -> make_params (Sprite.make_particle t ctx) 0. 30
+  | Score1000 as t -> make_params (Sprite.make_particle t ctx) 0. 30
+  | Score2000 as t -> make_params (Sprite.make_particle t ctx) 0. 30
+  | Score4000 as t -> make_params (Sprite.make_particle t ctx) 0. 30
+  | Score8000 as t -> make_params (Sprite.make_particle t ctx) 0. 30
+  
 let make ?vel:(vel=(0.,0.)) ?acc:(acc=(0.,0.)) part_type pos ctx =
   let params = make_type part_type ctx in
   let pos = pair_to_xy pos and vel = pair_to_xy vel and acc = pair_to_xy acc in
@@ -53,6 +61,19 @@ let make ?vel:(vel=(0.,0.)) ?acc:(acc=(0.,0.)) part_type pos ctx =
     life = params.lifetime;
   }
    
+let make_score score pos ctx = 
+  let t = match score with
+  | 100 -> Score100
+  | 200 -> Score200
+  | 400 -> Score400
+  | 800 -> Score800
+  | 1000 -> Score1000
+  | 2000 -> Score2000
+  | 4000 -> Score4000
+  | 8000 -> Score8000
+  | _ -> Score100
+  in make ~vel:(0.5,-0.7) t pos ctx
+
 let update_vel part =
   part.vel.x <- (part.vel.x +. part.acc.x);
   part.vel.y <- (part.vel.y +. part.acc.y) 
