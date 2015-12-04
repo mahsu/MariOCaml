@@ -1,4 +1,5 @@
 open Actors
+
 type xy = float * float
 
 type animation_typ =  | Reflect | Frame
@@ -64,15 +65,15 @@ let make_big_player (typ, dir) =
   match dir with
   | Left -> begin match typ with
     | Standing -> setup_sprite "mario-big.png" 1 0 ~bb_off:(2.,1.) ~bb_sz:(13.,25.) (16.,27.) (16.,5.)
-    | Jumping -> setup_sprite "mario-big.png" 1 0 ~bb_off:(2.,1.) ~bb_sz:(12.,24.) (16.,26.) (48.,6.)
-    | Running -> setup_sprite "mario-big.png" 4 10 ~bb_off:(2.,1.) ~bb_sz:(13.,24.) (16.,27.)(0.,37.)
-    | Crouching -> setup_sprite "mario-big.png" 1 0 ~bb_off:(2.,1.) ~bb_sz:(12.,17.) (16.,18.) (32.,14.)
+    | Jumping -> setup_sprite "mario-big.png" 1 0 ~bb_off:(2.,1.) ~bb_sz:(12.,25.) (16.,26.) (48.,6.)
+    | Running -> setup_sprite "mario-big.png" 4 10 ~bb_off:(2.,1.) ~bb_sz:(13.,25.) (16.,27.)(0.,37.)
+    | Crouching -> setup_sprite "mario-big.png" 1 0 ~bb_off:(2.,10.) ~bb_sz:(13.,17.) (16.,27.) (32.,5.)
     end
   | Right -> begin match typ with
     | Standing -> setup_sprite "mario-big.png" 1 0 ~bb_off:(1.,1.) ~bb_sz:(13.,25.) (16.,26.) (16.,69.)
-    | Jumping -> setup_sprite "mario-big.png" 1 0 ~bb_off:(2.,1.) ~bb_sz:(12.,23.) (16.,26.) (48.,70.)
+    | Jumping -> setup_sprite "mario-big.png" 1 0 ~bb_off:(2.,1.) ~bb_sz:(12.,25.) (16.,26.) (48.,70.)
     | Running -> setup_sprite "mario-big.png" 4 10 ~bb_off:(2.,1.) ~bb_sz:(13.,25.) (16.,27.) (0.,101.)
-    | Crouching -> setup_sprite "mario-big.png" 1 0 ~bb_off:(2.,1.) ~bb_sz:(12.,17.) (16.,18.) (32.,78.)
+    | Crouching -> setup_sprite "mario-big.png" 1 0 ~bb_off:(2.,10.) ~bb_sz:(13.,17.) (16.,27.) (32.,69.)
     end
 
 let make_enemy (typ, dir) =
@@ -89,7 +90,7 @@ let make_item = function
   (* 16x16 grid with 0x0 offset *)
   | Coin -> setup_sprite "items.png" ~bb_off:(3.,0.) ~bb_sz:(12.,0.) 3 15 (16.,16.) (0.,80.)
   | FireFlower -> setup_sprite "items.png" 1 0 (16.,16.) (0.,188.)
-  | Mushroom -> setup_sprite "items.png" 1 0 (16.,16.) (0.,0.)
+  | Mushroom -> setup_sprite "items.png" ~bb_off:(2.,0.) ~bb_sz: (12.,16.) 1 0 (16.,16.) (0.,0.)
   | Star -> setup_sprite "items.png" 1 0 (16.,16.) (16.,48.)
 
 let make_block = function
@@ -99,6 +100,10 @@ let make_block = function
   | QBlockUsed -> setup_sprite "blocks.png" 1 0 (16.,16.) (0.,32.)
   | UnBBlock -> setup_sprite "blocks.png" 1 0 (16.,16.) (0.,48.)
 
+let make_particle = function
+  | GoombaSquish -> setup_sprite "enemies.png" 1 0 (16.,16.) (0.,144.)
+  | BrickChunkL -> setup_sprite "chunks.png" 1 0 (8.,8.) (0.,0.)
+  | BrickChunkR -> setup_sprite "chunks.png" 1 0 (8.,8.) (8.,0.)
 
 let make_player pt spr_type =
   match pt with
@@ -129,6 +134,10 @@ let make spawn dir context  =
 
 let make_bgd context =
   let params = setup_sprite "bgd-1.png" 1 0 (512.,256.) (0.,0.) in
+  make_from_params params context
+
+let make_particle ptyp context =
+  let params = make_particle ptyp in
   make_from_params params context
 
 let transform_enemy enemy_typ spr dir =

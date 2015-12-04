@@ -1,6 +1,7 @@
 open Sprite
 open Object
 open Actors
+open Viewport
 
 type keys = {
   mutable left: bool;
@@ -9,50 +10,15 @@ type keys = {
   mutable down: bool;
 }
 
-type viewport = {
-  pos: Object.xy;
-  v_dim: Object.xy;
-  m_dim: Object.xy;
-}
-
 type st = {
   bgd: sprite;
   ctx: Dom_html.canvasRenderingContext2D Js.t;
   vpt: viewport;
   mutable score: int;
   mutable coins: int;
+  mutable multiplier: int;
+  mutable game_over: bool;
 }
-
-let make_viewport (vx,vy) (mx,my) = 
-  {
-    pos = {x = 0.; y = 0.;};
-    v_dim = {x = vx; y = vy};
-    m_dim = {x = mx; y = my};
-  }
-
-let calc_viewport_point cc vc mc = 
-  let vc_half = vc /. 2. in
-  min ( max (cc -. vc_half) 0. ) ( min (mc -. vc) (abs_float(cc -. vc_half)) )
-
-let in_viewport v pos = 
-  let margin = 32. in
-  let (v_min_x,v_max_x) = (v.pos.x -. margin, v.pos.x +. v.v_dim.x) in
-  let (v_min_y,v_max_y) = (v.pos.y -. margin, v.pos.y +. v.v_dim.y) in
-  let (x,y) = (pos.x, pos.y) in 
-  let test = x >= v_min_x && x <= v_max_x && y >= v_min_y && y<= v_max_y in
-  test
-
-let coord_to_viewport viewport coord = 
-  { 
-    x = coord.x -. viewport.pos.x;
-    y = coord.y -. viewport.pos.y;
-  }
-
-let update_viewport vpt ctr =
-  let new_x = calc_viewport_point ctr.x vpt.v_dim.x vpt.m_dim.x in
-  let new_y = calc_viewport_point ctr.y vpt.v_dim.y vpt.m_dim.y in
-  let pos = {x = new_x; y = new_y} in
-  {vpt with pos}
 
 let pressed_keys = {
   left = false;
@@ -64,80 +30,101 @@ let pressed_keys = {
 let collid_objs = ref []
 let last_time = ref 0.
 
-let end_game () =
-  Dom_html.window##alert (Js.string "Game over!");
+let game_over state =
+  state.ctx##rect (0.,0.,512.,512.);
+  state.ctx##fillStyle <- (Js.string "black");
+  state.ctx##fill ();
+  state.ctx##fillText (Js.string ("Game Over. You win!"), 240., 128.);
   failwith "Game over."
 
 let calc_fps t0 t1 =
   let delta = (t1 -. t0) /. 1000. in
   1. /. delta
 
-let player_attack_enemy ()= failwith "todo refactor"
-let enemy_attack_player ()= failwith "todo refactor"
-let col_enemy_enemy () = failwith "todo refactor"
+let update_score state i =
+  state.score <- state.score + i
+
+let player_attack_enemy s1 o1 typ s2 o2 state context =
+  o1.invuln <- invuln;
+  o1.jumping <- false;
+  o1.grounded <- true;
+  Printf.printf "Multiplier: %d \n" state.multiplier;
+  Printf.printf "Score: %d \n" state.score;
+  begin match typ with
+  | GKoopaShell | RKoopaShell ->
+      let r2 = evolve_enemy o1.dir typ s2 o2 context in
+      o1.vel.y <- ~-. dampen_jump;
+      o1.pos.y <- o1.pos.y -. 5.;
+      (None,r2)
+  | _ ->
+      dec_health o2;
+      o1.invuln <- invuln;
+      o1.vel.y <- ~-. dampen_jump;
+      ( if state.multiplier = 16 then ( update_score state 1600; (None, evolve_enemy o1.dir typ s2 o2 context) )
+         else ( update_score state (100 * state.multiplier);
+              state.multiplier <- state.multiplier * 2;
+      (None,(evolve_enemy o1.dir typ s2 o2 context)) ))
+  end
+
+let enemy_attack_player s1 o1 t2 s2 o2 context =
+  o1.invuln <- invuln;
+  begin match t2 with
+  | GKoopaShell |RKoopaShell ->
+      let r2 = if o2.vel.x = 0. then evolve_enemy o1.dir t2 s2 o2 context
+              else (dec_health o1; None) in
+      (None,r2)
+  | _ -> dec_health o1; (None,None)
+  end
+
+let col_enemy_enemy t1 s1 o1 t2 s2 o2 dir =
+  begin match (t1, t2) with
+  | (GKoopaShell, GKoopaShell)
+  | (GKoopaShell, RKoopaShell)
+  | (RKoopaShell, RKoopaShell)
+  | (RKoopaShell, GKoopaShell) ->
+      dec_health o1;
+      dec_health o2;
+      (None,None)
+  | (RKoopaShell, _) | (GKoopaShell, _) -> if o1.vel.x = 0. then
+      (rev_dir o2 t2 s2;
+      (None,None) )
+      else ( dec_health o2; (None,None) )
+  | (_, RKoopaShell) | (_, GKoopaShell) -> if o2.vel.x = 0. then
+      (rev_dir o1 t1 s1;
+      (None,None) )
+      else ( dec_health o1; (None,None) )
+  | (_, _) ->
+      begin match dir with
+      | West | East ->
+          rev_dir o1 t1 s1;
+          rev_dir o2 t2 s2;
+          (None,None)
+      | _ -> (None,None)
+      end
+  end
 
 let process_collision dir c1 c2  state =
   let context = state.ctx in
   match (c1, c2, dir) with
   | (Player(_,s1,o1), Enemy(typ,s2,o2), South)
   | (Enemy(typ,s2,o2),Player(_,s1,o1), North) ->
-      o1.invuln <- invuln;
-      o1.jumping <- false;
-      o1.grounded <- true;
-      begin match typ with
-      | GKoopaShell | RKoopaShell ->
-          let r2 = evolve_enemy o1.dir typ s2 o2 context in
-          o1.vel.y <- ~-. dampen_jump;
-          o1.pos.y <- o1.pos.y -. 5.;
-          (None,r2)
-      | _ ->
-          dec_health o2;
-          o1.invuln <- invuln;
-          o1.vel.y <- ~-. dampen_jump;
-          (None,(evolve_enemy o1.dir typ s2 o2 context))
-      end
+      player_attack_enemy s1 o1 typ s2 o2 state context
   | (Player(_,s1,o1), Enemy(t2,s2,o2), _)
   | (Enemy(t2,s2,o2), Player(_,s1,o1), _) ->
-      o1.invuln <- invuln;
-      begin match t2 with
-      | GKoopaShell |RKoopaShell ->
-          let r2 = if o2.vel.x = 0. then evolve_enemy o1.dir t2 s2 o2 context
-                  else (dec_health o1; None) in
-          (None,r2)
-      | _ -> dec_health o1; (None, None)
-      end
+      enemy_attack_player s1 o1 t2 s2 o2 context
   | (Player(_,s1,o1), Item(t2,s2,o2), _)
   | (Item(t2,s2,o2), Player(_,s1,o1), _) ->
       begin match t2 with
-      | Mushroom -> dec_health o2; o1.health <- o1.health + 1; (None, None)
-      | _ -> dec_health o2; (None, None)
+      | Mushroom -> dec_health o2; o1.health <- o1.health + 1;
+                    o1.vel.x <- 0.; o1.vel.y <- 0.;
+                    update_score state 1000; (None, None)
+      | Coin -> state.coins <- state.coins + 1; dec_health o2;
+          update_score state 100;
+          Printf.printf "Coins: %d \n" state.coins; (None, None)
+      | _ -> dec_health o2; update_score state 1000; (None, None)
       end
   | (Enemy(t1,s1,o1), Enemy(t2,s2,o2), dir) ->
-      begin match (t1, t2) with
-      | (GKoopaShell, GKoopaShell)
-      | (GKoopaShell, RKoopaShell)
-      | (RKoopaShell, RKoopaShell)
-      | (RKoopaShell, GKoopaShell) ->
-          dec_health o1;
-          dec_health o2;
-          (None,None)
-      | (RKoopaShell, _) | (GKoopaShell, _) -> if o1.vel.x = 0. then
-          (rev_dir o2 t2 s2;
-          (None,None) )
-          else ( dec_health o2; (None,None) )
-      | (_, RKoopaShell) | (_, GKoopaShell) -> if o2.vel.x = 0. then
-          (rev_dir o1 t1 s1;
-          (None,None) )
-          else ( dec_health o1; (None,None) )
-      | (_, _) ->
-          begin match dir with
-          | West | East ->
-              rev_dir o1 t1 s1;
-              rev_dir o2 t2 s2;
-              (None,None)
-          | _ -> (None,None)
-          end
-      end
+      col_enemy_enemy t1 s1 o1 t2 s2 o2 dir
   | (Enemy(t,s1,o1), Block(typ2,s2,o2), East)
   | (Enemy(t,s1,o1), Block(typ2,s2,o2), West)->
     begin match (t,typ2) with
@@ -158,19 +145,22 @@ let process_collision dir c1 c2  state =
   | (Item(_,s1,o1), Block(typ2,s2,o2), _) ->
       collide_block dir o1;
       (None, None)
-  | (Player(_,s1,o1), Block(t,s2,o2), North) ->
+  | (Player(t1,s1,o1), Block(t,s2,o2), North) ->
       begin match t with
       | QBlock typ ->
           let updated_block = evolve_block o2 context in
           let spawned_item = spawn_above o1.dir o2 typ context in
           collide_block dir o1;
           (Some spawned_item, Some updated_block)
-      (* TODO: Big mario and brick breaks break *)
+      | Brick -> if t1 = BigM then (collide_block dir o1; dec_health o2; (None, None))
+                 else (collide_block dir o1; (None,None))
       | _ -> collide_block dir o1; (None,None)
       end
   | (Player(_,s1,o1), Block(t,s2,o2), _) ->
-    collide_block dir o1;
-    (None, None)
+    begin match dir with
+    | South -> state.multiplier <- 0 ; collide_block dir o1; (None, None)
+    | _ -> collide_block dir o1; (None, None)
+    end
   | (_, _, _) -> (None,None)
 
 let broad_cache = ref []
@@ -234,15 +224,16 @@ let run_update state collid all_collids =
   match collid with
   | Player(t,s,o) as p ->
       let keys = translate_keys () in
+      o.crouch <- false;
       let player = begin match Object.update_player o keys state.ctx with
         | None -> p
-        | Some (new_typ, new_spr) -> Player(new_typ,new_spr,o)
+        | Some (new_typ, new_spr) -> Object.normalize_pos o.pos s.params new_spr.params; Player(new_typ,new_spr,o)
       end in
       let evolved = update_collidable state player all_collids in
       collid_objs := !collid_objs @ evolved;
       player
   | _ ->
-      let obj = get_obj collid in 
+      let obj = get_obj collid in
       let evolved = update_collidable state collid all_collids in
       if not obj.kill then (collid_objs := collid::(!collid_objs@evolved));
       collid
@@ -251,17 +242,20 @@ let update_loop canvas objs =
   let ctx = canvas##getContext (Dom_html._2d_) in
   let cwidth = float_of_int canvas##width in
   let cheight = float_of_int canvas##height in
-  let viewport = make_viewport (cwidth,cheight) (cwidth +. 500.,cheight +. 500.) in
+  let viewport = Viewport.make (cwidth,cheight) (cwidth +. 500.,cheight +. 500.) in
   let player = Object.spawn (SPlayer(SmallM,Standing)) ctx (200.,32.) in
   let state = {
       bgd = Sprite.make_bgd ctx;
-      vpt = update_viewport viewport (get_obj player).pos;
+      vpt = Viewport.update viewport (get_obj player).pos;
       ctx;
       score = 0;
       coins = 0;
+      multiplier = 1;
+      game_over = false;
   } in
   let rec update_helper time state player objs  =
-      collid_objs := [];
+      if state.game_over = true then game_over state else
+      ( collid_objs := [];
 
       let fps = calc_fps !last_time time in
       last_time := time;
@@ -269,21 +263,21 @@ let update_loop canvas objs =
       broad_cache := objs;
 
       Draw.clear_canvas canvas;
-      
+
       (* Parallax background *)
       let vpos_x_int = int_of_float (state.vpt.pos.x /. 5.)  in
       let bgd_width = int_of_float (fst state.bgd.params.frame_size) in
       Draw.draw_bgd state.bgd (float_of_int (vpos_x_int mod bgd_width));
-      
+
       let player = run_update state player objs in
-      let state = {state with vpt = update_viewport state.vpt (get_obj player).pos} in
+      let state = {state with vpt = Viewport.update state.vpt (get_obj player).pos} in
       List.iter (fun obj -> ignore (run_update state obj objs)) objs ;
 
       Draw.fps canvas fps;
+      Draw.hud canvas state.score state.coins;
       ignore Dom_html.window##requestAnimationFrame(
-          Js.wrap_callback (fun (t:float) -> update_helper t state player !collid_objs))
-
-  in update_helper 0. state player objs
+      Js.wrap_callback (fun (t:float) -> update_helper t state player !collid_objs)))
+      in update_helper 0. state player objs
 
 let keydown evt =
   let () = match evt##keyCode with

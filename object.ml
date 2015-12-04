@@ -1,7 +1,8 @@
 open Sprite
 open Actors
+open Particle
 
-let friction = 0.8
+let friction = 0.85
 let gravity = 0.2
 let max_y_vel = 4.5
 let player_speed = 2.8
@@ -39,6 +40,7 @@ type obj = {
   mutable invuln: int;
   mutable kill: bool;
   mutable health: int;
+  mutable crouch: bool;
 }
 
 type collidable =
@@ -114,6 +116,7 @@ let make ?id:(id=None) ?dir:(dir=Left) spawnable context (posx, posy) =
     invuln = 0;
     kill = false;
     health = 1;
+    crouch = false;
   } in
   (spr,obj)
 
@@ -148,23 +151,34 @@ let update_player_keys (player : obj) (controls : controls) : unit =
   let lr_acc = player.vel.x *. 0.2 in
   match controls with
   | CLeft ->
-    if player.vel.x > ~-.(player.params.speed)
-    then player.vel.x <- player.vel.x -. (0.5 -. lr_acc);
-    player.dir <- Left
+    if not player.crouch then begin
+      if player.vel.x > ~-.(player.params.speed)
+      then player.vel.x <- player.vel.x -. (0.5 -. lr_acc);
+      player.dir <- Left
+    end
   | CRight ->
-    if player.vel.x < player.params.speed
-    then player.vel.x <- player.vel.x +. (0.5 +. lr_acc);
-    player.dir <- Right
+    if not player.crouch then begin
+      if player.vel.x < player.params.speed
+      then player.vel.x <- player.vel.x +. (0.5 +. lr_acc);
+      player.dir <- Right
+    end
   | CUp ->
     if (not player.jumping && player.grounded) then begin
       player.jumping <- true;
       player.grounded <- false;
-      player.vel.y <- 
+      player.vel.y <-
         max (player.vel.y -.(player_jump +. abs_float player.vel.x *. 0.25))
             player_max_jump
     end
   | CDown ->
-    if (not player.jumping) then print_endline "crouch"
+    if (not player.jumping && player.grounded) then
+      player.crouch <- true
+
+let normalize_pos pos (p1:Sprite.sprite_params) (p2:Sprite.sprite_params) =
+    let (box1,boy1) = p1.bbox_offset and (box2,boy2) = p2.bbox_offset in
+    let (bw1,bh1) = p1.bbox_size and (bw2,bh2) = p2.bbox_size in
+    pos.x <- pos.x -. (bw2 +. box2) +. (bw1 +. box1);
+    pos.y <- pos.y -. (bh2 +. boy2) +. (bh1 +. boy1)
 
 let update_player player keys context =
   let prev_jumping = player.jumping in
@@ -176,10 +190,13 @@ let update_player player keys context =
   let pl_typ = if player.health <= 1 then SmallM else BigM in
   if not prev_jumping && player.jumping
   then Some (pl_typ, (Sprite.make (SPlayer(pl_typ,Jumping)) player.dir context))
-  else if prev_dir<>player.dir || (prev_vx=0. && (abs_float player.vel.x) > 0.) && not player.jumping
+  else if prev_dir<>player.dir || (prev_vx=0. && (abs_float player.vel.x) > 0.) 
+          && not player.jumping
   then Some (pl_typ, (Sprite.make (SPlayer(pl_typ,Running)) player.dir context))
   else if prev_dir <> player.dir && player.jumping && prev_jumping
   then Some (pl_typ, (Sprite.make (SPlayer(pl_typ,Jumping)) player.dir context))
+  else if player.vel.y = 0. && player.crouch
+  then Some (pl_typ, (Sprite.make (SPlayer(pl_typ,Crouching)) player.dir context))
   else if player.vel.y = 0. && player.vel.x = 0.
   then Some (pl_typ, (Sprite.make (SPlayer(pl_typ,Standing)) player.dir context))
   else None
@@ -206,12 +223,6 @@ let normalize_origin pos (spr:Sprite.sprite) =
   let (box,boy) = p.bbox_offset and (_,bh) = p.bbox_size in
   pos.x <- pos.x -. box;
   pos.y <- pos.y -. (boy +. bh)
-
-let normalize_pos pos (p1:Sprite.sprite_params) (p2:Sprite.sprite_params) =
-    let (box1,boy1) = p1.bbox_offset and (box2,boy2) = p2.bbox_offset in
-    let (bw1,bh1) = p1.bbox_size and (bw2,bh2) = p2.bbox_size in
-    pos.x <- pos.x -. (bw2 +. box2) +. (bw1 +. box1);
-    pos.y <- pos.y -. (bh2 +. boy2) +. (bh1 +. boy1)
 
 let collide_block ?check_x:(check_x=true) dir obj =
   match dir with
@@ -292,7 +303,8 @@ let collision_cond c1 c2 =
   let o1 = get_obj c1 and o2 = get_obj c2 in
   let ctypes = match(c1,c2) with
   | (Item(_,_,_), Enemy(_,_,_))
-  | (Enemy(_,_,_), Item(_,_,_)) -> true
+  | (Enemy(_,_,_), Item(_,_,_))
+  | (Item(_,_,_), Item(_,_,_)) -> true
   | _ -> false
   in o1.kill || o2.kill || ctypes
 

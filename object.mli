@@ -1,5 +1,6 @@
 open Sprite
 open Actors
+open Particle
 
 val invuln : int
 val dampen_jump : float
@@ -29,6 +30,7 @@ type obj = {
   mutable invuln: int;
   mutable kill: bool;
   mutable health: int;
+  mutable crouch: bool;
 }
 
 type collidable =
@@ -56,6 +58,8 @@ val is_player : collidable -> bool
 val is_enemy : collidable -> bool
 
 val normalize_origin : xy -> Sprite.sprite -> unit
+
+val normalize_pos : xy -> Sprite.sprite_params -> Sprite.sprite_params -> unit
 
 (* Destroys the object, returning a list of destruction effect objects *)
 val kill : obj -> noncollidable list
