@@ -18,8 +18,6 @@ val generate_enemies : float -> float -> float -> float -> obj_coord list -> obj
 
 val generate_helper : float -> float -> float -> float -> Dom_html.canvasRenderingContext2D Js.t -> collidable list
 
-val mem_loc : (float*float) -> obj_coord list -> bool
-
 val convert_list : obj_coord list -> obj_coord list
 
 val choose_block_pattern : float -> float -> float -> float -> int -> obj_coord list

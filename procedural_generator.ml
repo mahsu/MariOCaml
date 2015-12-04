@@ -24,15 +24,12 @@ let max_dist = 3;;
 (*Height of ground based on number of grids*)
 let ground_height = 2;;
 
-let block_prob = 6;;
-let enemy_prob = 1;;
-
 (*Canvas is 512 by 256 (w*h) -> 32 by 16 blocks
 * Let the first generaed map just be of size 5 by 5 blocks *)
 
 (*Check if the given location checkloc is already part of the list of locations
 * in the location list.*)
-let rec mem_loc checkloc loclist =
+let rec mem_loc (checkloc: float * float) (loclist: obj_coord list) : bool =
   match loclist with
   |[] -> false
   |h::t -> if (checkloc = (snd h)) then true
@@ -40,7 +37,7 @@ let rec mem_loc checkloc loclist =
 
 
 (*Convert list of locations from blocksize to pixelsize*)
-let rec convert_list lst =
+let rec convert_list (lst:obj_coord list) :obj_coord list =
   match lst with
   |[] -> []
   |(h::t) -> [(fst h, ((fst (snd h))*.16., (snd (snd h))*.16.))]@(convert_list t)
@@ -51,14 +48,14 @@ let rec convert_list lst =
 * 3 -> Goomba
 * _ -> TBD *)
 
-let choose_enemy_typ typ =
+let choose_enemy_typ (typ:int) : enemy_typ =
   match typ with
   |0 -> RKoopa
   |1 -> GKoopa
   |2 -> Goomba
   |_ -> failwith "Shouldn't reach here"
 
-let choose_sblock_typ typ =
+let choose_sblock_typ (typ:int) : block_typ =
   match typ with
   |0 -> Brick
   |1 -> UnBBlock
@@ -212,7 +209,7 @@ let generate (blockw:float) (blockh:float) (context:Dom_html.canvasRenderingCont
   let player = Object.spawn (SPlayer(SmallM,Standing)) context (100.,224.) in
   (player, collide_list)
 
-let init () = 
+let init () =
   Random.self_init();
 
   (* If I need it, these are the cross blocks.
