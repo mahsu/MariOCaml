@@ -333,8 +333,15 @@ let kill collid ctx =
       | Goomba -> [Particle.make GoombaSquish (o.pos.x,o.pos.y) ctx]
       | _ -> []
       end
-  | Item(t,s,o) ->
+  | Block(t,s,o) ->
       begin match t with
+      | Brick ->
+          let pos = (o.pos.x,o.pos.y) in
+          let p1 = Particle.make ~vel:(-5.,-5.) ~acc:(0.,0.2) BrickChunkL pos ctx in
+          let p2 = Particle.make ~vel:(-3.,-4.) ~acc:(0.,0.2) BrickChunkL pos ctx in
+          let p3 = Particle.make ~vel:(3.,-4.) ~acc:(0.,0.2) BrickChunkR pos ctx in
+          let p4 = Particle.make ~vel:(5.,-5.) ~acc:(0.,0.2) BrickChunkR pos ctx in
+          [p1;p2;p3;p4]
       | _ -> []
       end
   | _ -> []
