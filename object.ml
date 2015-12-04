@@ -219,10 +219,10 @@ let update_pos obj =
   obj.pos.x <- (obj.vel.x +. obj.pos.x);
   if obj.params.has_gravity then obj.pos.y <- (obj.vel.y +. obj.pos.y)
 
-let process_obj obj =
+let process_obj obj mapy =
   update_vel obj;
-  update_pos obj
-  (*todo kill if out of bounds *)
+  update_pos obj;
+  if obj.pos.y > mapy then obj.kill <- true
 
 (* Converts an origin based on the bottom left of the bounding box to the top
  * right of the sprite, to make it easier to place objects flush with the ground.*)
@@ -258,11 +258,13 @@ let reverse_left_right obj =
 let evolve_enemy player_dir typ (spr:Sprite.sprite) obj context =
   match typ with
   | GKoopa ->
-      let (new_spr,new_obj) = make ~dir:obj.dir (SEnemy GKoopaShell) context (obj.pos.x,obj.pos.y) in
+      let (new_spr,new_obj) = 
+        make ~dir:obj.dir (SEnemy GKoopaShell) context (obj.pos.x,obj.pos.y) in
       normalize_pos new_obj.pos spr.params new_spr.params;
       Some(Enemy(GKoopaShell,new_spr,new_obj))
   | RKoopa ->
-      let (new_spr,new_obj) = make ~dir:obj.dir (SEnemy RKoopaShell) context (obj.pos.x,obj.pos.y) in
+      let (new_spr,new_obj) = 
+        make ~dir:obj.dir (SEnemy RKoopaShell) context (obj.pos.x,obj.pos.y) in
       normalize_pos new_obj.pos spr.params new_spr.params;
       Some(Enemy(RKoopaShell,new_spr,new_obj))
   | GKoopaShell |RKoopaShell ->
@@ -286,12 +288,14 @@ let dec_health obj =
 (*Used for deleting a block and replacing it with a used block*)
 let evolve_block obj context =
   dec_health obj;
-  let (new_spr,new_obj) = make (SBlock QBlockUsed) context (obj.pos.x, obj.pos.y) in
+  let (new_spr,new_obj) = 
+    make (SBlock QBlockUsed) context (obj.pos.x, obj.pos.y) in
   Block(QBlockUsed,new_spr,new_obj)
 
 (*Used for making a small Mario into a Big Mario*)
 let evolve_player (spr : Sprite.sprite) obj context =
-  let (new_spr,new_obj) = make (SPlayer (BigM,Standing)) context (obj.pos.x, obj.pos.y) in
+  let (new_spr,new_obj) = 
+    make (SPlayer (BigM,Standing)) context (obj.pos.x, obj.pos.y) in
   normalize_pos new_obj.pos spr.params new_spr.params ;
   Player(BigM,new_spr,new_obj)
 
