@@ -3,6 +3,7 @@ open Object
 open Actors
 open Viewport
 
+(*keys represents the arrow keys pressed via boolean*)
 type keys = {
   mutable left: bool;
   mutable right: bool;
@@ -10,6 +11,13 @@ type keys = {
   mutable down: bool;
 }
 
+(*st represents the state of the game. It includes a background sprite (e.g.,
+ * (e.g., hills), a context (used for rendering onto the page), a viewport
+ * (used for moving the player's "camera"), a score (which is kept track
+ * throughout the game), coins (also kept track through the game),
+ * a multiplier (used for when you kill multiple enemies before ever touching
+ * the ground, as in the actual Super Mario), and a game_over bool (which
+ * is only true when the game is over). *)
 type st = {
   bgd: sprite;
   ctx: Dom_html.canvasRenderingContext2D Js.t;
@@ -20,6 +28,7 @@ type st = {
   mutable game_over: bool;
 }
 
+(*pressed_keys instantiates the keys.*)
 let pressed_keys = {
   left = false;
   right = false;
@@ -27,9 +36,13 @@ let pressed_keys = {
   down = false;
 }
 
+(*collid_objs is a list of collidable objects that have to be checked. This
+ *is used in a list, so must be a reference. last_time is used for calculating
+ *fps. *)
 let collid_objs = ref []
 let last_time = ref 0.
 
+(*game_over displays a black screen when you finish a game.*)
 let game_over state =
   state.ctx##rect (0.,0.,512.,512.);
   state.ctx##fillStyle <- (Js.string "black");
@@ -44,6 +57,10 @@ let calc_fps t0 t1 =
 let update_score state i =
   state.score <- state.score + i
 
+(*player_attack_enemy is called for a player hitting an enemy from the north.
+ *This causes the player to either kill the enemy or move the enemy, in the
+ *case that the enemy is a shell. Invulnerability, jumping, and grounded
+ *are used for fine tuning the movements.*)
 let player_attack_enemy s1 o1 typ s2 o2 state context =
   o1.invuln <- invuln;
   o1.jumping <- false;
@@ -60,12 +77,14 @@ let player_attack_enemy s1 o1 typ s2 o2 state context =
       dec_health o2;
       o1.invuln <- invuln;
       o1.vel.y <- ~-. dampen_jump;
-      ( if state.multiplier = 16 then ( update_score state 1600; (None, evolve_enemy o1.dir typ s2 o2 context) )
-         else ( update_score state (100 * state.multiplier);
+      ( if state.multiplier = 16 then
+        (update_score state 1600; (None, evolve_enemy o1.dir typ s2 o2 context))
+        else ( update_score state (100 * state.multiplier);
               state.multiplier <- state.multiplier * 2;
       (None,(evolve_enemy o1.dir typ s2 o2 context)) ))
   end
 
+(*enemy_attack_player is used when an enemy kills a player.*)
 let enemy_attack_player s1 o1 t2 s2 o2 context =
   o1.invuln <- invuln;
   begin match t2 with
@@ -76,6 +95,9 @@ let enemy_attack_player s1 o1 t2 s2 o2 context =
   | _ -> dec_health o1; (None,None)
   end
 
+(*In the case that two enemies collide, they are to reverse directions. However,
+ *in the case that one or more of the two enemies is a koopa shell, then
+ *the koopa shell kills the other enemy. *)
 let col_enemy_enemy t1 s1 o1 t2 s2 o2 dir =
   begin match (t1, t2) with
   | (GKoopaShell, GKoopaShell)
@@ -103,6 +125,8 @@ let col_enemy_enemy t1 s1 o1 t2 s2 o2 dir =
       end
   end
 
+(*Process collision is called to match each of the possible collisions that
+ *may occur. *)
 let process_collision dir c1 c2  state =
   let context = state.ctx in
   match (c1, c2, dir) with
@@ -132,7 +156,6 @@ let process_collision dir c1 c2  state =
         dec_health o2;
         reverse_left_right o1;
         (None,None)
-    (*TODO: spawn item when block is of type qblock*)
     | (_,_) ->
         rev_dir o1 t s1;
       (None,None)
@@ -167,6 +190,9 @@ let broad_cache = ref []
 let broad_phase collid =
   !broad_cache
 
+(*narrow_phase of collision is used in order to continuously loop through
+ *each of the collidable objects to constantly check if collisions are
+ *occurring.*)
 let rec narrow_phase c cs state =
   let rec narrow_helper c cs state acc =
     match cs with
@@ -199,6 +225,7 @@ let check_collisions collid state =
     let broad = broad_phase collid in
     narrow_phase collid broad state
 
+(*update_collidable is primarily used for updating animation*)
 let update_collidable state (collid:Object.collidable) all_collids =
  (* TODO: optimize. Draw static elements only once *)
   let obj = Object.get_obj collid in
@@ -215,11 +242,14 @@ let update_collidable state (collid:Object.collidable) all_collids =
     evolved
   end else []
 
+(*translate_keys is used for event listening*)
 let translate_keys () =
   let k = pressed_keys in
   let ctrls = [(k.left,CLeft);(k.right,CRight);(k.up,CUp);(k.down,CDown)] in
   List.fold_left (fun a x -> if fst x then (snd x)::a else a) [] ctrls
 
+(*run_update is used to update all of the collidables at once. Primarily used
+ *as a wrapper method.*)
 let run_update state collid all_collids =
   match collid with
   | Player(t,s,o) as p ->
@@ -227,7 +257,9 @@ let run_update state collid all_collids =
       o.crouch <- false;
       let player = begin match Object.update_player o keys state.ctx with
         | None -> p
-        | Some (new_typ, new_spr) -> Object.normalize_pos o.pos s.params new_spr.params; Player(new_typ,new_spr,o)
+        | Some (new_typ, new_spr) ->
+            Object.normalize_pos o.pos s.params new_spr.params;
+            Player(new_typ,new_spr,o)
       end in
       let evolved = update_collidable state player all_collids in
       collid_objs := !collid_objs @ evolved;
@@ -238,6 +270,8 @@ let run_update state collid all_collids =
       if not obj.kill then (collid_objs := collid::(!collid_objs@evolved));
       collid
 
+(*update_loop is constantly being called to check for collisions and to
+ *update each of the objects in the game.*)
 let update_loop canvas objs =
   let ctx = canvas##getContext (Dom_html._2d_) in
   let cwidth = float_of_int canvas##width in

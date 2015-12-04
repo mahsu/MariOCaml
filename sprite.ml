@@ -43,7 +43,8 @@ let setup_sprite ?anim:(anim=Frame) ?loop:(loop=true)
     loop;
   }
 
-
+(*The following functions are used in order to define sprite animations
+ *from their sprite sheets. Also creates bounding boxes if necessary.*)
 let make_small_player (typ, dir) =
   match dir with
     (* 16x16 grid with 0x0 offset*)
@@ -131,6 +132,7 @@ let make_bgd context =
   let params = setup_sprite "bgd-1.png" 1 0 (512.,256.) (0.,0.) in
   make_from_params params context
 
+(*Transform_enemy is used in order to switch the direction an enemy faces.*)
 let transform_enemy enemy_typ spr dir =
   let params = make_enemy  (enemy_typ,dir) in
   let img = (Dom_html.createImg Dom_html.document) in
