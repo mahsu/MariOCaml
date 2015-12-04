@@ -2,13 +2,16 @@ open Object
 
 
 (* Represents the game map *)
-type map;
+type map = {
+  mutable width: float;
+  mutable height: float;
+  mutable objects: collidable list
+}
 
 (* x,y coordinate vector *)
-type xy;
 
 (* Gets a list of objects in a certain position in the grid *)
-val get : xy -> obj list
+let get xy = []
 
 (* Puts an object in a certain position in the grid *)
-val put : xy -> obj -> map
+let put xy = []

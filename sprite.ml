@@ -99,6 +99,7 @@ let make_block = function
   | QBlockUsed -> setup_sprite "blocks.png" 1 0 (16.,16.) (0.,32.)
   | UnBBlock -> setup_sprite "blocks.png" 1 0 (16.,16.) (0.,48.)
 
+
 let make_player pt spr_type =
   match pt with
   | BigM -> make_big_player spr_type
