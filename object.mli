@@ -45,6 +45,7 @@ type collidable =
 val get_sprite : collidable -> Sprite.sprite
 
 val get_obj : collidable -> obj
+
 (* Creates a new object with a given
  * actor type on the the canvas at a given position *)
 val spawn : Actors.spawn_typ  -> Dom_html.canvasRenderingContext2D Js.t
