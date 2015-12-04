@@ -3,6 +3,8 @@ open Actors
 
 type obj_coord
 
+val init : unit -> unit
+
 val avoid_overlap : obj_coord list -> obj_coord list -> obj_coord list
 
 val choose_sblock_typ : int -> block_typ

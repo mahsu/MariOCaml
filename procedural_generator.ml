@@ -212,6 +212,9 @@ let generate (blockw:float) (blockh:float) (context:Dom_html.canvasRenderingCont
   let player = Object.spawn (SPlayer(SmallM,Standing)) context (100.,224.) in
   (player, collide_list)
 
+let init () = 
+  Random.self_init();
+
   (* If I need it, these are the cross blocks.
 
   let yBlocks =
