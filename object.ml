@@ -259,12 +259,12 @@ let reverse_left_right obj =
 let evolve_enemy player_dir typ (spr:Sprite.sprite) obj context =
   match typ with
   | GKoopa ->
-      let (new_spr,new_obj) = 
+      let (new_spr,new_obj) =
         make ~dir:obj.dir (SEnemy GKoopaShell) context (obj.pos.x,obj.pos.y) in
       normalize_pos new_obj.pos spr.params new_spr.params;
       Some(Enemy(GKoopaShell,new_spr,new_obj))
   | RKoopa ->
-      let (new_spr,new_obj) = 
+      let (new_spr,new_obj) =
         make ~dir:obj.dir (SEnemy RKoopaShell) context (obj.pos.x,obj.pos.y) in
       normalize_pos new_obj.pos spr.params new_spr.params;
       Some(Enemy(RKoopaShell,new_spr,new_obj))
@@ -289,13 +289,13 @@ let dec_health obj =
 (*Used for deleting a block and replacing it with a used block*)
 let evolve_block obj context =
   dec_health obj;
-  let (new_spr,new_obj) = 
+  let (new_spr,new_obj) =
     make (SBlock QBlockUsed) context (obj.pos.x, obj.pos.y) in
   Block(QBlockUsed,new_spr,new_obj)
 
 (*Used for making a small Mario into a Big Mario*)
 let evolve_player (spr : Sprite.sprite) obj context =
-  let (new_spr,new_obj) = 
+  let (new_spr,new_obj) =
     make (SPlayer (BigM,Standing)) context (obj.pos.x, obj.pos.y) in
   normalize_pos new_obj.pos spr.params new_spr.params ;
   Player(BigM,new_spr,new_obj)
@@ -353,9 +353,9 @@ let check_collision c1 c2 =
     end
   end else None
 
-let kill collid ctx = 
+let kill collid ctx =
   match collid with
-  | Enemy(t,s,o) -> 
+  | Enemy(t,s,o) ->
       begin match t with
       | Goomba -> [Particle.make GoombaSquish (o.pos.x,o.pos.y) ctx]
       | _ -> []

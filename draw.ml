@@ -6,6 +6,7 @@ let jstr = Js.string
 
 let get_context canvas = canvas##getContext (Dom_html._2d_)
 
+(*Draws a sprite onto the canvas.*)
 let render sprite (posx,posy) =
   let context = sprite.context in
   let (sx, sy) = sprite.params.src_offset in
@@ -17,16 +18,21 @@ let render sprite (posx,posy) =
   (*context##clearRect(0.,0.,sw, sh);*)
   context##drawImage_full(sprite.img, sx, sy, sw, sh, dx, dy, dw, dh)
 
+(*Draws two background images, which needs to be done because of the
+ *constantly changing viewport, which is always at most going to be
+ *between two background images.*)
 let draw_bgd bgd off_x =
   render bgd (~-.off_x,0.);
   render bgd ((fst bgd.params.frame_size) -. off_x, 0.)
 
+(*Used for animation updating. Canvas is cleared each frame and redrawn.*)
 let clear_canvas canvas =
   let context = canvas##getContext (Dom_html._2d_) in
   let cwidth = float_of_int canvas##width in
   let cheight = float_of_int canvas##height in
   ignore context##clearRect(0.,0.,cwidth,cheight)
 
+(*Displays the text for score and coins.*)
 let hud canvas score coins =
   let score_string = string_of_int score in
   let coin_string = string_of_int coins in
@@ -35,6 +41,7 @@ let hud canvas score coins =
   ignore context##fillText (Js.string ("Score: "^score_string), (float_of_int canvas##width) -. 140., 18.);
   ignore context##fillText (Js.string ("Coins: "^coin_string), 120., 18.)
 
+(*Displays the fps.*)
 let fps canvas fps_val =
   let fps_str = int_of_float fps_val |> string_of_int in
   let context = canvas##getContext (Dom_html._2d_) in

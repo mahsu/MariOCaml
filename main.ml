@@ -11,6 +11,9 @@ let level_height = (256./.16.) -. 1.
 
 let get_width () = level_width
 
+(*Canvas is chosen from the index.html file. The context is obtained from
+ *the canvas. Listeners are added. A level is generated and the general
+ *update_loop method is called to make the level playable.*)
 let load _ =
   Random.self_init();
   let canvas_id = "canvas" in
@@ -35,6 +38,7 @@ let inc_counter _ =
   loadCount := !loadCount + 1;
   if !loadCount = imgsToLoad then load() else ()
 
+(*Used for concurrency issues.*)
 let preload _ =
   let root_dir = "sprites/" in
   let imgs = [ "blocks.png";"items.png";"enemies.png";"mario-small.png" ] in

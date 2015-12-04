@@ -26,7 +26,7 @@ type sprite =
     mutable img: Dom_html.imageElement Js.t;
   }
 
-
+(*setup_sprite is used to initialize a sprite.*)
 let setup_sprite ?anim:(anim=Frame) ?loop:(loop=true)
          ?bb_off:(bbox_offset=(0.,0.)) ?bb_sz:(bbox_size=(0.,0.))
                  img_src max_frames max_ticks frame_size src_offset =
@@ -131,6 +131,7 @@ let make_from_params params context =
     ticks = ref 0;
   }
 
+(*Make is the wrapper function to cycle through sprite animations*)
 let make spawn dir context  =
   let params = make_type spawn dir in
   make_from_params params context
@@ -153,6 +154,7 @@ let transform_enemy enemy_typ spr dir =
 
 let reflect_sprite spr = failwith "todo"
 
+(*update_animation is the main method to cycle through sprite animations*)
 let update_animation (spr: sprite) =
   (* Only advance frame when ticked *)
   let curr_ticks = !(spr.ticks) in

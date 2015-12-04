@@ -137,6 +137,23 @@ let col_enemy_enemy t1 s1 o1 t2 s2 o2 dir =
       end
   end
 
+let obj_at_pos dir (pos: xy) (collids: Object.collidable list) : Object.collidable list =
+  match dir with
+  | Left -> (List.filter (fun (col: Object.collidable) -> (get_obj col).pos.y = pos.y && (get_obj col).pos.x = pos.x -. 16.)
+            collids)
+  | _ -> (List.filter (fun (col: Object.collidable) -> (get_obj col).pos.y = pos.y && (get_obj col).pos.x = pos.x +. 16.) collids)
+
+let is_block dir pos collids =
+  match obj_at_pos dir pos collids with
+  | [] -> false
+  | [Block (_,_,_)] -> true
+  | _ -> false
+
+let is_rkoopa collid =
+  match collid with
+  | Enemy(RKoopa,_,_) -> true
+  | _ -> false
+
 (*Process collision is called to match each of the possible collisions that
  *may occur. *)
 let process_collision dir c1 c2  state =
@@ -227,7 +244,14 @@ let rec narrow_phase c cs state =
         | None -> (None,None)
         | Some dir ->
           if (get_obj h).id <> c_obj.id
-          then process_collision dir c h state
+          then
+            ( (if (if is_rkoopa c then
+            begin match c_obj.dir with
+            | Left -> is_block c_obj.dir {x= c_obj.pos.x -. 16.; y= c_obj.pos.y -. 27.} cs
+            | _ -> is_block c_obj.dir {x= c_obj.pos.x +. 16.; y= c_obj.pos.y -. 27.} cs
+            end else false) then rev_dir c_obj RKoopa (Object.get_sprite c) else
+            ());
+            process_collision dir c h state )
           else (None,None)
       end else (None,None) in
       let acc = match new_objs with
