@@ -84,6 +84,7 @@ let make_block = function
   | QBlockUsed -> setup_obj ~g:false ()
   | Brick -> setup_obj ~g:false ()
   | UnBBlock -> setup_obj ~g:false ()
+  | Cloud -> setup_obj ~g: false ()
 
 let make_type = function
   | SPlayer(pt,t) -> make_player ()
@@ -187,7 +188,7 @@ let update_player player keys context =
   let pl_typ = if player.health <= 1 then SmallM else BigM in
   if not prev_jumping && player.jumping
   then Some (pl_typ, (Sprite.make (SPlayer(pl_typ,Jumping)) player.dir context))
-  else if prev_dir<>player.dir || (prev_vx=0. && (abs_float player.vel.x) > 0.) 
+  else if prev_dir<>player.dir || (prev_vx=0. && (abs_float player.vel.x) > 0.)
           && not player.jumping
   then Some (pl_typ, (Sprite.make (SPlayer(pl_typ,Running)) player.dir context))
   else if prev_dir <> player.dir && player.jumping && prev_jumping
