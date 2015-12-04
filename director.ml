@@ -9,9 +9,45 @@ type keys = {
   mutable down: bool;
 }
 
+type viewport = {
+  pos: Object.xy;
+  v_dim: Object.xy;
+  m_dim: Object.xy;
+}
+
 type st = {
   bgd: sprite;
 }
+
+let make_viewport (vx,vy) (mx,my) = 
+  {
+    pos = {x = 0.; y = 0.;};
+    v_dim = {x = vx; y = vy};
+    m_dim = {x = mx; y = my};
+  }
+
+let calc_viewport_point cc vc mc = 
+  let vc_half = vc /. 2. in
+  min ( max (cc -. vc_half) 0. ) ( min (mc -. vc) (abs_float(cc -. vc_half)) )
+
+let in_viewport v pos = 
+  let margin = 32. in
+  let (v_min_x,v_max_x) = (v.pos.x -. margin, v.pos.x +. v.v_dim.x) in
+  let (v_min_y,v_max_y) = (v.pos.y -. margin, v.pos.y +. v.v_dim.y) in
+  let (x,y) = (pos.x, pos.y) in
+  x >= v_min_x && x <= v_max_x && y >= v_min_y && y<= v_min_y
+
+let coord_to_viewport viewport coord = 
+  { 
+    x = viewport.pos.x -. coord.x;
+    y = viewport.pos.y -. coord.y;
+  }
+
+let update_viewport vpt ctr =
+  let new_x = calc_viewport_point ctr.x vpt.v_dim.x vpt.m_dim.x in
+  let new_y = calc_viewport_point ctr.y vpt.v_dim.y vpt.m_dim.y in
+  let pos = {x = new_x; y = new_y} in
+  {vpt with pos}
 
 let pressed_keys = {
   left = false;
@@ -67,17 +103,18 @@ let check_collisions collid context =
     let broad = broad_phase collid in
     narrow_phase collid broad context
 
-let update_collidable (collid:Object.collidable) all_collids context =
+let update_collidable vpt (collid:Object.collidable) all_collids context =
  (* TODO: optimize. Draw static elements only once *)
   let obj = Object.get_obj collid in
   let spr = Object.get_sprite collid in
-  if not obj.kill then begin
+  if not obj.kill && in_viewport vpt obj.pos then begin
     obj.grounded <- false;
     Object.process_obj obj;
     (* Run collision detection if moving object*)
     let evolved = check_collisions collid context in
     (* Render and update animation *)
-    Draw.render spr (obj.pos.x,obj.pos.y);
+    let vpt_adj_xy = coord_to_viewport vpt obj.pos in
+    Draw.render spr (vpt_adj_xy.x,vpt_adj_xy.y);
     if obj.vel.x <> 0. || not (is_enemy collid) then Sprite.update_animation spr;
     evolved
   end else []
@@ -87,7 +124,7 @@ let translate_keys () =
   let ctrls = [(k.left,CLeft);(k.right,CRight);(k.up,CUp);(k.down,CDown)] in
   List.fold_left (fun a x -> if fst x then (snd x)::a else a) [] ctrls
 
-let run_update collid all_collids canvas =
+let run_update viewport collid all_collids canvas =
   let context = canvas##getContext (Dom_html._2d_) in
   match collid with
   | Player(t,s,o) as p ->
@@ -96,23 +133,26 @@ let run_update collid all_collids canvas =
         | None -> p
         | Some (new_typ, new_spr) -> Player(new_typ,new_spr,o)
       end in
-      let evolved = update_collidable player all_collids context in
+      let evolved = update_collidable viewport player all_collids context in
       collid_objs := !collid_objs @ evolved;
       player
   | _ ->
       let obj = get_obj collid in 
-      let evolved = update_collidable collid all_collids context in
+      let evolved = update_collidable viewport collid all_collids context in
       if not obj.kill then (collid_objs := collid::(!collid_objs@evolved));
       collid
 
-
 let update_loop canvas objs =
   let context = canvas##getContext (Dom_html._2d_) in
+  let cwidth = float_of_int canvas##width in
+  let cheight = float_of_int canvas##height in
+  let viewport = make_viewport (cwidth,cheight) (cwidth,cheight) in
   let player = Object.spawn (SPlayer(SmallM,Standing)) context (200.,32.) in
+  let viewport = update_viewport viewport (get_obj player).pos in
   let state = {
       bgd = Sprite.make_bgd context;
   } in
-  let rec update_helper time canvas player objs  =
+  let rec update_helper time canvas viewport player objs  =
       collid_objs := [];
 
       let fps = calc_fps !last_time time in
@@ -122,14 +162,15 @@ let update_loop canvas objs =
 
       Draw.clear_canvas canvas;
       Draw.draw_bgd state.bgd;
-      let player = run_update player objs canvas in
-      List.iter (fun obj -> ignore (run_update obj objs canvas)) objs ;
+      let player = run_update viewport player objs canvas in
+      let viewport = update_viewport viewport (get_obj player).pos in
+      List.iter (fun obj -> ignore (run_update viewport obj objs canvas)) objs ;
 
       Draw.fps canvas fps;
       ignore Dom_html.window##requestAnimationFrame(
-          Js.wrap_callback (fun (t:float) -> update_helper t canvas player !collid_objs))
+          Js.wrap_callback (fun (t:float) -> update_helper t canvas viewport player !collid_objs))
 
-  in update_helper 0. canvas player objs
+  in update_helper 0. canvas viewport player objs
 
 let keydown evt =
   let () = match evt##keyCode with
