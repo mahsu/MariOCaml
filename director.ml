@@ -50,14 +50,18 @@ let game_over state =
   state.ctx##rect (0.,0.,512.,512.);
   state.ctx##fillStyle <- (Js.string "black");
   state.ctx##fill ();
-  state.ctx##fillText (Js.string ("Game Over. You win!"), 240., 128.);
+  state.ctx##fillStyle <- (Js.string "white");
+  state.ctx##font <- (Js.string "20px 'Press Start 2P'");
+  state.ctx##fillText (Js.string ("You win!"), 180., 128.);
   failwith "Game over."
 
 let game_loss state =
   state.ctx##rect (0.,0.,512.,512.);
   state.ctx##fillStyle <- (Js.string "black");
   state.ctx##fill ();
-  state.ctx##fillText (Js.string ("Game Over. You lose!"), 240., 128.);
+  state.ctx##fillStyle <- (Js.string "white");
+  state.ctx##font <- (Js.string "20px 'Press Start 2P'");
+  state.ctx##fillText (Js.string ("GAME OVER. You lose!"), 60., 128.);
   failwith "Game over."
 
 let calc_fps t0 t1 =
