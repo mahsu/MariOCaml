@@ -31,6 +31,7 @@ type obj = {
   mutable kill: bool;
   mutable health: int;
   mutable crouch: bool;
+  mutable score: int;
 }
 
 type collidable =
@@ -45,7 +46,6 @@ val get_sprite : collidable -> Sprite.sprite
 
 val get_obj : collidable -> obj
 
-val get_typ : collidable ->
 (* Creates a new object with a given
  * actor type on the the canvas at a given position *)
 val spawn : Actors.spawn_typ  -> Dom_html.canvasRenderingContext2D Js.t

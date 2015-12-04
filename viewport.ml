@@ -22,8 +22,11 @@ let in_viewport v pos =
   let (v_min_x,v_max_x) = (v.pos.x -. margin, v.pos.x +. v.v_dim.x) in
   let (v_min_y,v_max_y) = (v.pos.y -. margin, v.pos.y +. v.v_dim.y) in
   let (x,y) = (pos.x, pos.y) in 
-  let test = x >= v_min_x && x <= v_max_x && y >= v_min_y && y<= v_max_y in
-  test
+  x >= v_min_x && x <= v_max_x && y >= v_min_y && y<= v_max_y
+
+let out_of_viewport_below v y = 
+  let v_max_y = v.pos.y +. v.v_dim.y in
+  y >= v_max_y
 
 let coord_to_viewport viewport coord = 
   { 

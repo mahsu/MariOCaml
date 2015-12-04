@@ -107,7 +107,15 @@ let make_particle = function
   | GoombaSquish -> setup_sprite "enemies.png" 1 0 (16.,16.) (0.,144.)
   | BrickChunkL -> setup_sprite "chunks.png" 1 0 (8.,8.) (0.,0.)
   | BrickChunkR -> setup_sprite "chunks.png" 1 0 (8.,8.) (8.,0.)
-
+  | Score100 -> setup_sprite "score.png" 1 0 (12.,8.) (0.,0.)
+  | Score200 -> setup_sprite "score.png" 1 0 (12.,9.) (0.,9.)
+  | Score400 -> setup_sprite "score.png" 1 0 (12.,9.) (0.,18.)
+  | Score800 -> setup_sprite "score.png" 1 0 (12.,9.) (0.,27.)
+  | Score1000 -> setup_sprite "score.png" 1 0 (14.,9.) (13.,0.) 
+  | Score2000 -> setup_sprite "score.png" 1 0 (14.,9.) (13.,9.)
+  | Score4000 -> setup_sprite "score.png" 1 0 (14.,9.) (13.,18.)
+  | Score8000 -> setup_sprite "score.png" 1 0 (14.,9.) (13.,27.)
+  
 let make_player pt spr_type =
   match pt with
   | BigM -> make_big_player spr_type

@@ -40,6 +40,7 @@ type obj = {
   mutable kill: bool;
   mutable health: int;
   mutable crouch: bool;
+  mutable score: int;
 }
 
 type collidable =
@@ -119,6 +120,7 @@ let make ?id:(id=None) ?dir:(dir=Left) spawnable context (posx, posy) =
     kill = false;
     health = 1;
     crouch = false;
+    score = 0;
   } in
   (spr,obj)
 
@@ -356,10 +358,13 @@ let check_collision c1 c2 =
 let kill collid ctx =
   match collid with
   | Enemy(t,s,o) ->
-      begin match t with
-      | Goomba -> [Particle.make GoombaSquish (o.pos.x,o.pos.y) ctx]
+      let pos = (o.pos.x,o.pos.y) in
+      let score = if o.score > 0 then [Particle.make_score o.score pos ctx] else [] in
+      let remains = begin match t with
+      | Goomba -> [Particle.make GoombaSquish pos ctx]
       | _ -> []
-      end
+      end in
+      score @ remains
   | Block(t,s,o) ->
       begin match t with
       | Brick ->
@@ -369,6 +374,11 @@ let kill collid ctx =
           let p3 = Particle.make ~vel:(3.,-4.) ~acc:(0.,0.2) BrickChunkR pos ctx in
           let p4 = Particle.make ~vel:(5.,-5.) ~acc:(0.,0.2) BrickChunkR pos ctx in
           [p1;p2;p3;p4]
+      | _ -> []
+      end
+  | Item(t,s,o) ->
+      begin match t with
+      | Mushroom -> [Particle.make_score 1000 (o.pos.x,o.pos.y) ctx]
       | _ -> []
       end
   | _ -> []
