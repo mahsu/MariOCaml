@@ -26,7 +26,8 @@ let load _ =
   let context = canvas##getContext (Dom_html._2d_) in
   let _ = Html.addEventListener Html.document Html.Event.keydown (Html.handler Director.keydown) Js._true in
   let _ = Html.addEventListener Html.document Html.Event.keyup (Html.handler Director.keyup) Js._true in
-  Director.update_loop canvas (generate level_width level_height context);
+  let panel = Object.spawn (SBlock Panel) context (300., 160.) in
+  Director.update_loop canvas (panel::(generate level_width level_height context));
   ()
 
 let inc_counter _ =
