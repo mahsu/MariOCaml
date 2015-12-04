@@ -174,7 +174,8 @@ let process_collision dir c1 c2  state =
   | (Player(_,s1,o1), Item(t2,s2,o2), _)
   | (Item(t2,s2,o2), Player(_,s1,o1), _) ->
       begin match t2 with
-      | Mushroom -> dec_health o2; o1.health <- o1.health + 1;
+      | Mushroom -> dec_health o2;
+                    (if o1.health = 2 then () else o1.health <- o1.health + 1);
                     o1.vel.x <- 0.; o1.vel.y <- 0.;
                     update_score state 1000; (None, None)
       | Coin -> state.coins <- state.coins + 1; dec_health o2;
