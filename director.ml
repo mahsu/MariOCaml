@@ -17,6 +17,7 @@ type st = {
   mutable score: int;
   mutable coins: int;
   mutable multiplier: int;
+  mutable game_over: bool;
 }
 
 let pressed_keys = {
@@ -29,8 +30,11 @@ let pressed_keys = {
 let collid_objs = ref []
 let last_time = ref 0.
 
-let end_game () =
-  Dom_html.window##alert (Js.string "Game over!");
+let game_over state =
+  state.ctx##rect (0.,0.,512.,512.);
+  state.ctx##fillStyle <- (Js.string "black");
+  state.ctx##fill ();
+  state.ctx##fillText (Js.string ("Game Over. You win!"), 240., 128.);
   failwith "Game over."
 
 let calc_fps t0 t1 =
@@ -247,9 +251,11 @@ let update_loop canvas objs =
       score = 0;
       coins = 0;
       multiplier = 1;
+      game_over = false;
   } in
   let rec update_helper time state player objs  =
-      collid_objs := [];
+      if state.game_over = true then game_over state else
+      ( collid_objs := [];
 
       let fps = calc_fps !last_time time in
       last_time := time;
@@ -270,9 +276,8 @@ let update_loop canvas objs =
       Draw.fps canvas fps;
       Draw.hud canvas state.score state.coins;
       ignore Dom_html.window##requestAnimationFrame(
-          Js.wrap_callback (fun (t:float) -> update_helper t state player !collid_objs))
-
-  in update_helper 0. state player objs
+      Js.wrap_callback (fun (t:float) -> update_helper t state player !collid_objs)))
+      in update_helper 0. state player objs
 
 let keydown evt =
   let () = match evt##keyCode with
