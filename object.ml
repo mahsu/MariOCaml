@@ -2,13 +2,13 @@ open Sprite
 open Actors
 
 let friction = 0.8
-let gravity = 0.15
-let max_y_vel = 4.
+let gravity = 0.2
+let max_y_vel = 4.5
 let player_speed = 2.8
-let player_jump = 4.2
-let player_max_jump = -5.
+let player_jump = 5.7
+let player_max_jump = -6.
 let dampen_jump = 3.
-let invuln = 60
+let invuln = 30
 
 type xy = {
   mutable x: float;
