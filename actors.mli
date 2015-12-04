@@ -33,10 +33,11 @@ type player_typ =
   | Running
   | Crouching
 
-(*type ground_typ =
+(*type unbblock_typ =
   | Wood
   | Earth
-  | Brick*)
+  | Brick
+| *)
 
 type spawn_typ =
   | SPlayer of player_typ
