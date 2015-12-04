@@ -10,7 +10,9 @@ type keys = {
   mutable right: bool;
   mutable up: bool;
   mutable down: bool;
+  mutable bbox: int;
 }
+
 
 (*st represents the state of the game. It includes a background sprite (e.g.,
  * (e.g., hills), a context (used for rendering onto the page), a viewport
@@ -36,6 +38,7 @@ let pressed_keys = {
   right = false;
   up = false;
   down = false;
+  bbox = 0;
 }
 
 (*collid_objs is a list of collidable objects that have to be checked. This
@@ -84,7 +87,7 @@ let player_attack_enemy s1 o1 typ s2 o2 state context =
       let r2 = evolve_enemy o1.dir typ s2 o2 context in
       o1.vel.y <- ~-. dampen_jump;
       o1.pos.y <- o1.pos.y -. 5.;
-      (None,r2)
+      (None,r2)      
   | _ ->
       dec_health o2;
       o1.vel.y <- ~-. dampen_jump;
@@ -172,13 +175,17 @@ let process_collision dir c1 c2  state =
   | (Player(_,s1,o1), Item(t2,s2,o2), _)
   | (Item(t2,s2,o2), Player(_,s1,o1), _) ->
       begin match t2 with
-      | Mushroom -> dec_health o2;
-                    (if o1.health = 2 then () else o1.health <- o1.health + 1);
-                    o1.vel.x <- 0.; o1.vel.y <- 0.;
-                    update_score state 1000; (None, None)
+      | Mushroom -> 
+          dec_health o2;
+          (if o1.health = 2 then () else o1.health <- o1.health + 1);
+          o1.vel.x <- 0.;
+          o1.vel.y <- 0.;
+          update_score state 1000;
+          o2.score <- 1000;
+          (None, None)
       | Coin -> state.coins <- state.coins + 1; dec_health o2;
           update_score state 100;
-          Printf.printf "Coins: %d \n" state.coins; (None, None)
+          (None, None)
       | _ -> dec_health o2; update_score state 1000; (None, None)
       end
   | (Enemy(t1,s1,o1), Enemy(t2,s2,o2), dir) ->
@@ -193,7 +200,7 @@ let process_collision dir c1 c2  state =
     | (RKoopaShell, QBlock typ) | (GKoopaShell, QBlock typ) ->
         let updated_block = evolve_block o2 context in
         let spawned_item = spawn_above o1.dir o2 typ context in
-        collide_block dir o1; rev_dir o1 t1 s1;
+         rev_dir o1 t1 s1;
         (Some updated_block, Some spawned_item)
     | (_,_) ->
         rev_dir o1 t1 s1;
@@ -248,14 +255,15 @@ let rec narrow_phase c cs state =
         | None -> (None,None)
         | Some dir ->
           if (get_obj h).id <> c_obj.id
-          then
-            ( (if (if is_rkoopa c then
+          then begin
+            (*( (if (if is_rkoopa c then
             begin match c_obj.dir with
             | Left -> is_block c_obj.dir {x= c_obj.pos.x -. 16.; y= c_obj.pos.y -. 27.} cs
             | _ -> is_block c_obj.dir {x= c_obj.pos.x +. 16.; y= c_obj.pos.y -. 27.} cs
             end else false) then rev_dir c_obj RKoopa (Object.get_sprite c) else
-            ());
-            process_collision dir c h state )
+            ());*)
+            process_collision dir c h state 
+          end
           else (None,None)
       end else (None,None) in
       let acc = match new_objs with
@@ -274,6 +282,8 @@ let check_collisions collid state =
     let broad = broad_phase collid in
     narrow_phase collid broad state
 
+let check_bbox_enabled () = pressed_keys.bbox = 1
+
 (*update_collidable is primarily used for updating animation*)
 let update_collidable state (collid:Object.collidable) all_collids =
  (* TODO: optimize. Draw static elements only once *)
@@ -290,7 +300,8 @@ let update_collidable state (collid:Object.collidable) all_collids =
     (* Render and update animation *)
     let vpt_adj_xy = coord_to_viewport state.vpt obj.pos in
     Draw.render spr (vpt_adj_xy.x,vpt_adj_xy.y);
-    Draw.render_bbox spr (vpt_adj_xy.x,vpt_adj_xy.y);
+    if check_bbox_enabled() 
+      then Draw.render_bbox spr (vpt_adj_xy.x,vpt_adj_xy.y);
 
     if obj.vel.x <> 0. || not (is_enemy collid) then Sprite.update_animation spr;
     evolved
@@ -366,31 +377,36 @@ let update_loop canvas (player,objs) map_dim =
         Draw.draw_bgd state.bgd (float_of_int (vpos_x_int mod bgd_width));
 
         let player = run_update_collid state player objs in
-        if (get_obj player).kill = true then game_loss state else
-        (let state = {state with vpt = Viewport.update state.vpt (get_obj player).pos} in
-        List.iter (fun obj -> ignore (run_update_collid state obj objs)) objs ;
-        List.iter (fun part -> run_update_particle state part) parts;
-        Draw.fps canvas fps;
-        Draw.hud canvas state.score state.coins;
-        ignore Dom_html.window##requestAnimationFrame(
-        Js.wrap_callback (fun (t:float) -> update_helper t state player !collid_objs !particles)))
+
+        if (get_obj player).kill = true then game_loss state else begin
+          let state = 
+            {state with vpt = Viewport.update state.vpt (get_obj player).pos} in
+          List.iter (fun obj -> ignore (run_update_collid state obj objs)) objs;
+          List.iter (fun part -> run_update_particle state part) parts;
+          Draw.fps canvas fps;
+          Draw.hud canvas state.score state.coins;
+          ignore Dom_html.window##requestAnimationFrame(
+            Js.wrap_callback (fun (t:float) -> 
+              update_helper t state player !collid_objs !particles))
+        end
       end
   in update_helper 0. state player objs []
 
 let keydown evt =
   let () = match evt##keyCode with
-  | 38 | 32 -> pressed_keys.up <- true; print_endline  "Jump"
-  | 39 -> pressed_keys.right <- true; print_endline "Right"
-  | 37 -> pressed_keys.left <- true; print_endline "Left"
-  | 40 -> pressed_keys.down <- true; print_endline "Crouch"
+  | 38 | 32 | 87 -> pressed_keys.up <- true 
+  | 39 | 68 -> pressed_keys.right <- true 
+  | 37 | 65 -> pressed_keys.left <- true
+  | 40 | 83 -> pressed_keys.down <- true
+  | 66 -> pressed_keys.bbox <- (pressed_keys.bbox + 1) mod 2
   | _ -> ()
   in Js._true
 
 let keyup evt =
   let () = match evt##keyCode with
-  | 38 | 32 -> pressed_keys.up <- false
-  | 39 -> pressed_keys.right <- false
-  | 37 -> pressed_keys.left <- false
-  | 40 -> pressed_keys.down <- false
+  | 38 | 32 | 87 -> pressed_keys.up <- false
+  | 39 | 68 -> pressed_keys.right <- false
+  | 37 | 65 -> pressed_keys.left <- false
+  | 40 | 83 -> pressed_keys.down <- false
   | _ -> ()
   in Js._true
