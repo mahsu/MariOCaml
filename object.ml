@@ -2,9 +2,12 @@ open Sprite
 open Actors
 
 let friction = 0.8
-let gravity = 0.1
-let player_speed = 2.7
-let dampen_jump = 2.5
+let gravity = 0.15
+let max_y_vel = 4.
+let player_speed = 2.8
+let player_jump = 4.2
+let player_max_jump = -5.
+let dampen_jump = 3.
 let invuln = 60
 
 type xy = {
@@ -156,7 +159,9 @@ let update_player_keys (player : obj) (controls : controls) : unit =
     if (not player.jumping && player.grounded) then begin
       player.jumping <- true;
       player.grounded <- false;
-      player.vel.y <- player.vel.y -.(player.params.speed)
+      player.vel.y <- 
+        max (player.vel.y -.(player_jump +. abs_float player.vel.x *. 0.25))
+            player_max_jump
     end
   | CDown ->
     if (not player.jumping) then print_endline "crouch"
@@ -182,7 +187,8 @@ let update_player player keys context =
 
 let update_vel obj =
   if obj.grounded then obj.vel.y <- 0.
-  else if obj.params.has_gravity then obj.vel.y <- (obj.vel.y +. gravity)
+  else if obj.params.has_gravity then
+    obj.vel.y <- min (obj.vel.y +. gravity +. abs_float obj.vel.y *. 0.01) max_y_vel
 
 let update_pos obj =
   obj.pos.x <- (obj.vel.x +. obj.pos.x);
@@ -275,6 +281,8 @@ let process_collision dir c1 c2 context =
   | (Player(_,s1,o1), Enemy(typ,s2,o2), South)
   | (Enemy(typ,s2,o2),Player(_,s1,o1), North) ->
       o1.invuln <- invuln;
+      o1.jumping <- false;
+      o1.grounded <- true;
       begin match typ with
       | GKoopaShell | RKoopaShell ->
           let r2 = evolve_enemy o1.dir typ s2 o2 context in
@@ -282,9 +290,7 @@ let process_collision dir c1 c2 context =
           o1.pos.y <- o1.pos.y -. 5.;
           (None,r2)
       | _ ->
-          o1.jumping <- false;
           dec_health o2;
-          o1.grounded <- true;
           o1.invuln <- invuln;
           o1.vel.y <- ~-. dampen_jump;
           (None,(evolve_enemy o1.dir typ s2 o2 context)) 

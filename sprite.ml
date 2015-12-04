@@ -50,13 +50,13 @@ let make_small_player (typ, dir) =
     | Left -> begin match typ with
       | Standing -> setup_sprite "mario-small.png" ~bb_off:(3.,1.) ~bb_sz:(11.,15.) 1 0 (16.,16.) (0.,0.)
       | Jumping -> setup_sprite "mario-small.png" ~bb_off:(2.,1.) ~bb_sz:(13.,15.) 2 10 (16.,16.) (16.,16.)
-      | Running -> setup_sprite "mario-small.png" ~bb_off:(2.,1.) ~bb_sz:(12.,15.) 3 10 (16.,16.) (16.,0.)
+      | Running -> setup_sprite "mario-small.png" ~bb_off:(2.,1.) ~bb_sz:(12.,15.) 3 5 (16.,16.) (16.,0.)
       | Crouching -> setup_sprite "mario-small.png" ~bb_off:(1.,5.) ~bb_sz:(14.,10.) 1 0 (16.,16.) (0.,64.)
       end
     | Right -> begin match typ with
       | Standing -> setup_sprite "mario-small.png" ~bb_off:(1.,1.) ~bb_sz:(11.,15.) 1 0 (16.,16.) (0.,32.)
       | Jumping -> setup_sprite "mario-small.png" ~bb_off:(2.,1.) ~bb_sz:(13.,15.) 2 10 (16.,16.) (16.,48.)
-      | Running -> setup_sprite "mario-small.png" ~bb_off:(2.,1.) ~bb_sz:(12.,15.) 3 10 (16.,16.) (16.,32.)
+      | Running -> setup_sprite "mario-small.png" ~bb_off:(2.,1.) ~bb_sz:(12.,15.) 3 5 (16.,16.) (16.,32.)
       | Crouching -> setup_sprite "mario-small.png" ~bb_off:(1.,5.) ~bb_sz:(14.,10.) 1 0 (16.,16.) (0.,64.)
       end
 
@@ -79,8 +79,8 @@ let make_enemy (typ, dir) =
   match (typ, dir) with
       | (Goomba,_) -> setup_sprite "enemies.png" ~bb_off:(1.,1.) ~bb_sz:(14.,14.) 2 10 (16.,16.) (0.,128.)
       | (GKoopa,Left) -> setup_sprite "enemies.png" ~bb_off:(4.,8.) ~bb_sz:(11.,18.) 2 10 (16.,27.) (0.,69.)
-      | (GKoopa,Right) -> setup_sprite "enemies.png" ~bb_off:(1.,8.) ~bb_sz:(11.,18.) 2 10 (16.,27.) (32.,69.)
-      | (RKoopa,Left) -> setup_sprite "enemies.png" ~bb_off:(4.,8.) ~bb_sz:(11.,18.) 2 10 (16.,27.) (0.,5.)
+      | (GKoopa,Right) -> setup_sprite "enemies.png" ~bb_off:(1.,9.) ~bb_sz:(11.,17.) 2 10 (16.,27.) (32.,69.)
+      | (RKoopa,Left) -> setup_sprite "enemies.png" ~bb_off:(4.,9.) ~bb_sz:(11.,17.) 2 10 (16.,27.) (0.,5.)
       | (RKoopa,Right) -> setup_sprite "enemies.png" ~bb_off:(1.,8.) ~bb_sz:(11.,18.) 2 10 (16.,27.) (32.,5.)
       | (GKoopaShell,_) -> setup_sprite "enemies.png" ~bb_off:(2.,2.) ~bb_sz:(12.,13.) 4 10 (16.,16.) (0.,96.)
       | (RKoopaShell,_) -> setup_sprite "enemies.png" ~bb_off:(2.,2.) ~bb_sz:(12.,13.) 4 10 (16.,16.) (0.,32.)
