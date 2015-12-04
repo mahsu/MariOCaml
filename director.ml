@@ -23,6 +23,7 @@ type st = {
   bgd: sprite;
   ctx: Dom_html.canvasRenderingContext2D Js.t;
   vpt: viewport;
+  map: float;
   mutable score: int;
   mutable coins: int;
   mutable multiplier: int;
@@ -49,7 +50,18 @@ let game_over state =
   state.ctx##rect (0.,0.,512.,512.);
   state.ctx##fillStyle <- (Js.string "black");
   state.ctx##fill ();
-  state.ctx##fillText (Js.string ("Game Over. You win!"), 240., 128.);
+  state.ctx##fillStyle <- (Js.string "white");
+  state.ctx##font <- (Js.string "20px 'Press Start 2P'");
+  state.ctx##fillText (Js.string ("You win!"), 180., 128.);
+  failwith "Game over."
+
+let game_loss state =
+  state.ctx##rect (0.,0.,512.,512.);
+  state.ctx##fillStyle <- (Js.string "black");
+  state.ctx##fill ();
+  state.ctx##fillStyle <- (Js.string "white");
+  state.ctx##font <- (Js.string "20px 'Press Start 2P'");
+  state.ctx##fillText (Js.string ("GAME OVER. You lose!"), 60., 128.);
   failwith "Game over."
 
 let calc_fps t0 t1 =
@@ -177,12 +189,17 @@ let process_collision dir c1 c2  state =
           (Some spawned_item, Some updated_block)
       | Brick -> if t1 = BigM then (collide_block dir o1; dec_health o2; (None, None))
                  else (collide_block dir o1; (None,None))
+      | Panel -> game_over state
       | _ -> collide_block dir o1; (None,None)
       end
   | (Player(_,s1,o1), Block(t,s2,o2), _) ->
-    begin match dir with
-    | South -> state.multiplier <- 0 ; collide_block dir o1; (None, None)
-    | _ -> collide_block dir o1; (None, None)
+    begin match t with
+    | Panel -> game_over state
+    | _ ->
+        begin match dir with
+        | South -> state.multiplier <- 0 ; collide_block dir o1; (None, None)
+        | _ -> collide_block dir o1; (None, None)
+        end
     end
   | (_, _, _) -> (None,None)
 
@@ -232,7 +249,7 @@ let update_collidable state (collid:Object.collidable) all_collids =
   let spr = Object.get_sprite collid in
   if not obj.kill && (in_viewport state.vpt obj.pos || is_player collid) then begin
     obj.grounded <- false;
-    Object.process_obj obj;
+    Object.process_obj obj state.map;
     (* Run collision detection if moving object*)
     let evolved = check_collisions collid state in
     (* Render and update animation *)
@@ -292,6 +309,7 @@ let update_loop canvas objs =
       score = 0;
       coins = 0;
       multiplier = 1;
+      map = float_of_int canvas##height +. 500.;
       game_over = false;
   } in
   let rec update_helper time state player objs parts =
@@ -312,13 +330,14 @@ let update_loop canvas objs =
         Draw.draw_bgd state.bgd (float_of_int (vpos_x_int mod bgd_width));
 
         let player = run_update_collid state player objs in
-        let state = {state with vpt = Viewport.update state.vpt (get_obj player).pos} in
+        if (get_obj player).kill = true then game_loss state else
+        (let state = {state with vpt = Viewport.update state.vpt (get_obj player).pos} in
         List.iter (fun obj -> ignore (run_update_collid state obj objs)) objs ;
         List.iter (fun part -> run_update_particle state part) parts;
         Draw.fps canvas fps;
         Draw.hud canvas state.score state.coins;
         ignore Dom_html.window##requestAnimationFrame(
-        Js.wrap_callback (fun (t:float) -> update_helper t state player !collid_objs !particles))
+        Js.wrap_callback (fun (t:float) -> update_helper t state player !collid_objs !particles)))
       end
   in update_helper 0. state player objs []
 

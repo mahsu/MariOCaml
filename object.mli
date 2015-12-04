@@ -61,7 +61,7 @@ val normalize_pos : xy -> Sprite.sprite_params -> Sprite.sprite_params -> unit
 (* Destroys the object, returning a list of destruction effect objects *)
 val kill : collidable -> Dom_html.canvasRenderingContext2D Js.t ->  particle list
 
-val process_obj : obj -> unit
+val process_obj : obj -> float -> unit
 
 val update_player : obj -> Actors.controls list -> Dom_html.canvasRenderingContext2D Js.t -> (pl_typ * sprite) option
 
