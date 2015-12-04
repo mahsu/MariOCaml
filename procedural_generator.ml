@@ -141,15 +141,15 @@ let rec generate_enemies (blockw: float) (blockh: float) (cbx: float)
     generate_enemies blockw blockh cbx (cby+.1.) acc
   else
     let prob = Random.int 100 in
-    let block_prob = 3 in
-      if(prob < block_prob) then
+    let enem_prob = 3 in
+      if(prob < enem_prob) then
         let enemy = [(prob,(cbx,cby))] in
         enemy@(generate_enemies blockw blockh cbx (cby+.1.) acc)
       else generate_enemies blockw blockh cbx (cby+.1.) acc
 
 (*Generates an obj_coord list (typ, coordinates) of blocks to be placed.*)
 let rec generate_block_locs (blockw: float) (blockh: float) (cbx: float)
-                    (cby: float) (acc: obj_coord list) =
+                    (cby: float) (acc: obj_coord list) : obj_coord list =
   if(cbx > blockw) then acc
   else if (cby > (blockh-. 1.)) then
     generate_block_locs blockw blockh (cbx+.1.) 0. acc
@@ -165,10 +165,25 @@ let rec generate_block_locs (blockw: float) (blockh: float) (cbx: float)
         generate_block_locs blockw blockh cbx (cby+.1.) called_acc
       else generate_block_locs blockw blockh cbx (cby+.1.) acc
 
+let rec generate_items (blockw: float) (blockh: float) (cbx:float)
+                       (cby: float) (acc: obj_coord list) : obj_coord list =
+  if(cbx > blockw) then []
+  else if (cby > (blockh -. 1.)) then
+    generate_items blockw blockh (cbx +. 1.) 0. acc
+  else if (mem_loc (cbx, cby) acc) then
+    generate_items blockw blockh cbx (cby +. 1.) acc
+  else
+    let prob = Random.int 100 in
+    let item_prob = 10 in
+      if(prob < item_prob) then
+        let item = [(0,(cbx,cby))] in
+        item@(generate_items blockw blockh cbx (cby +. 1.) acc)
+      else generate_items blockw blockh cbx (cby +. 1.) acc
+
 (*Generates the list of brick locations needed to display the ground.
 * 1/10 chance that a ground block is skipped each call.*)
 let rec generate_ground (blockw:float) (blockh:float) (inc:float)
-                        (acc: obj_coord list) =
+                        (acc: obj_coord list) : obj_coord list =
   if(inc > blockw) then acc
   else
     if(inc > 10.) then
@@ -182,7 +197,7 @@ let rec generate_ground (blockw:float) (blockh:float) (inc:float)
 (*Converts the obj_coord list called by generate_block_locs to a list of objects
 * with the coordinates given from the obj_coord list. *)
 let rec convert_to_block_obj (lst:obj_coord list)
-  (context:Dom_html.canvasRenderingContext2D Js.t) :collidable list =
+  (context:Dom_html.canvasRenderingContext2D Js.t) : collidable list =
   match lst with
   |[] -> []
   |h::t ->
@@ -201,6 +216,15 @@ let rec convert_to_enemy_obj (lst:obj_coord list)
     let ob = Object.spawn (SEnemy senemy_typ) context (snd h) in
     [ob]@(convert_to_enemy_obj t context)
 
+let rec convert_to_item_obj (lst:obj_coord list)
+            (context:Dom_html.canvasRenderingContext2D Js.t) : collidable list =
+  match lst with
+  |[] -> []
+  |h::t ->
+    let sitem_typ = Coin in
+    let ob = Object.spawn (SItem sitem_typ) context (snd h) in
+    [ob]@(convert_to_item_obj t context)
+
 (*Procedurally generates a map given canvas width, height and context*)
 let generate_helper (blockw:float) (blockh:float) (cx:float) (cy:float)
             (context:Dom_html.canvasRenderingContext2D Js.t) : collidable list =
@@ -215,7 +239,10 @@ let generate_helper (blockw:float) (blockh:float) (cx:float) (cy:float)
   let all_blocks = obj_converted_block_locs@obj_converted_ground_blocks in
   let enemy_locs = generate_enemies blockw blockh 0. 0. block_locations in
   let obj_converted_enemies = convert_to_enemy_obj enemy_locs context in
-  all_blocks@obj_converted_enemies
+  let all_taken = block_locations@enemy_locs in
+  let item_locs = generate_items blockw blockh 0. 0. all_taken in
+  let obj_converted_items = convert_to_item_obj item_locs context in
+  all_blocks@obj_converted_enemies@obj_converted_items
 
 (*Main function called to procedurally generate the level map.*)
 let generate (blockw:float) (blockh:float)
