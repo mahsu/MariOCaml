@@ -46,6 +46,7 @@ let choose_sblock_typ (typ:int) : block_typ =
   |1 -> UnBBlock
   |2 -> Cloud
   |3 -> QBlock Mushroom
+  |4 -> Ground
   |_ -> failwith "Shouldn't reach here"
 
 (*Optimizes lst such that there are no two items in the list that have the same
@@ -142,8 +143,8 @@ let rec generate_enemies (blockw: float) (blockh: float) (cbx: float)
   else
     let prob = Random.int 100 in
     let enem_prob = 3 in
-      if(prob < enem_prob) then
-        let enemy = [(prob,(cbx,cby))] in
+      if(prob < enem_prob && (blockh -. 1. = cby)) then
+        let enemy = [(prob,(cbx*.16.,cby*.16.))] in
         enemy@(generate_enemies blockw blockh cbx (cby+.1.) acc)
       else generate_enemies blockw blockh cbx (cby+.1.) acc
 
@@ -177,14 +178,14 @@ let rec generate_items (blockw: float) (blockh: float) (cbx:float)
     let prob = Random.int 100 in
     let item_prob = 10 in
       if(prob < item_prob) then
-        let item = [(0,(cbx,cby))] in
+        let item = [(0,(cbx*.16.,cby*.16.))] in
         item@(generate_items blockw blockh cbx (cby +. 1.) acc)
       else generate_items blockw blockh cbx (cby +. 1.) acc
 
 let generate_panel (context:Dom_html.canvasRenderingContext2D Js.t)
                    (blockw: float) (blockh: float) : collidable =
   let ob = Object.spawn (SBlock Panel) context
-    (blockw -. (5.*.16.), blockh/.2.) in
+    (1600., (blockh *. 16.)/.2.) in
   ob
 
 (*Generates the list of brick locations needed to display the ground.
@@ -195,10 +196,10 @@ let rec generate_ground (blockw:float) (blockh:float) (inc:float)
   else
     if(inc > 10.) then
       let skip = Random.int 10 in
-      let newacc = acc@[(1, (inc*. 16.,blockh *. 16.))] in
+      let newacc = acc@[(4, (inc*. 16.,blockh *. 16.))] in
       if (skip = 7) then generate_ground blockw blockh (inc +. 1.) acc
       else  generate_ground blockw blockh (inc +. 1.) newacc
-    else let newacc = acc@[(1, (inc*. 16.,blockh *. 16.))] in
+    else let newacc = acc@[(4, (inc*. 16.,blockh *. 16.))] in
       generate_ground blockw blockh (inc +. 1.) newacc
 
 (*Converts the obj_coord list called by generate_block_locs to a list of objects

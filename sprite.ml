@@ -102,6 +102,7 @@ let make_block = function
   | UnBBlock -> setup_sprite "blocks.png" 1 0 (16.,16.) (0.,48.)
   | Cloud -> setup_sprite "blocks.png" 1 0 (16., 16.) (0., 64.)
   | Panel -> setup_sprite "panel.png" 3 15 (26., 26.) (0., 0.)
+  | Ground -> setup_sprite "ground.png" 1 0 (16., 16.) (0., 32.)
 
 let make_particle = function
   | GoombaSquish -> setup_sprite "enemies.png" 1 0 (16.,16.) (0.,144.)
@@ -111,11 +112,11 @@ let make_particle = function
   | Score200 -> setup_sprite "score.png" 1 0 (12.,9.) (0.,9.)
   | Score400 -> setup_sprite "score.png" 1 0 (12.,9.) (0.,18.)
   | Score800 -> setup_sprite "score.png" 1 0 (12.,9.) (0.,27.)
-  | Score1000 -> setup_sprite "score.png" 1 0 (14.,9.) (13.,0.) 
+  | Score1000 -> setup_sprite "score.png" 1 0 (14.,9.) (13.,0.)
   | Score2000 -> setup_sprite "score.png" 1 0 (14.,9.) (13.,9.)
   | Score4000 -> setup_sprite "score.png" 1 0 (14.,9.) (13.,18.)
   | Score8000 -> setup_sprite "score.png" 1 0 (14.,9.) (13.,27.)
-  
+
 let make_player pt spr_type =
   match pt with
   | BigM -> make_big_player spr_type
