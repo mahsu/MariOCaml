@@ -141,7 +141,7 @@ let rec generate_enemies (blockw: float) (blockh: float) (cbx: float)
   else if(mem_loc (cbx, cby) acc || cby = 0.) then
     generate_enemies blockw blockh cbx (cby+.1.) acc
   else
-    let prob = Random.int 100 in
+    let prob = Random.int 10 in
     let enem_prob = 3 in
       if(prob < enem_prob && (blockh -. 1. = cby)) then
         let enemy = [(prob,(cbx*.16.,cby*.16.))] in
@@ -185,7 +185,7 @@ let rec generate_items (blockw: float) (blockh: float) (cbx:float)
 let generate_panel (context:Dom_html.canvasRenderingContext2D Js.t)
                    (blockw: float) (blockh: float) : collidable =
   let ob = Object.spawn (SBlock Panel) context
-    (1600., (blockh *. 16.)/.2.) in
+    ((blockw*.16.)-.100., (blockh *. 16.)/.2.) in
   ob
 
 (*Generates the list of brick locations needed to display the ground.
