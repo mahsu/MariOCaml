@@ -29,8 +29,6 @@ let load _ =
   let _ = Html.addEventListener Html.document Html.Event.keyup (Html.handler Director.keyup) Js._true in
   Pg.init ();
   Director.update_loop canvas (Pg.generate level_width level_height context);
-  let panel = Object.spawn (SBlock Panel) context (300., 160.) in
-  Director.update_loop canvas (panel::(Pg.generate level_width level_height context));
   ()
 
 let inc_counter _ =

@@ -168,6 +168,11 @@ let process_collision dir c1 c2  state =
         dec_health o2;
         reverse_left_right o1;
         (None,None)
+    | (RKoopaShell, QBlock typ) | (GKoopaShell, QBlock typ) ->
+        ( let updated_block = evolve_block o2 context in
+        let spawned_item = spawn_above o1.dir o2 typ context in
+        collide_block dir o1; rev_dir o1 t s1;
+        (Some updated_block, Some spawned_item) )
     | (_,_) ->
         rev_dir o1 t s1;
       (None,None)
