@@ -10,7 +10,7 @@ val choose_sblock_typ : int -> block_typ
 val convert_to_block_obj : obj_coord list -> Dom_html.canvasRenderingContext2D Js.t -> collidable list
 
 (* Procedurally generates a new map of default size*)
-val generate : float -> float -> Dom_html.canvasRenderingContext2D Js.t -> collidable list
+val generate : float -> float -> Dom_html.canvasRenderingContext2D Js.t -> collidable * collidable list
 
 val generate_enemies : float -> float -> float -> float -> obj_coord list -> obj_coord list
 
