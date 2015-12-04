@@ -171,8 +171,14 @@ let update_player_keys (player : obj) (controls : controls) : unit =
             player_max_jump
     end
   | CDown ->
-    if (not player.jumping && player.grounded) then 
+    if (not player.jumping && player.grounded) then
       player.crouch <- true
+
+let normalize_pos pos (p1:Sprite.sprite_params) (p2:Sprite.sprite_params) =
+    let (box1,boy1) = p1.bbox_offset and (box2,boy2) = p2.bbox_offset in
+    let (bw1,bh1) = p1.bbox_size and (bw2,bh2) = p2.bbox_size in
+    pos.x <- pos.x -. (bw2 +. box2) +. (bw1 +. box1);
+    pos.y <- pos.y -. (bh2 +. boy2) +. (bh1 +. boy1)
 
 let update_player player keys context =
   let prev_jumping = player.jumping in
@@ -217,12 +223,6 @@ let normalize_origin pos (spr:Sprite.sprite) =
   let (box,boy) = p.bbox_offset and (_,bh) = p.bbox_size in
   pos.x <- pos.x -. box;
   pos.y <- pos.y -. (boy +. bh)
-
-let normalize_pos pos (p1:Sprite.sprite_params) (p2:Sprite.sprite_params) =
-    let (box1,boy1) = p1.bbox_offset and (box2,boy2) = p2.bbox_offset in
-    let (bw1,bh1) = p1.bbox_size and (bw2,bh2) = p2.bbox_size in
-    pos.x <- pos.x -. (bw2 +. box2) +. (bw1 +. box1);
-    pos.y <- pos.y -. (bh2 +. boy2) +. (bh1 +. boy1)
 
 let collide_block ?check_x:(check_x=true) dir obj =
   match dir with

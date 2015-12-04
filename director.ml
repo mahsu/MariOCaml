@@ -17,6 +17,7 @@ type st = {
   mutable score: int;
   mutable coins: int;
   mutable multiplier: int;
+  mutable game_over: bool;
 }
 
 let pressed_keys = {
@@ -29,8 +30,11 @@ let pressed_keys = {
 let collid_objs = ref []
 let last_time = ref 0.
 
-let end_game () =
-  Dom_html.window##alert (Js.string "Game over!");
+let game_over state =
+  state.ctx##rect (0.,0.,512.,512.);
+  state.ctx##fillStyle <- (Js.string "black");
+  state.ctx##fill ();
+  state.ctx##fillText (Js.string ("Game Over. You win!"), 240., 128.);
   failwith "Game over."
 
 let calc_fps t0 t1 =
@@ -111,10 +115,13 @@ let process_collision dir c1 c2  state =
   | (Player(_,s1,o1), Item(t2,s2,o2), _)
   | (Item(t2,s2,o2), Player(_,s1,o1), _) ->
       begin match t2 with
-      | Mushroom -> dec_health o2; o1.health <- o1.health + 1; (None, None)
+      | Mushroom -> dec_health o2; o1.health <- o1.health + 1;
+                    o1.vel.x <- 0.; o1.vel.y <- 0.;
+                    update_score state 1000; (None, None)
       | Coin -> state.coins <- state.coins + 1; dec_health o2;
+          update_score state 100;
           Printf.printf "Coins: %d \n" state.coins; (None, None)
-      | _ -> dec_health o2; (None, None)
+      | _ -> dec_health o2; update_score state 1000; (None, None)
       end
   | (Enemy(t1,s1,o1), Enemy(t2,s2,o2), dir) ->
       col_enemy_enemy t1 s1 o1 t2 s2 o2 dir
@@ -138,14 +145,15 @@ let process_collision dir c1 c2  state =
   | (Item(_,s1,o1), Block(typ2,s2,o2), _) ->
       collide_block dir o1;
       (None, None)
-  | (Player(_,s1,o1), Block(t,s2,o2), North) ->
+  | (Player(t1,s1,o1), Block(t,s2,o2), North) ->
       begin match t with
       | QBlock typ ->
           let updated_block = evolve_block o2 context in
           let spawned_item = spawn_above o1.dir o2 typ context in
           collide_block dir o1;
           (Some spawned_item, Some updated_block)
-      | Brick -> collide_block dir o1; dec_health o2; (None, None)
+      | Brick -> if t1 = BigM then (collide_block dir o1; dec_health o2; (None, None))
+                 else (collide_block dir o1; (None,None))
       | _ -> collide_block dir o1; (None,None)
       end
   | (Player(_,s1,o1), Block(t,s2,o2), _) ->
@@ -219,7 +227,7 @@ let run_update state collid all_collids =
       o.crouch <- false;
       let player = begin match Object.update_player o keys state.ctx with
         | None -> p
-        | Some (new_typ, new_spr) -> Player(new_typ,new_spr,o)
+        | Some (new_typ, new_spr) -> Object.normalize_pos o.pos s.params new_spr.params; Player(new_typ,new_spr,o)
       end in
       let evolved = update_collidable state player all_collids in
       collid_objs := !collid_objs @ evolved;
@@ -243,9 +251,11 @@ let update_loop canvas objs =
       score = 0;
       coins = 0;
       multiplier = 1;
+      game_over = false;
   } in
   let rec update_helper time state player objs  =
-      collid_objs := [];
+      if state.game_over = true then game_over state else
+      ( collid_objs := [];
 
       let fps = calc_fps !last_time time in
       last_time := time;
@@ -264,10 +274,10 @@ let update_loop canvas objs =
       List.iter (fun obj -> ignore (run_update state obj objs)) objs ;
 
       Draw.fps canvas fps;
+      Draw.hud canvas state.score state.coins;
       ignore Dom_html.window##requestAnimationFrame(
-          Js.wrap_callback (fun (t:float) -> update_helper t state player !collid_objs))
-
-  in update_helper 0. state player objs
+      Js.wrap_callback (fun (t:float) -> update_helper t state player !collid_objs)))
+      in update_helper 0. state player objs
 
 let keydown evt =
   let () = match evt##keyCode with
