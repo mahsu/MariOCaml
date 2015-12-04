@@ -100,6 +100,7 @@ let make_block = function
   | QBlockUsed -> setup_sprite "blocks.png" 1 0 (16.,16.) (0.,32.)
   | UnBBlock -> setup_sprite "blocks.png" 1 0 (16.,16.) (0.,48.)
   | Cloud -> setup_sprite "blocks.png" 1 0 (16., 16.) (0., 64.)
+  | Panel -> setup_sprite "panel.png" 4 20 (26., 26.) (0., 0.)
 
 let make_particle = function
   | GoombaSquish -> setup_sprite "enemies.png" 1 0 (16.,16.) (0.,144.)
