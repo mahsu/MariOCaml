@@ -198,6 +198,7 @@ let run_update state collid all_collids =
   match collid with
   | Player(t,s,o) as p ->
       let keys = translate_keys () in
+      o.crouch <- false;
       let player = begin match Object.update_player o keys state.ctx with
         | None -> p
         | Some (new_typ, new_spr) -> Player(new_typ,new_spr,o)

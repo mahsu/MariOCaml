@@ -29,6 +29,7 @@ type obj = {
   mutable invuln: int;
   mutable kill: bool;
   mutable health: int;
+  mutable crouch: bool;
 }
 
 type collidable =
