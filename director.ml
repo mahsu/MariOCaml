@@ -309,13 +309,11 @@ let run_update_particle state part =
 
 (*update_loop is constantly being called to check for collisions and to
  *update each of the objects in the game.*)
-let update_loop canvas pair =
+let update_loop canvas (player,objs) map_dim =
   let ctx = canvas##getContext (Dom_html._2d_) in
   let cwidth = float_of_int canvas##width in
   let cheight = float_of_int canvas##height in
-  let viewport = Viewport.make (cwidth,cheight) (cwidth +. 1600.,cheight) in
-  let player = fst pair in
-  let objs = snd pair in
+  let viewport = Viewport.make (cwidth,cheight) map_dim in
   let state = {
       bgd = Sprite.make_bgd ctx;
       vpt = Viewport.update viewport (get_obj player).pos;
@@ -323,7 +321,7 @@ let update_loop canvas pair =
       score = 0;
       coins = 0;
       multiplier = 1;
-      map = float_of_int canvas##height +. 500.;
+      map = snd map_dim;
       game_over = false;
   } in
   let rec update_helper time state player objs parts =

@@ -254,9 +254,11 @@ let generate_helper (blockw:float) (blockh:float) (cx:float) (cy:float)
   all_blocks@obj_converted_enemies@obj_converted_items@[obj_panel]
 
 (*Main function called to procedurally generate the level map.*)
-let generate (blockw:float) (blockh:float)
+let generate (w:float) (h:float)
                     (context:Dom_html.canvasRenderingContext2D Js.t) :
                     (collidable * collidable list) =
+  let blockw = w/.16. in
+  let blockh = (h/.16.) -. 1. in
   let collide_list = generate_helper blockw blockh 0. 0. context in
   let player = Object.spawn (SPlayer(SmallM,Standing)) context (100.,224.) in
   (player, collide_list)

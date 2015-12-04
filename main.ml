@@ -6,8 +6,8 @@ module Pg = Procedural_generator
 
 let loadCount =  ref 0
 let imgsToLoad = 4
-let level_width = 1600./.16.
-let level_height = (256./.16.) -. 1.
+let level_width = 2500.
+let level_height = 256.
 
 let get_width () = level_width
 
@@ -28,7 +28,7 @@ let load _ =
   let _ = Html.addEventListener Html.document Html.Event.keydown (Html.handler Director.keydown) Js._true in
   let _ = Html.addEventListener Html.document Html.Event.keyup (Html.handler Director.keyup) Js._true in
   Pg.init ();
-  Director.update_loop canvas (Pg.generate level_width level_height context);
+  Director.update_loop canvas (Pg.generate level_width level_height context) (level_width,level_height);
   ()
 
 let inc_counter _ =
