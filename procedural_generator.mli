@@ -1,5 +1,4 @@
 open Object
-open Map
 open Actors
 
 type obj_coord
@@ -15,7 +14,7 @@ val convert_to_block_obj : obj_coord list -> Dom_html.canvasRenderingContext2D J
 (* Procedurally generates a new map of default size*)
 val generate : float -> float -> Dom_html.canvasRenderingContext2D Js.t -> collidable list
 
-val generate_enemies : unit -> collidable list
+val generate_enemies : float -> float -> float -> float -> obj_coord list -> obj_coord list
 
 val generate_helper : float -> float -> float -> float -> Dom_html.canvasRenderingContext2D Js.t -> collidable list
 

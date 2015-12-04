@@ -7,7 +7,7 @@ open Object
 * 3 -> Item object
 **)
 
-(*|0 |1-> Plane of 3 blocks
+(* |0 |1-> Plane of 3 blocks
  |2 |3 -> Cross of blocks
  |4-> Wall of 3 blocks
  |5 |6-> Single block
@@ -130,8 +130,20 @@ let choose_block_pattern blockw blockh cbx cby prob =
     |5 -> [(3,(cbx, cby))]
     |_ -> failwith "Shouldn't reach here"
 
-let rec generate_enemies () =
-  []
+let rec generate_enemies (blockw: float) (blockh: float) (cbx: float)
+                    (cby: float) (acc: obj_coord list) =
+  if(cbx > blockw) then []
+  else if (cby > (blockh-. 1.)) then
+    generate_enemies blockw blockh (cbx +. 1.) 0. acc
+  else if(mem_loc (cbx, cby) acc) then
+    generate_enemies blockw blockh cbx (cby+.1.) acc
+  else
+    let prob = Random.int 100 in
+    let block_prob = 3 in
+      if(prob < block_prob) then
+        let enemy = [(prob,(cbx,cby))] in
+        enemy@(generate_enemies blockw blockh cbx (cby+.1.) acc)
+      else generate_enemies blockw blockh cbx (cby+.1.) acc
 
 let rec generate_block_locs (blockw: float) (blockh: float) (cbx: float)
                     (cby: float) (acc: obj_coord list) =
@@ -172,15 +184,26 @@ let rec convert_to_block_obj lst context =
     let ob = Object.spawn (SBlock sblock_typ) context (snd h) in
     [ob]@(convert_to_block_obj t context)
 
+let rec convert_to_enemy_obj lst context =
+  match lst with
+  |[] -> []
+  |h::t ->
+    let senemy_typ = choose_enemy_typ (fst h) in
+    let ob = Object.spawn (SEnemy senemy_typ) context (snd h) in
+    [ob]@(convert_to_enemy_obj t context)
+
 (*Procedurally generates a map given canvas width, height and context*)
 let generate_helper blockw blockh cx cy context =
-  let block_locs = generate_block_locs blockw blockh 0. 20. [] in
+  let block_locs = generate_block_locs blockw blockh 0. 0. [] in
   let converted_block_locs = convert_list block_locs in
   let obj_converted_block_locs = convert_to_block_obj converted_block_locs context in
   let ground_blocks = generate_ground blockw blockh 0. [] in
   let obj_converted_ground_blocks = convert_to_block_obj ground_blocks context in
-  obj_converted_block_locs@obj_converted_ground_blocks
-
+  let block_locations = block_locs@ground_blocks in
+  let all_blocks = obj_converted_block_locs@obj_converted_ground_blocks in
+  let enemy_locs = generate_enemies blockw blockh 0. 0. block_locations in
+  let obj_converted_enemies = convert_to_enemy_obj enemy_locs context in
+  all_blocks@obj_converted_enemies
 
   (*  let brick1 = Object.spawn (SBlock Brick) context (200.0,200.0) in*)
 

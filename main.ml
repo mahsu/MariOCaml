@@ -12,6 +12,7 @@ let level_height = (256./.16.) -. 1.
 let get_width () = level_width
 
 let load _ =
+  Random.self_init();
   let canvas_id = "canvas" in
   let canvas =
     Js.Opt.get
@@ -28,6 +29,8 @@ let load _ =
   let _ = Html.addEventListener Html.document Html.Event.keyup (Html.handler Director.keyup) Js._true in
   Pg.init ();
   Director.update_loop canvas (Pg.generate level_width level_height context);
+  let panel = Object.spawn (SBlock Panel) context (300., 160.) in
+  Director.update_loop canvas (panel::(Pg.generate level_width level_height context));
   ()
 
 let inc_counter _ =
