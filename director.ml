@@ -184,6 +184,7 @@ let process_collision dir c1 c2  state =
           (Some spawned_item, Some updated_block)
       | Brick -> if t1 = BigM then (collide_block dir o1; dec_health o2; (None, None))
                  else (collide_block dir o1; (None,None))
+      | Panel -> game_over state
       | _ -> collide_block dir o1; (None,None)
       end
   | (Player(_,s1,o1), Block(t,s2,o2), _) ->
