@@ -257,6 +257,10 @@ let evolve_block obj context =
   let (new_spr,new_obj) = make (SBlock QBlockUsed) context (obj.pos.x, obj.pos.y) in
   Block(QBlockUsed,new_spr,new_obj)
 
+let evolve_player (spr : Sprite.sprite) obj context =
+  let (new_spr,new_obj) = make (SPlayer (BigM,Standing)) context (obj.pos.x, obj.pos.y) in
+  normalize_pos new_obj.pos spr.params new_spr.params ;
+  Player(BigM,new_spr,new_obj)
 
 let spawn_above player_dir obj typ context =
   let item = spawn (SItem typ) context (obj.pos.x, obj.pos.y) in
@@ -287,7 +291,7 @@ let process_collision dir c1 c2 context =
           o1.grounded <- true;
           o1.invuln <- invuln;
           o1.vel.y <- ~-. dampen_jump;
-          (None,(evolve_enemy o1.dir typ s2 o2 context)) 
+          (None,(evolve_enemy o1.dir typ s2 o2 context))
       end
   | (Player(_,s1,o1), Enemy(t2,s2,o2), _)
   | (Enemy(t2,s2,o2), Player(_,s1,o1), _) ->
@@ -301,17 +305,20 @@ let process_collision dir c1 c2 context =
       end
   | (Player(_,s1,o1), Item(t2,s2,o2), _)
   | (Item(t2,s2,o2), Player(_,s1,o1), _) ->
-      dec_health o2; (None,None)(*& stuff happens to player*)
+      begin match t2 with
+      | Mushroom -> dec_health o2; o1.health <- o1.health + 1; (None, None)
+      | _ -> dec_health o2; (None, None)
+      end
   | (Enemy(t1,s1,o1), Enemy(t2,s2,o2), dir) ->
       begin match (t1, t2) with
       | (GKoopaShell, GKoopaShell)
       | (GKoopaShell, RKoopaShell)
       | (RKoopaShell, RKoopaShell)
-      | (RKoopaShell, GKoopaShell) -> 
+      | (RKoopaShell, GKoopaShell) ->
           dec_health o1;
           dec_health o2;
           (None,None)
-      | (RKoopaShell, _) | (GKoopaShell, _) -> if o1.vel.x = 0. then 
+      | (RKoopaShell, _) | (GKoopaShell, _) -> if o1.vel.x = 0. then
           (rev_dir o2 t2 s2;
           (None,None) )
           else ( dec_health o2; (None,None) )
@@ -321,7 +328,7 @@ let process_collision dir c1 c2 context =
           else ( dec_health o1; (None,None) )
       | (_, _) ->
           begin match dir with
-          | West | East -> 
+          | West | East ->
               rev_dir o1 t1 s1;
               rev_dir o2 t2 s2;
               (None,None)
@@ -331,7 +338,7 @@ let process_collision dir c1 c2 context =
   | (Enemy(t,s1,o1), Block(typ2,s2,o2), East)
   | (Enemy(t,s1,o1), Block(typ2,s2,o2), West)->
     begin match (t,typ2) with
-    | (RKoopaShell, Brick) | (GKoopaShell, Brick) -> 
+    | (RKoopaShell, Brick) | (GKoopaShell, Brick) ->
         dec_health o2;
         reverse_left_right o1;
         (None,None)
