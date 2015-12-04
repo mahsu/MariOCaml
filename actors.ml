@@ -42,6 +42,14 @@ type part_typ =
   | GoombaSquish
   | BrickChunkL
   | BrickChunkR
+  | Score100
+  | Score200
+  | Score400
+  | Score800
+  | Score1000
+  | Score2000
+  | Score4000
+  | Score8000
 
 type spawn_typ =
   | SPlayer of pl_typ * player_typ
