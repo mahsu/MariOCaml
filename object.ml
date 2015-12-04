@@ -16,7 +16,6 @@ type xy = {
   mutable y: float;
 }
 
-
 type aabb = {
   center: xy;
   half: xy;
@@ -50,6 +49,7 @@ type collidable =
   | Block of block_typ * sprite * obj
 
 
+(*setup_obj is used to set gravity and speed, with default values true and 1.*)
 let setup_obj ?anim:(anim=true) ?g:(has_gravity=true) ?spd:(speed=1.) () =
   {
     has_gravity;
@@ -64,6 +64,7 @@ let set_vel_to_speed obj =
   | Left -> obj.vel.x <- ~-.speed
   | Right -> obj.vel.x <- speed
 
+(*The following make functions all set the objects' has_gravity and speed.*)
 let make_player () = setup_obj ~spd:player_speed ()
 
 let make_item = function
@@ -92,10 +93,12 @@ let make_type = function
   | SItem t -> make_item t
   | SBlock t -> make_block t
 
+(*Used in object creation and to compare two objects.*)
 let new_id () =
   id_counter := !id_counter + 1;
   !id_counter
 
+(*Used to return a new sprite and object of a created spawnable object*)
 let make ?id:(id=None) ?dir:(dir=Left) spawnable context (posx, posy) =
   let spr = Sprite.make spawnable dir context in
   let params = make_type spawnable in
@@ -118,6 +121,7 @@ let make ?id:(id=None) ?dir:(dir=Left) spawnable context (posx, posy) =
   } in
   (spr,obj)
 
+(*spawn returns a new collidable*)
 let spawn spawnable context (posx, posy) =
   let (spr,obj) = make spawnable context (posx, posy) in
   match spawnable with
@@ -128,7 +132,7 @@ let spawn spawnable context (posx, posy) =
   | SItem t -> Item(t,spr,obj)
   | SBlock t -> Block(t,spr,obj)
 
-
+(*Helper methods for getting sprites and objects from their collidables*)
 let get_sprite = function
   | Player (_,s,_) | Enemy (_,s, _) | Item (_,s, _) | Block (_,s, _)  -> s
 
@@ -145,6 +149,7 @@ let is_enemy = function
 
 let equals col1 col2 = (get_obj col1).id = (get_obj col2).id
 
+(*Matches the controls being used and updates each of the player's params.*)
 let update_player_keys (player : obj) (controls : controls) : unit =
   let lr_acc = player.vel.x *. 0.2 in
   match controls with
@@ -172,12 +177,17 @@ let update_player_keys (player : obj) (controls : controls) : unit =
     if (not player.jumping && player.grounded) then
       player.crouch <- true
 
+(*Used for sprite changing. If sprites change to different dimensions as a result
+ *of some action, the new sprite must be normalized so that things aren't
+ *jumpy*)
 let normalize_pos pos (p1:Sprite.sprite_params) (p2:Sprite.sprite_params) =
     let (box1,boy1) = p1.bbox_offset and (box2,boy2) = p2.bbox_offset in
     let (bw1,bh1) = p1.bbox_size and (bw2,bh2) = p2.bbox_size in
     pos.x <- pos.x -. (bw2 +. box2) +. (bw1 +. box1);
     pos.y <- pos.y -. (bh2 +. boy2) +. (bh1 +. boy1)
 
+(*Update plyaer is constantly being called to check for if big or small
+ *Mario sprites/collidables should be used.*)
 let update_player player keys context =
   let prev_jumping = player.jumping in
   let prev_dir = player.dir and prev_vx = abs_float player.vel.x in
@@ -199,7 +209,7 @@ let update_player player keys context =
   then Some (pl_typ, (Sprite.make (SPlayer(pl_typ,Standing)) player.dir context))
   else None
 
-
+(*The following two helper methods update velocity and position of the player*)
 let update_vel obj =
   if obj.grounded then obj.vel.y <- 0.
   else if obj.params.has_gravity then
@@ -231,15 +241,20 @@ let collide_block ?check_x:(check_x=true) dir obj =
       obj.jumping <- false;
   | East | West -> if check_x then obj.vel.x <- 0.
 
+(*Simple helper method that reverses the direction in question*)
 let opposite_dir dir =
   match dir with
   | Left -> Right
   | Right -> Left
 
+(*Used for enemy-enemy collisions*)
 let reverse_left_right obj =
   obj.vel.x <- ~-.(obj.vel.x);
   obj.dir <- opposite_dir obj.dir
 
+(*Actually creates a new enemy and deletes the previous. The positions must be
+ *normalized. This method is typically called when enemies are killed and a
+ *new sprite must be used (i.e., koopa to koopa shell). *)
 let evolve_enemy player_dir typ (spr:Sprite.sprite) obj context =
   match typ with
   | GKoopa ->
@@ -262,21 +277,25 @@ let rev_dir o t (s:sprite) =
   Sprite.transform_enemy t s o.dir;
   normalize_pos o.pos old_params s.params
 
+(*Used for killing enemies, or to make big Mario into small Mario*)
 let dec_health obj =
   let health = obj.health - 1 in
   if health = 0 then obj.kill <- true else
   obj.health <- health
 
+(*Used for deleting a block and replacing it with a used block*)
 let evolve_block obj context =
   dec_health obj;
   let (new_spr,new_obj) = make (SBlock QBlockUsed) context (obj.pos.x, obj.pos.y) in
   Block(QBlockUsed,new_spr,new_obj)
 
+(*Used for making a small Mario into a Big Mario*)
 let evolve_player (spr : Sprite.sprite) obj context =
   let (new_spr,new_obj) = make (SPlayer (BigM,Standing)) context (obj.pos.x, obj.pos.y) in
   normalize_pos new_obj.pos spr.params new_spr.params ;
   Player(BigM,new_spr,new_obj)
 
+(*Used for spawning items above question mark blocks*)
 let spawn_above player_dir obj typ context =
   let item = spawn (SItem typ) context (obj.pos.x, obj.pos.y) in
   let item_obj = get_obj item in
@@ -306,6 +325,9 @@ let collision_cond c1 c2 =
   | _ -> false
   in o1.kill || o2.kill || ctypes
 
+(*Used for checking if collisions occur. Compares half-widths and half-heights
+ *and adjusts for when collisions do occur, by changing position so that
+ *a second collision does not occur again immediately. This causes snapping.*)
 let check_collision c1 c2 =
   let b1 = get_aabb c1 and b2 = get_aabb c2 in
   let o1 = get_obj c1 in
