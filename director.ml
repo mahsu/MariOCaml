@@ -89,9 +89,9 @@ let player_attack_enemy s1 o1 typ s2 o2 state context =
       dec_health o2;
       o1.invuln <- invuln;
       o1.vel.y <- ~-. dampen_jump;
-      if state.multiplier = 16 then begin
-        update_score state 1600;
-        o2.score <- 1600; 
+      if state.multiplier = 8 then begin
+        update_score state 800;
+        o2.score <- 800; 
         (None, evolve_enemy o1.dir typ s2 o2 context)
       end else begin
         let score = 100 * state.multiplier in
@@ -258,7 +258,9 @@ let update_collidable state (collid:Object.collidable) all_collids =
  (* TODO: optimize. Draw static elements only once *)
   let obj = Object.get_obj collid in
   let spr = Object.get_sprite collid in
-  if not obj.kill && (in_viewport state.vpt obj.pos || is_player collid) then begin
+  let viewport_filter = in_viewport state.vpt obj.pos || is_player collid ||
+      out_of_viewport_below state.vpt obj.pos.y in
+  if not obj.kill &&  viewport_filter then begin
     obj.grounded <- false;
     Object.process_obj obj state.map;
     (* Run collision detection if moving object*)
