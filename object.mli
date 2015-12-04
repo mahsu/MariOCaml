@@ -39,9 +39,6 @@ type collidable =
   | Item of item_typ * sprite * obj
   | Block of block_typ * sprite * obj
 
-type noncollidable =
-  | Scenery of sprite * obj
-
 
 (* Returns the sprite associated with the object *)
 val get_sprite : collidable -> Sprite.sprite
@@ -62,7 +59,7 @@ val normalize_origin : xy -> Sprite.sprite -> unit
 val normalize_pos : xy -> Sprite.sprite_params -> Sprite.sprite_params -> unit
 
 (* Destroys the object, returning a list of destruction effect objects *)
-val kill : obj -> noncollidable list
+val kill : collidable -> Dom_html.canvasRenderingContext2D Js.t ->  particle list
 
 val process_obj : obj -> unit
 
