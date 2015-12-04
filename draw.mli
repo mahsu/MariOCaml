@@ -9,3 +9,5 @@ val draw_bgd : Sprite.sprite -> float -> unit
 
 (* Draws the fps on the canvas *)
 val fps : Dom_html.canvasElement Js.t -> float -> unit
+
+val hud : Dom_html.canvasElement Js.t -> int -> int -> unit

@@ -112,10 +112,12 @@ let process_collision dir c1 c2  state =
   | (Item(t2,s2,o2), Player(_,s1,o1), _) ->
       begin match t2 with
       | Mushroom -> dec_health o2; o1.health <- o1.health + 1;
-                    o1.vel.x <- 0.; o1.vel.y <- 0.; (None, None)
+                    o1.vel.x <- 0.; o1.vel.y <- 0.;
+                    update_score state 1000; (None, None)
       | Coin -> state.coins <- state.coins + 1; dec_health o2;
+          update_score state 100;
           Printf.printf "Coins: %d \n" state.coins; (None, None)
-      | _ -> dec_health o2; (None, None)
+      | _ -> dec_health o2; update_score state 1000; (None, None)
       end
   | (Enemy(t1,s1,o1), Enemy(t2,s2,o2), dir) ->
       col_enemy_enemy t1 s1 o1 t2 s2 o2 dir
@@ -221,7 +223,7 @@ let run_update state collid all_collids =
       o.crouch <- false;
       let player = begin match Object.update_player o keys state.ctx with
         | None -> p
-        | Some (new_typ, new_spr) -> Player(new_typ,new_spr,o)
+        | Some (new_typ, new_spr) -> Object.normalize_pos o.pos s.params new_spr.params; Player(new_typ,new_spr,o)
       end in
       let evolved = update_collidable state player all_collids in
       collid_objs := !collid_objs @ evolved;
@@ -266,6 +268,7 @@ let update_loop canvas objs =
       List.iter (fun obj -> ignore (run_update state obj objs)) objs ;
 
       Draw.fps canvas fps;
+      Draw.hud canvas state.score state.coins;
       ignore Dom_html.window##requestAnimationFrame(
           Js.wrap_callback (fun (t:float) -> update_helper t state player !collid_objs))
 
