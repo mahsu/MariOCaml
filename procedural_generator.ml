@@ -83,6 +83,11 @@ let generate_airdown_stairs cbx cby typ =
   let two = [(typ,(cbx +. 2., cby +. 1.));(typ,(cbx +. 3., cby +. 1.));(typ,(cbx +. 4., cby +. 1.))] in
   let one = [(typ,(cbx +. 4., cby +. 2.));(typ,(cbx +. 5., cby +. 2.));(typ,(cbx +. 6., cby +. 2.))] in
   three@two@one
+
+let rec generate_clouds cbx cby typ num =
+  if(num = 0) then []
+  else [(typ,(cbx, cby))]@generate_clouds (cbx+.1.) cby typ (num-1)
+
 (*
 * Chooses the form of the blocks to be places.
 * |0 |1-> Plane of 3 blocks
@@ -95,16 +100,19 @@ let choose_block_pattern blockw blockh cbx cby prob =
   if(cbx > blockw || cby > blockh) then []
   else if (cbx < 10. || blockw -. cbx < 10.) then []
   else
-    let block_typ = Random.int 3 in
+    let block_typ = Random.int 4 in
     let stair_typ = Random.int 2 in
     (*let block_length = Random.int 6 in*)
     match prob with
-    |0 |1 ->
+    |0 ->
       if(blockw -. cbx = 2.) then [(block_typ, (cbx, cby));
         (block_typ,(cbx +. 1., cby));(block_typ,(cbx +. 2., cby))]
       else if (blockw -. cbx = 1.) then [(block_typ,(cbx, cby));
         (block_typ,(cbx +. 1., cby))]
       else [(block_typ,(cbx, cby))]
+    |1 -> let num_clouds = Random.int 10 in
+          if(cby < 15) then generate_clouds cbx cby 2 num_clouds
+          else []
     |2   ->
       if(blockh-.cby = 1.) then generate_ground_stairs cbx cby stair_typ
       else []
@@ -117,7 +125,7 @@ let choose_block_pattern blockw blockh cbx cby prob =
         (stair_typ, (cbx, cby +. 1.))]
       else [(stair_typ,(cbx, cby)); (stair_typ,(cbx, cby +. 1.));
         (stair_typ,(cbx, cby +. 2.))]
-    |5 -> [(2,(cbx, cby))]
+    |5 -> [(3,(cbx, cby))]
     |_ -> failwith "Shouldn't reach here"
 
 
@@ -125,7 +133,8 @@ let choose_sblock_typ typ =
   match typ with
   |0 -> Brick
   |1 -> UnBBlock
-  |2 -> QBlock Mushroom
+  |2 -> Cloud
+  |3 -> QBlock Mushroom
   |_ -> failwith "Shouldn't reach here"
 
 let rec generate_block_locs (blockw: float) (blockh: float) (cbx: float)
