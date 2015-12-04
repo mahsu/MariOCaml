@@ -207,8 +207,13 @@ let generate_helper blockw blockh cx cy context =
 
   (*  let brick1 = Object.spawn (SBlock Brick) context (200.0,200.0) in*)
 
-let generate blockw blockh context =
-  generate_helper blockw blockh 0. 19. context
+let generate (blockw:float) (blockh:float) (context:Dom_html.canvasRenderingContext2D Js.t) : (collidable * collidable list) =
+  let collide_list = generate_helper blockw blockh 0. 0. context in
+  let player = Object.spawn (SPlayer(SmallM,Standing)) context (100.,224.) in
+  (player, collide_list)
+
+let init () = 
+  Random.self_init();
 
   (* If I need it, these are the cross blocks.
 

@@ -301,12 +301,13 @@ let run_update_particle state part =
 
 (*update_loop is constantly being called to check for collisions and to
  *update each of the objects in the game.*)
-let update_loop canvas objs =
+let update_loop canvas pair =
   let ctx = canvas##getContext (Dom_html._2d_) in
   let cwidth = float_of_int canvas##width in
   let cheight = float_of_int canvas##height in
-  let viewport = Viewport.make (cwidth,cheight) (cwidth +. 500.,cheight +. 500.) in
-  let player = Object.spawn (SPlayer(SmallM,Standing)) ctx (200.,32.) in
+  let viewport = Viewport.make (cwidth,cheight) (cwidth +. 1000.,cheight) in
+  let player = fst pair in
+  let objs = snd pair in
   let state = {
       bgd = Sprite.make_bgd ctx;
       vpt = Viewport.update viewport (get_obj player).pos;
