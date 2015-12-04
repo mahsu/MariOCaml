@@ -30,6 +30,7 @@ type block_typ =
   | Brick
   | UnBBlock
   | Cloud
+  | Panel
 
 type player_typ =
   | Standing

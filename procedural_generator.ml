@@ -7,7 +7,7 @@ open Object
 * 3 -> Item object
 **)
 
-(*) |0 |1-> Plane of 3 blocks
+(*|0 |1-> Plane of 3 blocks
  |2 |3 -> Cross of blocks
  |4-> Wall of 3 blocks
  |5 |6-> Single block
@@ -50,15 +50,22 @@ let rec convert_list lst =
 * 2 -> GKoopa
 * 3 -> Goomba
 * _ -> TBD *)
-let generate_enemies () = []
-(*
-let choose_enemy = function
-  |1->
-  |2->
-  |3->
-  |_->
 
-*)
+let choose_enemy_typ typ =
+  match typ with
+  |0 -> RKoopa
+  |1 -> GKoopa
+  |2 -> Goomba
+  |_ -> failwith "Shouldn't reach here"
+
+let choose_sblock_typ typ =
+  match typ with
+  |0 -> Brick
+  |1 -> UnBBlock
+  |2 -> Cloud
+  |3 -> QBlock Mushroom
+  |_ -> failwith "Shouldn't reach here"
+
 let rec avoid_overlap lst currentLst =
   match lst with
   |[] -> []
@@ -90,11 +97,6 @@ let rec generate_clouds cbx cby typ num =
 
 (*
 * Chooses the form of the blocks to be places.
-* |0 |1-> Plane of 3 blocks
-* |2 |3 -> stairs
-* |4-> Wall of 3 blocks
-* |5 |6-> Single block
-* |_ -> y u fail
 * When calling this method, leave a 1 block gap from canvas size*)
 let choose_block_pattern blockw blockh cbx cby prob =
   if(cbx > blockw || cby > blockh) then []
@@ -111,7 +113,7 @@ let choose_block_pattern blockw blockh cbx cby prob =
         (block_typ,(cbx +. 1., cby))]
       else [(block_typ,(cbx, cby))]
     |1 -> let num_clouds = Random.int 10 in
-          if(cby < 15) then generate_clouds cbx cby 2 num_clouds
+          if(cby < 5.) then generate_clouds cbx cby 2 num_clouds
           else []
     |2   ->
       if(blockh-.cby = 1.) then generate_ground_stairs cbx cby stair_typ
@@ -128,14 +130,8 @@ let choose_block_pattern blockw blockh cbx cby prob =
     |5 -> [(3,(cbx, cby))]
     |_ -> failwith "Shouldn't reach here"
 
-
-let choose_sblock_typ typ =
-  match typ with
-  |0 -> Brick
-  |1 -> UnBBlock
-  |2 -> Cloud
-  |3 -> QBlock Mushroom
-  |_ -> failwith "Shouldn't reach here"
+let rec generate_enemies () =
+  []
 
 let rec generate_block_locs (blockw: float) (blockh: float) (cbx: float)
                     (cby: float) (acc: obj_coord list) =

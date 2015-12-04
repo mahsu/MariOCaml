@@ -86,6 +86,7 @@ let make_block = function
   | Brick -> setup_obj ~g:false ()
   | UnBBlock -> setup_obj ~g:false ()
   | Cloud -> setup_obj ~g: false ()
+  | Panel -> setup_obj ~g: false ()
 
 let make_type = function
   | SPlayer(pt,t) -> make_player ()
