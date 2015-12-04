@@ -36,6 +36,11 @@ type player_typ =
   | Running
   | Crouching
 
+type part_typ = 
+  | GoombaSquish
+  | BrickChunkL
+  | BrickChunkR
+
 type spawn_typ =
   | SPlayer of pl_typ * player_typ
   | SEnemy of enemy_typ

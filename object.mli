@@ -1,5 +1,6 @@
 open Sprite
 open Actors
+open Particle
 
 val invuln : int
 val dampen_jump : float

@@ -41,6 +41,8 @@ val make : Actors.spawn_typ -> Actors.dir_1d -> Dom_html.canvasRenderingContext2
 
 val make_bgd : Dom_html.canvasRenderingContext2D Js.t  -> sprite
 
+val make_particle : Actors.part_typ -> Dom_html.canvasRenderingContext2D Js.t -> sprite
+
 val transform_enemy : Actors.enemy_typ -> sprite -> Actors.dir_1d -> unit
 
 (* Updates the sprite's animation *)

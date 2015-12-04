@@ -1,5 +1,6 @@
 open Sprite
 open Actors
+open Particle
 
 let friction = 0.85
 let gravity = 0.2
@@ -183,7 +184,8 @@ let update_player player keys context =
   let pl_typ = if player.health <= 1 then SmallM else BigM in
   if not prev_jumping && player.jumping
   then Some (pl_typ, (Sprite.make (SPlayer(pl_typ,Jumping)) player.dir context))
-  else if prev_dir<>player.dir || (prev_vx=0. && (abs_float player.vel.x) > 0.) && not player.jumping
+  else if prev_dir<>player.dir || (prev_vx=0. && (abs_float player.vel.x) > 0.) 
+          && not player.jumping
   then Some (pl_typ, (Sprite.make (SPlayer(pl_typ,Running)) player.dir context))
   else if prev_dir <> player.dir && player.jumping && prev_jumping
   then Some (pl_typ, (Sprite.make (SPlayer(pl_typ,Jumping)) player.dir context))

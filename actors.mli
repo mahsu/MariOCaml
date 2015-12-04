@@ -37,6 +37,11 @@ type player_typ =
   | Running
   | Crouching
 
+type part_typ = 
+  | GoombaSquish
+  | BrickChunkL
+  | BrickChunkR
+
 (*type unbblock_typ =
   | Wood
   | Earth
