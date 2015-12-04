@@ -1,19 +1,8 @@
 open Actors
 open Object
-(*
-* 0 -> Ground Object
-* 1 -> Block object
-* 2 -> Enemy object
-* 3 -> Item object
-**)
-
-(* |0 |1-> Plane of 3 blocks
- |2 |3 -> Cross of blocks
- |4-> Wall of 3 blocks
- |5 |6-> Single block
- |_ -> y u fail*)
 
 type obj_coord =  int * (float * float)
+
 (*Set boundary variables*)
 (*Max height Mario can jump*)
 let max_jump = 3;;
@@ -27,27 +16,22 @@ let ground_height = 2;;
 (*Canvas is 512 by 256 (w*h) -> 32 by 16 blocks
 * Let the first generaed map just be of size 5 by 5 blocks *)
 
-(*Check if the given location checkloc is already part of the list of locations
-* in the location list.*)
+(*Checks if the given location checkloc is already part of the list of locations
+* in loclist.*)
 let rec mem_loc (checkloc: float * float) (loclist: obj_coord list) : bool =
   match loclist with
   |[] -> false
   |h::t -> if (checkloc = (snd h)) then true
            else mem_loc checkloc t
 
-
-(*Convert list of locations from blocksize to pixelsize*)
+(*Converts list of locations from blocksize to pixelsize by multiplying (x,y) by
+16*)
 let rec convert_list (lst:obj_coord list) :obj_coord list =
   match lst with
   |[] -> []
-  |(h::t) -> [(fst h, ((fst (snd h))*.16., (snd (snd h))*.16.))]@(convert_list t)
+  |(h::t) -> [(fst h, ((fst (snd h))*.16.,(snd (snd h))*.16.))]@(convert_list t)
 
-(*Generates a list of enemy coordinates
-* 1 -> RKoopa
-* 2 -> GKoopa
-* 3 -> Goomba
-* _ -> TBD *)
-
+(*Chooses what type of enemy should be instantiated given typ number*)
 let choose_enemy_typ (typ:int) : enemy_typ =
   match typ with
   |0 -> RKoopa
@@ -55,6 +39,7 @@ let choose_enemy_typ (typ:int) : enemy_typ =
   |2 -> Goomba
   |_ -> failwith "Shouldn't reach here"
 
+(*Chooses what type of block should be instantiated given typ number*)
 let choose_sblock_typ (typ:int) : block_typ =
   match typ with
   |0 -> Brick
@@ -63,70 +48,90 @@ let choose_sblock_typ (typ:int) : block_typ =
   |3 -> QBlock Mushroom
   |_ -> failwith "Shouldn't reach here"
 
-let rec avoid_overlap lst currentLst =
+(*Optimizes lst such that there are no two items in the list that have the same
+* coordinates. If there is one, it is removed.*)
+let rec avoid_overlap (lst:obj_coord list) (currentLst:obj_coord list)
+                      : obj_coord list =
   match lst with
   |[] -> []
   |h::t -> if(mem_loc (snd h) currentLst) then avoid_overlap t currentLst
            else [h]@(avoid_overlap t currentLst)
 
+(*Generates a stair formation with block typ being dependent on typ. This type
+* of stair formation requires that the first step be on the ground.*)
 let generate_ground_stairs cbx cby typ =
-  let four = [(typ, (cbx, cby));(typ, (cbx+.1., cby));(typ, (cbx+.2., cby));(typ, (cbx+.3., cby))] in
-  let three = [(typ,(cbx +. 1., cby -. 1.));(typ,(cbx +. 2., cby -. 1.));(typ,(cbx +. 3., cby -. 1.))] in
+  let four = [(typ, (cbx, cby));(typ, (cbx+.1., cby));(typ, (cbx+.2., cby));
+             (typ, (cbx+.3., cby))] in
+  let three = [(typ,(cbx +. 1., cby -. 1.));(typ,(cbx +. 2., cby -. 1.));
+              (typ,(cbx +. 3., cby -. 1.))] in
   let two = [(typ,(cbx +. 2., cby -. 2.));(typ,(cbx +. 3., cby -. 2.))] in
   let one = [(typ,(cbx +. 3., cby -. 3.))] in
   four@three@two@one
 
+(*Generates a stair formation going upwards with the starting step not being
+* on the ground.*)
 let generate_airup_stairs cbx cby typ =
   let one = [(typ,(cbx, cby));(typ,(cbx +. 1., cby));(typ,(cbx +. 2., cby))] in
-  let two = [(typ,(cbx +. 2., cby -. 1.));(typ,(cbx +. 3., cby -. 1.));(typ,(cbx +. 4., cby -. 1.))] in
-  let three = [(typ,(cbx +. 4., cby -. 2.));(typ,(cbx +. 5., cby -. 2.));(typ,(cbx +. 6., cby -. 2.))] in
+  let two = [(typ,(cbx +. 2., cby -. 1.));(typ,(cbx +. 3., cby -. 1.));
+            (typ,(cbx +. 4., cby -. 1.))] in
+  let three = [(typ,(cbx +. 4., cby -. 2.));(typ,(cbx +. 5., cby -. 2.));
+              (typ,(cbx +. 6., cby -. 2.))] in
   one@two@three
 
+(*Generates a stair formation going downwards with the starting step not being
+* on the ground. *)
 let generate_airdown_stairs cbx cby typ =
-  let three = [(typ,(cbx, cby));(typ,(cbx +. 1., cby));(typ,(cbx +. 2., cby))] in
-  let two = [(typ,(cbx +. 2., cby +. 1.));(typ,(cbx +. 3., cby +. 1.));(typ,(cbx +. 4., cby +. 1.))] in
-  let one = [(typ,(cbx +. 4., cby +. 2.));(typ,(cbx +. 5., cby +. 2.));(typ,(cbx +. 6., cby +. 2.))] in
+  let three = [(typ,(cbx, cby));(typ,(cbx +. 1., cby));(typ,(cbx +. 2., cby))]in
+  let two = [(typ,(cbx +. 2., cby +. 1.));(typ,(cbx +. 3., cby +. 1.));
+            (typ,(cbx +. 4., cby +. 1.))] in
+  let one = [(typ,(cbx +. 4., cby +. 2.));(typ,(cbx +. 5., cby +. 2.));
+            (typ,(cbx +. 6., cby +. 2.))] in
   three@two@one
 
+(*Generates a cloud block platform with some length num.*)
 let rec generate_clouds cbx cby typ num =
   if(num = 0) then []
   else [(typ,(cbx, cby))]@generate_clouds (cbx+.1.) cby typ (num-1)
 
-(*
-* Chooses the form of the blocks to be places.
-* When calling this method, leave a 1 block gap from canvas size*)
-let choose_block_pattern blockw blockh cbx cby prob =
+(*Chooses the form of the blocks to be placed.
+* When called, leaves a 1 block gap from canvas size.
+* 1. If current xblock or yblock is greater than canvas width or height
+*    respectively, return an empty list.
+* 2. If current xblock or yblock is within 10 blocks of the left and right sides
+*    of the level map, prevent any objects from being initialized.
+* 3. Else call helper methods to created block formations and return obj_coord
+*    list.
+**)
+let choose_block_pattern (blockw:float) (blockh: float) (cbx:float) (cby:float)
+                         (prob:int) : obj_coord list=
   if(cbx > blockw || cby > blockh) then []
   else if (cbx < 10. || blockw -. cbx < 10.) then []
   else
     let block_typ = Random.int 4 in
     let stair_typ = Random.int 2 in
-    (*let block_length = Random.int 6 in*)
     match prob with
-    |0 ->
-      if(blockw -. cbx = 2.) then [(block_typ, (cbx, cby));
-        (block_typ,(cbx +. 1., cby));(block_typ,(cbx +. 2., cby))]
-      else if (blockw -. cbx = 1.) then [(block_typ,(cbx, cby));
-        (block_typ,(cbx +. 1., cby))]
-      else [(block_typ,(cbx, cby))]
+    |0 -> if(blockw -. cbx = 2.) then [(block_typ, (cbx, cby));
+            (block_typ,(cbx +. 1., cby));(block_typ,(cbx +. 2., cby))]
+          else if (blockw -. cbx = 1.) then [(block_typ,(cbx, cby));
+            (block_typ,(cbx +. 1., cby))]
+          else [(block_typ,(cbx, cby))]
     |1 -> let num_clouds = Random.int 10 in
           if(cby < 5.) then generate_clouds cbx cby 2 num_clouds
           else []
-    |2   ->
-      if(blockh-.cby = 1.) then generate_ground_stairs cbx cby stair_typ
-      else []
-    |3 ->
-      if(stair_typ = 0 && blockh -. cby > 3.) then generate_airdown_stairs cbx cby stair_typ
-      else generate_airup_stairs cbx cby stair_typ
-    |4 ->
-      if ((cby +. 3.) -. blockh = 2.) then [(stair_typ,(cbx, cby))]
-      else if ((cby +. 3.) -. blockh = 1.) then [(stair_typ, (cbx,cby));
-        (stair_typ, (cbx, cby +. 1.))]
-      else [(stair_typ,(cbx, cby)); (stair_typ,(cbx, cby +. 1.));
-        (stair_typ,(cbx, cby +. 2.))]
+    |2 -> if(blockh-.cby = 1.) then generate_ground_stairs cbx cby stair_typ
+          else []
+    |3 -> if(stair_typ = 0 && blockh -. cby > 3.) then
+          generate_airdown_stairs cbx cby stair_typ
+          else generate_airup_stairs cbx cby stair_typ
+    |4 -> if ((cby +. 3.) -. blockh = 2.) then [(stair_typ,(cbx, cby))]
+          else if ((cby +. 3.) -. blockh = 1.) then [(stair_typ, (cbx,cby));
+          (stair_typ, (cbx, cby +. 1.))]
+          else [(stair_typ,(cbx, cby)); (stair_typ,(cbx, cby +. 1.));
+          (stair_typ,(cbx, cby +. 2.))]
     |5 -> [(3,(cbx, cby))]
     |_ -> failwith "Shouldn't reach here"
 
+(*Generates an obj_coord list (typ, coordinates) of enemies to be placed.*)
 let rec generate_enemies (blockw: float) (blockh: float) (cbx: float)
                     (cby: float) (acc: obj_coord list) =
   if(cbx > blockw) then []
@@ -142,6 +147,7 @@ let rec generate_enemies (blockw: float) (blockh: float) (cbx: float)
         enemy@(generate_enemies blockw blockh cbx (cby+.1.) acc)
       else generate_enemies blockw blockh cbx (cby+.1.) acc
 
+(*Generates an obj_coord list (typ, coordinates) of blocks to be placed.*)
 let rec generate_block_locs (blockw: float) (blockh: float) (cbx: float)
                     (cby: float) (acc: obj_coord list) =
   if(cbx > blockw) then acc
@@ -173,7 +179,10 @@ let rec generate_ground (blockw:float) (blockh:float) (inc:float)
     else let newacc = acc@[(1, (inc*. 16.,blockh *. 16.))] in
       generate_ground blockw blockh (inc +. 1.) newacc
 
-let rec convert_to_block_obj lst context =
+(*Converts the obj_coord list called by generate_block_locs to a list of objects
+* with the coordinates given from the obj_coord list. *)
+let rec convert_to_block_obj (lst:obj_coord list)
+  (context:Dom_html.canvasRenderingContext2D Js.t) :collidable list =
   match lst with
   |[] -> []
   |h::t ->
@@ -181,7 +190,10 @@ let rec convert_to_block_obj lst context =
     let ob = Object.spawn (SBlock sblock_typ) context (snd h) in
     [ob]@(convert_to_block_obj t context)
 
-let rec convert_to_enemy_obj lst context =
+(*Converts the obj_coord list called by generate_enemies to a list of objects
+* with the coordinates given from the obj_coord list. *)
+let rec convert_to_enemy_obj (lst:obj_coord list)
+            (context:Dom_html.canvasRenderingContext2D Js.t) : collidable list =
   match lst with
   |[] -> []
   |h::t ->
@@ -190,36 +202,29 @@ let rec convert_to_enemy_obj lst context =
     [ob]@(convert_to_enemy_obj t context)
 
 (*Procedurally generates a map given canvas width, height and context*)
-let generate_helper blockw blockh cx cy context =
+let generate_helper (blockw:float) (blockh:float) (cx:float) (cy:float)
+            (context:Dom_html.canvasRenderingContext2D Js.t) : collidable list =
   let block_locs = generate_block_locs blockw blockh 0. 0. [] in
   let converted_block_locs = convert_list block_locs in
-  let obj_converted_block_locs = convert_to_block_obj converted_block_locs context in
+  let obj_converted_block_locs = convert_to_block_obj converted_block_locs
+    context in
   let ground_blocks = generate_ground blockw blockh 0. [] in
-  let obj_converted_ground_blocks = convert_to_block_obj ground_blocks context in
+  let obj_converted_ground_blocks = convert_to_block_obj ground_blocks
+    context in
   let block_locations = block_locs@ground_blocks in
   let all_blocks = obj_converted_block_locs@obj_converted_ground_blocks in
   let enemy_locs = generate_enemies blockw blockh 0. 0. block_locations in
   let obj_converted_enemies = convert_to_enemy_obj enemy_locs context in
   all_blocks@obj_converted_enemies
 
-  (*  let brick1 = Object.spawn (SBlock Brick) context (200.0,200.0) in*)
-
-let generate (blockw:float) (blockh:float) (context:Dom_html.canvasRenderingContext2D Js.t) : (collidable * collidable list) =
+(*Main function called to procedurally generate the level map.*)
+let generate (blockw:float) (blockh:float)
+                    (context:Dom_html.canvasRenderingContext2D Js.t) :
+                    (collidable * collidable list) =
   let collide_list = generate_helper blockw blockh 0. 0. context in
   let player = Object.spawn (SPlayer(SmallM,Standing)) context (100.,224.) in
   (player, collide_list)
 
+(*Makes sure level map is uniquely generated at each call.*)
 let init () =
   Random.self_init();
-
-  (* If I need it, these are the cross blocks.
-
-  let yBlocks =
-        if(blockh -. cby = 0.) then [(block_typ,(cbx, cby -. 1.))]
-        else if (cby = 0.) then [(block_typ, (cbx, cby +. 1.))]
-        else [(block_typ,(cbx, cby -. 1.));(block_typ,(cbx, cby +. 1.))] in
-      let xBlocks =
-        if(blockw -. cbx = 0.) then [(block_typ, (cbx -. 1., cby))]
-        else if (cbx = 0.) then [(block_typ, (cbx +. 1., cby))]
-        else [(block_typ, (cbx -. 1., cby));(block_typ,(cbx +. 1., cby))] in
-      yBlocks@[(block_typ, (cbx, cby))]@xBlocks*)
