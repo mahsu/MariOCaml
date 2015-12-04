@@ -111,7 +111,8 @@ let process_collision dir c1 c2  state =
   | (Player(_,s1,o1), Item(t2,s2,o2), _)
   | (Item(t2,s2,o2), Player(_,s1,o1), _) ->
       begin match t2 with
-      | Mushroom -> dec_health o2; o1.health <- o1.health + 1; (None, None)
+      | Mushroom -> dec_health o2; o1.health <- o1.health + 1;
+                    o1.vel.x <- 0.; o1.vel.y <- 0.; (None, None)
       | Coin -> state.coins <- state.coins + 1; dec_health o2;
           Printf.printf "Coins: %d \n" state.coins; (None, None)
       | _ -> dec_health o2; (None, None)
@@ -138,14 +139,15 @@ let process_collision dir c1 c2  state =
   | (Item(_,s1,o1), Block(typ2,s2,o2), _) ->
       collide_block dir o1;
       (None, None)
-  | (Player(_,s1,o1), Block(t,s2,o2), North) ->
+  | (Player(t1,s1,o1), Block(t,s2,o2), North) ->
       begin match t with
       | QBlock typ ->
           let updated_block = evolve_block o2 context in
           let spawned_item = spawn_above o1.dir o2 typ context in
           collide_block dir o1;
           (Some spawned_item, Some updated_block)
-      | Brick -> collide_block dir o1; dec_health o2; (None, None)
+      | Brick -> if t1 = BigM then (collide_block dir o1; dec_health o2; (None, None))
+                 else (collide_block dir o1; (None,None))
       | _ -> collide_block dir o1; (None,None)
       end
   | (Player(_,s1,o1), Block(t,s2,o2), _) ->
