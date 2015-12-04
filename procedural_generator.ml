@@ -115,7 +115,7 @@ let choose_block_pattern (blockw:float) (blockh: float) (cbx:float) (cby:float)
           else if (blockw -. cbx = 1.) then [(block_typ,(cbx, cby));
             (block_typ,(cbx +. 1., cby))]
           else [(block_typ,(cbx, cby))]
-    |1 -> let num_clouds = Random.int 10 in
+    |1 -> let num_clouds = (Random.int 5) + 5 in
           if(cby < 5.) then generate_clouds cbx cby 2 num_clouds
           else []
     |2 -> if(blockh-.cby = 1.) then generate_ground_stairs cbx cby stair_typ
@@ -137,7 +137,7 @@ let rec generate_enemies (blockw: float) (blockh: float) (cbx: float)
   if(cbx > blockw) then []
   else if (cby > (blockh-. 1.)) then
     generate_enemies blockw blockh (cbx +. 1.) 0. acc
-  else if(mem_loc (cbx, cby) acc) then
+  else if(mem_loc (cbx, cby) acc || cby = 0.) then
     generate_enemies blockw blockh cbx (cby+.1.) acc
   else
     let prob = Random.int 100 in
@@ -153,7 +153,7 @@ let rec generate_block_locs (blockw: float) (blockh: float) (cbx: float)
   if(cbx > blockw) then acc
   else if (cby > (blockh-. 1.)) then
     generate_block_locs blockw blockh (cbx+.1.) 0. acc
-  else if(mem_loc (cbx, cby) acc) then
+  else if(mem_loc (cbx, cby) acc || cby = 0.) then
     generate_block_locs blockw blockh cbx (cby+.1.) acc
   else
     let prob = Random.int 100 in
@@ -165,6 +165,7 @@ let rec generate_block_locs (blockw: float) (blockh: float) (cbx: float)
         generate_block_locs blockw blockh cbx (cby+.1.) called_acc
       else generate_block_locs blockw blockh cbx (cby+.1.) acc
 
+(*Generates an obj_coord list (typ, coordinates) of items to be placed.*)
 let rec generate_items (blockw: float) (blockh: float) (cbx:float)
                        (cby: float) (acc: obj_coord list) : obj_coord list =
   if(cbx > blockw) then []
@@ -179,6 +180,12 @@ let rec generate_items (blockw: float) (blockh: float) (cbx:float)
         let item = [(0,(cbx,cby))] in
         item@(generate_items blockw blockh cbx (cby +. 1.) acc)
       else generate_items blockw blockh cbx (cby +. 1.) acc
+
+let generate_panel (context:Dom_html.canvasRenderingContext2D Js.t)
+                   (blockw: float) (blockh: float) : collidable =
+  let ob = Object.spawn (SBlock Panel) context
+    (blockw -. (5.*.16.), blockh/.2.) in
+  ob
 
 (*Generates the list of brick locations needed to display the ground.
 * 1/10 chance that a ground block is skipped each call.*)
@@ -242,7 +249,8 @@ let generate_helper (blockw:float) (blockh:float) (cx:float) (cy:float)
   let all_taken = block_locations@enemy_locs in
   let item_locs = generate_items blockw blockh 0. 0. all_taken in
   let obj_converted_items = convert_to_item_obj item_locs context in
-  all_blocks@obj_converted_enemies@obj_converted_items
+  let obj_panel = generate_panel context blockw blockh in
+  all_blocks@obj_converted_enemies@obj_converted_items@[obj_panel]
 
 (*Main function called to procedurally generate the level map.*)
 let generate (blockw:float) (blockh:float)
