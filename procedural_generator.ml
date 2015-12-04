@@ -187,6 +187,9 @@ let generate_helper blockw blockh cx cy context =
 let generate blockw blockh context =
   generate_helper blockw blockh 0. 19. context
 
+let init () = 
+  Random.self_init();
+
   (* If I need it, these are the cross blocks.
 
   let yBlocks =
