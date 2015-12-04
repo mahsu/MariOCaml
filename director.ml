@@ -19,7 +19,8 @@ type st = {
   bgd: sprite;
   ctx: Dom_html.canvasRenderingContext2D Js.t;
   vpt: viewport;
-
+  mutable score: int;
+  mutable coins: int;
 }
 
 let make_viewport (vx,vy) (mx,my) = 
@@ -39,7 +40,6 @@ let in_viewport v pos =
   let (v_min_y,v_max_y) = (v.pos.y -. margin, v.pos.y +. v.v_dim.y) in
   let (x,y) = (pos.x, pos.y) in 
   let test = x >= v_min_x && x <= v_max_x && y >= v_min_y && y<= v_max_y in
-  if test = false then Printf.printf "%f %f %f %f\n" x y v_max_x v_max_y;
   test
 
 let coord_to_viewport viewport coord = 
@@ -72,12 +72,113 @@ let calc_fps t0 t1 =
   let delta = (t1 -. t0) /. 1000. in
   1. /. delta
 
+let player_attack_enemy ()= failwith "todo refactor"
+let enemy_attack_player ()= failwith "todo refactor"
+let col_enemy_enemy () = failwith "todo refactor"
+
+let process_collision dir c1 c2  state =
+  let context = state.ctx in
+  match (c1, c2, dir) with
+  | (Player(_,s1,o1), Enemy(typ,s2,o2), South)
+  | (Enemy(typ,s2,o2),Player(_,s1,o1), North) ->
+      o1.invuln <- invuln;
+      o1.jumping <- false;
+      o1.grounded <- true;
+      begin match typ with
+      | GKoopaShell | RKoopaShell ->
+          let r2 = evolve_enemy o1.dir typ s2 o2 context in
+          o1.vel.y <- ~-. dampen_jump;
+          o1.pos.y <- o1.pos.y -. 5.;
+          (None,r2)
+      | _ ->
+          dec_health o2;
+          o1.invuln <- invuln;
+          o1.vel.y <- ~-. dampen_jump;
+          (None,(evolve_enemy o1.dir typ s2 o2 context))
+      end
+  | (Player(_,s1,o1), Enemy(t2,s2,o2), _)
+  | (Enemy(t2,s2,o2), Player(_,s1,o1), _) ->
+      o1.invuln <- invuln;
+      begin match t2 with
+      | GKoopaShell |RKoopaShell ->
+          let r2 = if o2.vel.x = 0. then evolve_enemy o1.dir t2 s2 o2 context
+                  else (dec_health o1; None) in
+          (None,r2)
+      | _ -> dec_health o1; (None, None)
+      end
+  | (Player(_,s1,o1), Item(t2,s2,o2), _)
+  | (Item(t2,s2,o2), Player(_,s1,o1), _) ->
+      begin match t2 with
+      | Mushroom -> dec_health o2; o1.health <- o1.health + 1; (None, None)
+      | _ -> dec_health o2; (None, None)
+      end
+  | (Enemy(t1,s1,o1), Enemy(t2,s2,o2), dir) ->
+      begin match (t1, t2) with
+      | (GKoopaShell, GKoopaShell)
+      | (GKoopaShell, RKoopaShell)
+      | (RKoopaShell, RKoopaShell)
+      | (RKoopaShell, GKoopaShell) ->
+          dec_health o1;
+          dec_health o2;
+          (None,None)
+      | (RKoopaShell, _) | (GKoopaShell, _) -> if o1.vel.x = 0. then
+          (rev_dir o2 t2 s2;
+          (None,None) )
+          else ( dec_health o2; (None,None) )
+      | (_, RKoopaShell) | (_, GKoopaShell) -> if o2.vel.x = 0. then
+          (rev_dir o1 t1 s1;
+          (None,None) )
+          else ( dec_health o1; (None,None) )
+      | (_, _) ->
+          begin match dir with
+          | West | East ->
+              rev_dir o1 t1 s1;
+              rev_dir o2 t2 s2;
+              (None,None)
+          | _ -> (None,None)
+          end
+      end
+  | (Enemy(t,s1,o1), Block(typ2,s2,o2), East)
+  | (Enemy(t,s1,o1), Block(typ2,s2,o2), West)->
+    begin match (t,typ2) with
+    | (RKoopaShell, Brick) | (GKoopaShell, Brick) ->
+        dec_health o2;
+        reverse_left_right o1;
+        (None,None)
+    (*TODO: spawn item when block is of type qblock*)
+    | (_,_) ->
+        rev_dir o1 t s1;
+      (None,None)
+    end
+  | (Item(_,s1,o1), Block(typ2,s2,o2), East)
+  | (Item(_,s1,o1), Block(typ2,s2,o2), West) ->
+      reverse_left_right o1;
+      (None, None)
+  | (Enemy(_,s1,o1), Block(typ2,s2,o2), _)
+  | (Item(_,s1,o1), Block(typ2,s2,o2), _) ->
+      collide_block dir o1;
+      (None, None)
+  | (Player(_,s1,o1), Block(t,s2,o2), North) ->
+      begin match t with
+      | QBlock typ ->
+          let updated_block = evolve_block o2 context in
+          let spawned_item = spawn_above o1.dir o2 typ context in
+          collide_block dir o1;
+          (Some spawned_item, Some updated_block)
+      (* TODO: Big mario and brick breaks break *)
+      | _ -> collide_block dir o1; (None,None)
+      end
+  | (Player(_,s1,o1), Block(t,s2,o2), _) ->
+    collide_block dir o1;
+    (None, None)
+  | (_, _, _) -> (None,None)
+
 let broad_cache = ref []
 let broad_phase collid =
   !broad_cache
 
-let rec narrow_phase c cs context =
-  let rec narrow_helper c cs context acc =
+let rec narrow_phase c cs state =
+  let rec narrow_helper c cs state acc =
     match cs with
     | [] -> acc
     | h::t ->
@@ -88,7 +189,7 @@ let rec narrow_phase c cs context =
         | None -> (None,None)
         | Some dir ->
           if (get_obj h).id <> c_obj.id
-          then Object.process_collision dir c h context
+          then process_collision dir c h state
           else (None,None)
       end else (None,None) in
       let acc = match new_objs with
@@ -98,15 +199,15 @@ let rec narrow_phase c cs context =
         | (None, None) -> acc
       in
       c_obj.invuln <- if invuln > 0 then invuln-1 else invuln;
-      narrow_helper c t context acc
-  in narrow_helper c cs context []
+      narrow_helper c t state acc
+  in narrow_helper c cs state []
 
-let check_collisions collid context =
+let check_collisions collid state =
   match collid with
   | Block(_,_,_) -> []
   | _ ->
     let broad = broad_phase collid in
-    narrow_phase collid broad context
+    narrow_phase collid broad state
 
 let update_collidable state (collid:Object.collidable) all_collids =
  (* TODO: optimize. Draw static elements only once *)
@@ -116,7 +217,7 @@ let update_collidable state (collid:Object.collidable) all_collids =
     obj.grounded <- false;
     Object.process_obj obj;
     (* Run collision detection if moving object*)
-    let evolved = check_collisions collid state.ctx in
+    let evolved = check_collisions collid state in
     (* Render and update animation *)
     let vpt_adj_xy = coord_to_viewport state.vpt obj.pos in
     Draw.render spr (vpt_adj_xy.x,vpt_adj_xy.y);
@@ -150,12 +251,14 @@ let update_loop canvas objs =
   let ctx = canvas##getContext (Dom_html._2d_) in
   let cwidth = float_of_int canvas##width in
   let cheight = float_of_int canvas##height in
-  let viewport = make_viewport (cwidth,cheight) (cwidth +. 500.,cheight) in
+  let viewport = make_viewport (cwidth,cheight) (cwidth +. 500.,cheight +. 500.) in
   let player = Object.spawn (SPlayer(SmallM,Standing)) ctx (200.,32.) in
   let state = {
       bgd = Sprite.make_bgd ctx;
       vpt = update_viewport viewport (get_obj player).pos;
       ctx;
+      score = 0;
+      coins = 0;
   } in
   let rec update_helper time state player objs  =
       collid_objs := [];
@@ -166,7 +269,12 @@ let update_loop canvas objs =
       broad_cache := objs;
 
       Draw.clear_canvas canvas;
-      Draw.draw_bgd state.bgd;
+      
+      (* Parallax background *)
+      let vpos_x_int = int_of_float (state.vpt.pos.x /. 5.)  in
+      let bgd_width = int_of_float (fst state.bgd.params.frame_size) in
+      Draw.draw_bgd state.bgd (float_of_int (vpos_x_int mod bgd_width));
+      
       let player = run_update state player objs in
       let state = {state with vpt = update_viewport state.vpt (get_obj player).pos} in
       List.iter (fun obj -> ignore (run_update state obj objs)) objs ;

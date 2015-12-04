@@ -1,6 +1,9 @@
 open Sprite
 open Actors
 
+val invuln : int
+val dampen_jump : float
+
 type xy = {
   mutable x: float;
   mutable y: float;
@@ -65,4 +68,15 @@ val update_player : obj -> Actors.controls list -> Dom_html.canvasRenderingConte
  * direction of the collision if one occurred. *)
 val check_collision : collidable -> collidable -> Actors.dir_2d option
 
-val process_collision : Actors.dir_2d -> collidable -> collidable -> Dom_html.canvasRenderingContext2D Js.t -> (collidable option * collidable option)
+val evolve_enemy : Actors.dir_1d -> Actors.enemy_typ -> Sprite.sprite -> obj -> Dom_html.canvasRenderingContext2D Js.t -> collidable option
+
+val evolve_block : obj -> Dom_html.canvasRenderingContext2D Js.t -> collidable
+val dec_health : obj -> unit
+
+val rev_dir : obj -> Actors.enemy_typ -> Sprite.sprite -> unit
+
+val reverse_left_right : obj -> unit
+
+val collide_block : ?check_x: bool -> Actors.dir_2d -> obj -> unit
+
+val spawn_above : Actors.dir_1d -> obj -> Actors.item_typ -> Dom_html.canvasRenderingContext2D Js.t-> collidable

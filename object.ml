@@ -7,7 +7,7 @@ let max_y_vel = 4.5
 let player_speed = 2.8
 let player_jump = 5.7
 let player_max_jump = -6.
-let dampen_jump = 3.
+let dampen_jump = 4.
 let invuln = 30
 
 type xy = {
@@ -276,105 +276,6 @@ let spawn_above player_dir obj typ context =
   set_vel_to_speed item_obj;
   item
 
-let player_attack_enemy ()= failwith "todo refactor"
-let enemy_attack_player ()= failwith "todo refactor"
-let col_enemy_enemy () = failwith "todo refactor"
-
-let process_collision dir c1 c2 context =
-  match (c1, c2, dir) with
-  | (Player(_,s1,o1), Enemy(typ,s2,o2), South)
-  | (Enemy(typ,s2,o2),Player(_,s1,o1), North) ->
-      o1.invuln <- invuln;
-      o1.jumping <- false;
-      o1.grounded <- true;
-      begin match typ with
-      | GKoopaShell | RKoopaShell ->
-          let r2 = evolve_enemy o1.dir typ s2 o2 context in
-          o1.vel.y <- ~-. dampen_jump;
-          o1.pos.y <- o1.pos.y -. 5.;
-          (None,r2)
-      | _ ->
-          dec_health o2;
-          o1.invuln <- invuln;
-          o1.vel.y <- ~-. dampen_jump;
-          (None,(evolve_enemy o1.dir typ s2 o2 context))
-      end
-  | (Player(_,s1,o1), Enemy(t2,s2,o2), _)
-  | (Enemy(t2,s2,o2), Player(_,s1,o1), _) ->
-      o1.invuln <- invuln;
-      begin match t2 with
-      | GKoopaShell |RKoopaShell ->
-          let r2 = if o2.vel.x = 0. then evolve_enemy o1.dir t2 s2 o2 context
-                  else (dec_health o1; None) in
-          (None,r2)
-      | _ -> dec_health o1; (None, None)
-      end
-  | (Player(_,s1,o1), Item(t2,s2,o2), _)
-  | (Item(t2,s2,o2), Player(_,s1,o1), _) ->
-      begin match t2 with
-      | Mushroom -> dec_health o2; o1.health <- o1.health + 1; (None, None)
-      | _ -> dec_health o2; (None, None)
-      end
-  | (Enemy(t1,s1,o1), Enemy(t2,s2,o2), dir) ->
-      begin match (t1, t2) with
-      | (GKoopaShell, GKoopaShell)
-      | (GKoopaShell, RKoopaShell)
-      | (RKoopaShell, RKoopaShell)
-      | (RKoopaShell, GKoopaShell) ->
-          dec_health o1;
-          dec_health o2;
-          (None,None)
-      | (RKoopaShell, _) | (GKoopaShell, _) -> if o1.vel.x = 0. then
-          (rev_dir o2 t2 s2;
-          (None,None) )
-          else ( dec_health o2; (None,None) )
-      | (_, RKoopaShell) | (_, GKoopaShell) -> if o2.vel.x = 0. then
-          (rev_dir o1 t1 s1;
-          (None,None) )
-          else ( dec_health o1; (None,None) )
-      | (_, _) ->
-          begin match dir with
-          | West | East ->
-              rev_dir o1 t1 s1;
-              rev_dir o2 t2 s2;
-              (None,None)
-          | _ -> (None,None)
-          end
-      end
-  | (Enemy(t,s1,o1), Block(typ2,s2,o2), East)
-  | (Enemy(t,s1,o1), Block(typ2,s2,o2), West)->
-    begin match (t,typ2) with
-    | (RKoopaShell, Brick) | (GKoopaShell, Brick) ->
-        dec_health o2;
-        reverse_left_right o1;
-        (None,None)
-    (*TODO: spawn item when block is of type qblock*)
-    | (_,_) ->
-        rev_dir o1 t s1;
-      (None,None)
-    end
-  | (Item(_,s1,o1), Block(typ2,s2,o2), East)
-  | (Item(_,s1,o1), Block(typ2,s2,o2), West) ->
-      reverse_left_right o1;
-      (None, None)
-  | (Enemy(_,s1,o1), Block(typ2,s2,o2), _)
-  | (Item(_,s1,o1), Block(typ2,s2,o2), _) ->
-      collide_block dir o1;
-      (None, None)
-  | (Player(_,s1,o1), Block(t,s2,o2), North) ->
-      begin match t with
-      | QBlock typ ->
-          let updated_block = evolve_block o2 context in
-          let spawned_item = spawn_above o1.dir o2 typ context in
-          collide_block dir o1;
-          (Some spawned_item, Some updated_block)
-      (* TODO: Big mario and brick breaks break *)
-      | _ -> collide_block dir o1; (None,None)
-      end
-  | (Player(_,s1,o1), Block(t,s2,o2), _) ->
-    collide_block dir o1;
-    (None, None)
-  | (_, _, _) -> (None,None)
 
 let get_aabb obj  =
   let spr = ((get_sprite obj).params)  in
