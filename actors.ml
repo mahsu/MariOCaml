@@ -7,6 +7,10 @@ type controls =
   | CUp
   | CDown
 
+type pl_typ =
+  | BigM
+  | SmallM
+
 type item_typ =
   | Mushroom
   | FireFlower
@@ -32,13 +36,8 @@ type player_typ =
   | Running
   | Crouching
 
-(*type ground_typ =
-  | Wood
-  | Earth
-  | Brick*)
-
 type spawn_typ =
-  | SPlayer of player_typ
+  | SPlayer of pl_typ * player_typ
   | SEnemy of enemy_typ
   | SItem of item_typ
   | SBlock of block_typ
