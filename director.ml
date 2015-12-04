@@ -34,13 +34,15 @@ let in_viewport v pos =
   let margin = 32. in
   let (v_min_x,v_max_x) = (v.pos.x -. margin, v.pos.x +. v.v_dim.x) in
   let (v_min_y,v_max_y) = (v.pos.y -. margin, v.pos.y +. v.v_dim.y) in
-  let (x,y) = (pos.x, pos.y) in
-  x >= v_min_x && x <= v_max_x && y >= v_min_y && y<= v_min_y
+  let (x,y) = (pos.x, pos.y) in 
+  let test = x >= v_min_x && x <= v_max_x && y >= v_min_y && y<= v_max_y in
+  if test = false then Printf.printf "%f %f %f %f\n" x y v_max_x v_max_y;
+  test
 
 let coord_to_viewport viewport coord = 
   { 
-    x = viewport.pos.x -. coord.x;
-    y = viewport.pos.y -. coord.y;
+    x = coord.x -. viewport.pos.x;
+    y = coord.y -. viewport.pos.y;
   }
 
 let update_viewport vpt ctr =
@@ -146,7 +148,7 @@ let update_loop canvas objs =
   let context = canvas##getContext (Dom_html._2d_) in
   let cwidth = float_of_int canvas##width in
   let cheight = float_of_int canvas##height in
-  let viewport = make_viewport (cwidth,cheight) (cwidth,cheight) in
+  let viewport = make_viewport (cwidth,cheight) (cwidth +. 500.,cheight) in
   let player = Object.spawn (SPlayer(SmallM,Standing)) context (200.,32.) in
   let viewport = update_viewport viewport (get_obj player).pos in
   let state = {
