@@ -28,7 +28,8 @@ let load _ =
   let _ = Html.addEventListener Html.document Html.Event.keydown (Html.handler Director.keydown) Js._true in
   let _ = Html.addEventListener Html.document Html.Event.keyup (Html.handler Director.keyup) Js._true in
   let panel = Object.spawn (SBlock Panel) context (300., 160.) in
-  Director.update_loop canvas (panel::(generate level_width level_height context));
+  let enemy = Object.spawn (SEnemy RKoopa) context (340., 160.) in
+  Director.update_loop canvas (panel::enemy::(generate level_width level_height context));
   ()
 
 let inc_counter _ =
