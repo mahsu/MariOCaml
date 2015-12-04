@@ -64,15 +64,15 @@ let make_big_player (typ, dir) =
   match dir with
   | Left -> begin match typ with
     | Standing -> setup_sprite "mario-big.png" 1 0 ~bb_off:(2.,1.) ~bb_sz:(13.,25.) (16.,27.) (16.,5.)
-    | Jumping -> setup_sprite "mario-big.png" 1 0 ~bb_off:(2.,1.) ~bb_sz:(12.,24.) (16.,26.) (48.,6.)
-    | Running -> setup_sprite "mario-big.png" 4 10 ~bb_off:(2.,1.) ~bb_sz:(13.,24.) (16.,27.)(0.,37.)
-    | Crouching -> setup_sprite "mario-big.png" 1 0 ~bb_off:(2.,1.) ~bb_sz:(12.,17.) (16.,18.) (32.,14.)
+    | Jumping -> setup_sprite "mario-big.png" 1 0 ~bb_off:(2.,1.) ~bb_sz:(12.,25.) (16.,26.) (48.,6.)
+    | Running -> setup_sprite "mario-big.png" 4 10 ~bb_off:(2.,1.) ~bb_sz:(13.,25.) (16.,27.)(0.,37.)
+    | Crouching -> setup_sprite "mario-big.png" 1 0 ~bb_off:(2.,10.) ~bb_sz:(13.,17.) (16.,27.) (32.,5.)
     end
   | Right -> begin match typ with
     | Standing -> setup_sprite "mario-big.png" 1 0 ~bb_off:(1.,1.) ~bb_sz:(13.,25.) (16.,26.) (16.,69.)
-    | Jumping -> setup_sprite "mario-big.png" 1 0 ~bb_off:(2.,1.) ~bb_sz:(12.,23.) (16.,26.) (48.,70.)
+    | Jumping -> setup_sprite "mario-big.png" 1 0 ~bb_off:(2.,1.) ~bb_sz:(12.,25.) (16.,26.) (48.,70.)
     | Running -> setup_sprite "mario-big.png" 4 10 ~bb_off:(2.,1.) ~bb_sz:(13.,25.) (16.,27.) (0.,101.)
-    | Crouching -> setup_sprite "mario-big.png" 1 0 ~bb_off:(2.,1.) ~bb_sz:(12.,17.) (16.,18.) (32.,78.)
+    | Crouching -> setup_sprite "mario-big.png" 1 0 ~bb_off:(2.,10.) ~bb_sz:(13.,17.) (16.,27.) (32.,69.)
     end
 
 let make_enemy (typ, dir) =
@@ -98,6 +98,7 @@ let make_block = function
   | QBlock _ -> setup_sprite "blocks.png" 4 15 (16.,16.) (0.,16.)
   | QBlockUsed -> setup_sprite "blocks.png" 1 0 (16.,16.) (0.,32.)
   | UnBBlock -> setup_sprite "blocks.png" 1 0 (16.,16.) (0.,48.)
+
 
 let make_player pt spr_type =
   match pt with

@@ -1,7 +1,7 @@
 open Sprite
 open Actors
 
-let friction = 0.8
+let friction = 0.85
 let gravity = 0.2
 let max_y_vel = 4.5
 let player_speed = 2.8
@@ -39,6 +39,7 @@ type obj = {
   mutable invuln: int;
   mutable kill: bool;
   mutable health: int;
+  mutable crouch: bool;
 }
 
 type collidable =
@@ -114,6 +115,7 @@ let make ?id:(id=None) ?dir:(dir=Left) spawnable context (posx, posy) =
     invuln = 0;
     kill = false;
     health = 1;
+    crouch = false;
   } in
   (spr,obj)
 
@@ -148,13 +150,17 @@ let update_player_keys (player : obj) (controls : controls) : unit =
   let lr_acc = player.vel.x *. 0.2 in
   match controls with
   | CLeft ->
-    if player.vel.x > ~-.(player.params.speed)
-    then player.vel.x <- player.vel.x -. (0.5 -. lr_acc);
-    player.dir <- Left
+    if not player.crouch then begin
+      if player.vel.x > ~-.(player.params.speed)
+      then player.vel.x <- player.vel.x -. (0.5 -. lr_acc);
+      player.dir <- Left
+    end
   | CRight ->
-    if player.vel.x < player.params.speed
-    then player.vel.x <- player.vel.x +. (0.5 +. lr_acc);
-    player.dir <- Right
+    if not player.crouch then begin
+      if player.vel.x < player.params.speed
+      then player.vel.x <- player.vel.x +. (0.5 +. lr_acc);
+      player.dir <- Right
+    end
   | CUp ->
     if (not player.jumping && player.grounded) then begin
       player.jumping <- true;
@@ -164,7 +170,8 @@ let update_player_keys (player : obj) (controls : controls) : unit =
             player_max_jump
     end
   | CDown ->
-    if (not player.jumping) then print_endline "crouch"
+    if (not player.jumping && player.grounded) then 
+      player.crouch <- true
 
 let update_player player keys context =
   let prev_jumping = player.jumping in
@@ -180,6 +187,8 @@ let update_player player keys context =
   then Some (pl_typ, (Sprite.make (SPlayer(pl_typ,Running)) player.dir context))
   else if prev_dir <> player.dir && player.jumping && prev_jumping
   then Some (pl_typ, (Sprite.make (SPlayer(pl_typ,Jumping)) player.dir context))
+  else if player.vel.y = 0. && player.crouch
+  then Some (pl_typ, (Sprite.make (SPlayer(pl_typ,Crouching)) player.dir context))
   else if player.vel.y = 0. && player.vel.x = 0.
   then Some (pl_typ, (Sprite.make (SPlayer(pl_typ,Standing)) player.dir context))
   else None

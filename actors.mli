@@ -37,9 +37,16 @@ type player_typ =
   | Running
   | Crouching
 
+(*type unbblock_typ =
+  | Wood
+  | Earth
+  | Brick
+| *)
+
 type spawn_typ =
   | SPlayer of pl_typ * player_typ
   | SEnemy of enemy_typ
   | SItem of item_typ
   | SBlock of block_typ
+  (*| SGround of ground_typ*)
 

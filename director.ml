@@ -1,18 +1,13 @@
 open Sprite
 open Object
 open Actors
+open Viewport
 
 type keys = {
   mutable left: bool;
   mutable right: bool;
   mutable up: bool;
   mutable down: bool;
-}
-
-type viewport = {
-  pos: Object.xy;
-  v_dim: Object.xy;
-  m_dim: Object.xy;
 }
 
 type st = {
@@ -23,37 +18,6 @@ type st = {
   mutable coins: int;
   mutable multiplier: int;
 }
-
-let make_viewport (vx,vy) (mx,my) =
-  {
-    pos = {x = 0.; y = 0.;};
-    v_dim = {x = vx; y = vy};
-    m_dim = {x = mx; y = my};
-  }
-
-let calc_viewport_point cc vc mc =
-  let vc_half = vc /. 2. in
-  min ( max (cc -. vc_half) 0. ) ( min (mc -. vc) (abs_float(cc -. vc_half)) )
-
-let in_viewport v pos =
-  let margin = 32. in
-  let (v_min_x,v_max_x) = (v.pos.x -. margin, v.pos.x +. v.v_dim.x) in
-  let (v_min_y,v_max_y) = (v.pos.y -. margin, v.pos.y +. v.v_dim.y) in
-  let (x,y) = (pos.x, pos.y) in
-  let test = x >= v_min_x && x <= v_max_x && y >= v_min_y && y<= v_max_y in
-  test
-
-let coord_to_viewport viewport coord =
-  {
-    x = coord.x -. viewport.pos.x;
-    y = coord.y -. viewport.pos.y;
-  }
-
-let update_viewport vpt ctr =
-  let new_x = calc_viewport_point ctr.x vpt.v_dim.x vpt.m_dim.x in
-  let new_y = calc_viewport_point ctr.y vpt.v_dim.y vpt.m_dim.y in
-  let pos = {x = new_x; y = new_y} in
-  {vpt with pos}
 
 let pressed_keys = {
   left = false;
@@ -252,6 +216,7 @@ let run_update state collid all_collids =
   match collid with
   | Player(t,s,o) as p ->
       let keys = translate_keys () in
+      o.crouch <- false;
       let player = begin match Object.update_player o keys state.ctx with
         | None -> p
         | Some (new_typ, new_spr) -> Player(new_typ,new_spr,o)
@@ -269,11 +234,11 @@ let update_loop canvas objs =
   let ctx = canvas##getContext (Dom_html._2d_) in
   let cwidth = float_of_int canvas##width in
   let cheight = float_of_int canvas##height in
-  let viewport = make_viewport (cwidth,cheight) (cwidth +. 500.,cheight +. 500.) in
+  let viewport = Viewport.make (cwidth,cheight) (cwidth +. 500.,cheight +. 500.) in
   let player = Object.spawn (SPlayer(SmallM,Standing)) ctx (200.,32.) in
   let state = {
       bgd = Sprite.make_bgd ctx;
-      vpt = update_viewport viewport (get_obj player).pos;
+      vpt = Viewport.update viewport (get_obj player).pos;
       ctx;
       score = 0;
       coins = 0;
@@ -295,7 +260,7 @@ let update_loop canvas objs =
       Draw.draw_bgd state.bgd (float_of_int (vpos_x_int mod bgd_width));
 
       let player = run_update state player objs in
-      let state = {state with vpt = update_viewport state.vpt (get_obj player).pos} in
+      let state = {state with vpt = Viewport.update state.vpt (get_obj player).pos} in
       List.iter (fun obj -> ignore (run_update state obj objs)) objs ;
 
       Draw.fps canvas fps;
