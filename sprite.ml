@@ -1,4 +1,5 @@
 open Actors
+
 type xy = float * float
 
 type animation_typ =  | Reflect | Frame
@@ -99,7 +100,12 @@ let make_block = function
   | QBlock _ -> setup_sprite "blocks.png" 4 15 (16.,16.) (0.,16.)
   | QBlockUsed -> setup_sprite "blocks.png" 1 0 (16.,16.) (0.,32.)
   | UnBBlock -> setup_sprite "blocks.png" 1 0 (16.,16.) (0.,48.)
+  | Cloud -> setup_sprite "blocks.png" 1 0 (16., 16.) (0., 64.)
 
+let make_particle = function
+  | GoombaSquish -> setup_sprite "enemies.png" 1 0 (16.,16.) (0.,144.)
+  | BrickChunkL -> setup_sprite "chunks.png" 1 0 (8.,8.) (0.,0.)
+  | BrickChunkR -> setup_sprite "chunks.png" 1 0 (8.,8.) (8.,0.)
 
 let make_player pt spr_type =
   match pt with
@@ -130,6 +136,10 @@ let make spawn dir context  =
 
 let make_bgd context =
   let params = setup_sprite "bgd-1.png" 1 0 (512.,256.) (0.,0.) in
+  make_from_params params context
+
+let make_particle ptyp context =
+  let params = make_particle ptyp in
   make_from_params params context
 
 (*Transform_enemy is used in order to switch the direction an enemy faces.*)

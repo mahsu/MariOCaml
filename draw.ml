@@ -21,7 +21,6 @@ let draw_bgd bgd off_x =
   render bgd (~-.off_x,0.);
   render bgd ((fst bgd.params.frame_size) -. off_x, 0.)
 
-
 let clear_canvas canvas =
   let context = canvas##getContext (Dom_html._2d_) in
   let cwidth = float_of_int canvas##width in

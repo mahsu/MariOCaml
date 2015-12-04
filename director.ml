@@ -2,6 +2,7 @@ open Sprite
 open Object
 open Actors
 open Viewport
+open Particle
 
 (*keys represents the arrow keys pressed via boolean*)
 type keys = {
@@ -40,6 +41,7 @@ let pressed_keys = {
  *is used in a list, so must be a reference. last_time is used for calculating
  *fps. *)
 let collid_objs = ref []
+let particles = ref []
 let last_time = ref 0.
 
 (*game_over displays a black screen when you finish a game.*)
@@ -65,8 +67,6 @@ let player_attack_enemy s1 o1 typ s2 o2 state context =
   o1.invuln <- invuln;
   o1.jumping <- false;
   o1.grounded <- true;
-  Printf.printf "Multiplier: %d \n" state.multiplier;
-  Printf.printf "Score: %d \n" state.score;
   begin match typ with
   | GKoopaShell | RKoopaShell ->
       let r2 = evolve_enemy o1.dir typ s2 o2 context in
@@ -85,7 +85,7 @@ let player_attack_enemy s1 o1 typ s2 o2 state context =
   end
 
 (*enemy_attack_player is used when an enemy kills a player.*)
-let enemy_attack_player s1 o1 t2 s2 o2 context =
+let enemy_attack_player s1 (o1:Object.obj) t2 s2 (o2:Object.obj) context =
   o1.invuln <- invuln;
   begin match t2 with
   | GKoopaShell |RKoopaShell ->
@@ -242,7 +242,6 @@ let update_collidable state (collid:Object.collidable) all_collids =
     evolved
   end else []
 
-(*translate_keys is used for event listening*)
 let translate_keys () =
   let k = pressed_keys in
   let ctrls = [(k.left,CLeft);(k.right,CRight);(k.up,CUp);(k.down,CDown)] in
@@ -250,7 +249,7 @@ let translate_keys () =
 
 (*run_update is used to update all of the collidables at once. Primarily used
  *as a wrapper method.*)
-let run_update state collid all_collids =
+let run_update_collid state collid all_collids =
   match collid with
   | Player(t,s,o) as p ->
       let keys = translate_keys () in
@@ -268,7 +267,15 @@ let run_update state collid all_collids =
       let obj = get_obj collid in
       let evolved = update_collidable state collid all_collids in
       if not obj.kill then (collid_objs := collid::(!collid_objs@evolved));
+      let new_parts = if obj.kill then Object.kill collid state.ctx else [] in
+      particles := !particles @ new_parts;
       collid
+
+let run_update_particle state part =
+  Particle.process part;
+  let x = part.pos.x -. state.vpt.pos.x and y = part.pos.y -. state.vpt.pos.y in
+  Draw.render part.params.sprite (x,y);
+  if not part.kill then particles := part :: !particles
 
 (*update_loop is constantly being called to check for collisions and to
  *update each of the objects in the game.*)
@@ -287,31 +294,33 @@ let update_loop canvas objs =
       multiplier = 1;
       game_over = false;
   } in
-  let rec update_helper time state player objs  =
-      if state.game_over = true then game_over state else
-      ( collid_objs := [];
+  let rec update_helper time state player objs parts =
+      if state.game_over = true then game_over state else begin
+        collid_objs := [];
+        particles := [];
 
-      let fps = calc_fps !last_time time in
-      last_time := time;
+        let fps = calc_fps !last_time time in
+        last_time := time;
 
-      broad_cache := objs;
+        broad_cache := objs;
 
-      Draw.clear_canvas canvas;
+        Draw.clear_canvas canvas;
 
-      (* Parallax background *)
-      let vpos_x_int = int_of_float (state.vpt.pos.x /. 5.)  in
-      let bgd_width = int_of_float (fst state.bgd.params.frame_size) in
-      Draw.draw_bgd state.bgd (float_of_int (vpos_x_int mod bgd_width));
+        (* Parallax background *)
+        let vpos_x_int = int_of_float (state.vpt.pos.x /. 5.)  in
+        let bgd_width = int_of_float (fst state.bgd.params.frame_size) in
+        Draw.draw_bgd state.bgd (float_of_int (vpos_x_int mod bgd_width));
 
-      let player = run_update state player objs in
-      let state = {state with vpt = Viewport.update state.vpt (get_obj player).pos} in
-      List.iter (fun obj -> ignore (run_update state obj objs)) objs ;
-
-      Draw.fps canvas fps;
-      Draw.hud canvas state.score state.coins;
-      ignore Dom_html.window##requestAnimationFrame(
-      Js.wrap_callback (fun (t:float) -> update_helper t state player !collid_objs)))
-      in update_helper 0. state player objs
+        let player = run_update_collid state player objs in
+        let state = {state with vpt = Viewport.update state.vpt (get_obj player).pos} in
+        List.iter (fun obj -> ignore (run_update_collid state obj objs)) objs ;
+        List.iter (fun part -> run_update_particle state part) parts;
+        Draw.fps canvas fps;
+        Draw.hud canvas state.score state.coins;
+        ignore Dom_html.window##requestAnimationFrame(
+        Js.wrap_callback (fun (t:float) -> update_helper t state player !collid_objs !particles))
+      end
+  in update_helper 0. state player objs []
 
 let keydown evt =
   let () = match evt##keyCode with

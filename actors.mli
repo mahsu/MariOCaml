@@ -30,12 +30,18 @@ type block_typ =
   | QBlockUsed
   | Brick
   | UnBBlock
+  | Cloud
 
 type player_typ =
   | Standing
   | Jumping
   | Running
   | Crouching
+
+type part_typ =
+  | GoombaSquish
+  | BrickChunkL
+  | BrickChunkR
 
 (*type unbblock_typ =
   | Wood

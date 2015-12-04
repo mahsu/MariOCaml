@@ -1,5 +1,6 @@
 open Sprite
 open Actors
+open Particle
 
 let friction = 0.85
 let gravity = 0.2
@@ -47,9 +48,6 @@ type collidable =
   | Item of item_typ * sprite * obj
   | Block of block_typ * sprite * obj
 
-type noncollidable =
-  (*| Dead of dead_type * sprite*)
-  | Scenery of sprite * obj
 
 (*setup_obj is used to set gravity and speed, with default values true and 1.*)
 let setup_obj ?anim:(anim=true) ?g:(has_gravity=true) ?spd:(speed=1.) () =
@@ -87,6 +85,7 @@ let make_block = function
   | QBlockUsed -> setup_obj ~g:false ()
   | Brick -> setup_obj ~g:false ()
   | UnBBlock -> setup_obj ~g:false ()
+  | Cloud -> setup_obj ~g: false ()
 
 let make_type = function
   | SPlayer(pt,t) -> make_player ()
@@ -199,7 +198,8 @@ let update_player player keys context =
   let pl_typ = if player.health <= 1 then SmallM else BigM in
   if not prev_jumping && player.jumping
   then Some (pl_typ, (Sprite.make (SPlayer(pl_typ,Jumping)) player.dir context))
-  else if prev_dir<>player.dir || (prev_vx=0. && (abs_float player.vel.x) > 0.) && not player.jumping
+  else if prev_dir<>player.dir || (prev_vx=0. && (abs_float player.vel.x) > 0.)
+          && not player.jumping
   then Some (pl_typ, (Sprite.make (SPlayer(pl_typ,Running)) player.dir context))
   else if prev_dir <> player.dir && player.jumping && prev_jumping
   then Some (pl_typ, (Sprite.make (SPlayer(pl_typ,Jumping)) player.dir context))
@@ -348,5 +348,15 @@ let check_collision c1 c2 =
     end
   end else None
 
-let kill = function
+let kill collid ctx = 
+  match collid with
+  | Enemy(t,s,o) -> 
+      begin match t with
+      | Goomba -> [Particle.make GoombaSquish (o.pos.x,o.pos.y) ctx]
+      | _ -> []
+      end
+  | Item(t,s,o) ->
+      begin match t with
+      | _ -> []
+      end
   | _ -> []
