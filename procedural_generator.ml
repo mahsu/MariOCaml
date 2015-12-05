@@ -94,6 +94,17 @@ let rec generate_clouds cbx cby typ num =
   if(num = 0) then []
   else [(typ,(cbx, cby))]@generate_clouds (cbx+.1.) cby typ (num-1)
 
+(*Generates an obj_coord list (typ, coordinates) of items to be placed.*)
+let rec generate_items (block_coord: obj_coord list) : obj_coord list =
+  let place_coin = Random.int 2 in
+  match block_coord with
+  |[] -> []
+  |h::t ->  if(place_coin = 0) then
+              let xc = fst(snd h) in
+              let yc = snd(snd h) in
+              [(0,(16.*.xc,16.*.(yc-.1.)))]@generate_items t
+            else generate_items t
+
 (*Chooses the form of the blocks to be placed.
 * When called, leaves a 1 block gap from canvas size.
 * 1. If current xblock or yblock is greater than canvas width or height
@@ -110,6 +121,7 @@ let choose_block_pattern (blockw:float) (blockh: float) (cbx:float) (cby:float)
   else
     let block_typ = Random.int 4 in
     let stair_typ = Random.int 2 in
+    let obj_coord =
     match prob with
     |0 -> if(blockw -. cbx = 2.) then [(block_typ, (cbx, cby));
             (block_typ,(cbx +. 1., cby));(block_typ,(cbx +. 2., cby))]
@@ -123,20 +135,22 @@ let choose_block_pattern (blockw:float) (blockh: float) (cbx:float) (cby:float)
           else []
     |3 -> if(stair_typ = 0 && blockh -. cby > 3.) then
           generate_airdown_stairs cbx cby stair_typ
-          else generate_airup_stairs cbx cby stair_typ
+          else if (blockh-.cby>2.) then generate_airup_stairs cbx cby stair_typ
+          else [(stair_typ,(cbx, cby))]
     |4 -> if ((cby +. 3.) -. blockh = 2.) then [(stair_typ,(cbx, cby))]
           else if ((cby +. 3.) -. blockh = 1.) then [(stair_typ, (cbx,cby));
           (stair_typ, (cbx, cby +. 1.))]
           else [(stair_typ,(cbx, cby)); (stair_typ,(cbx, cby +. 1.));
           (stair_typ,(cbx, cby +. 2.))]
     |5 -> [(3,(cbx, cby))]
-    |_ -> failwith "Shouldn't reach here"
+    |_ -> failwith "Shouldn't reach here" in
+    obj_coord
 
 (*Generates an obj_coord list (typ, coordinates) of enemies to be placed.*)
 let rec generate_enemies (blockw: float) (blockh: float) (cbx: float)
                     (cby: float) (acc: obj_coord list) =
-  if(cbx > blockw) then []
-  else if (cby > (blockh-. 1.)) ||  cbx < 10. then
+  if(cbx > (blockw-.32.)) then []
+  else if (cby > (blockh-. 1.) ||  cbx < 15.) then
     generate_enemies blockw blockh (cbx +. 1.) 0. acc
   else if(mem_loc (cbx, cby) acc || cby = 0.) then
     generate_enemies blockw blockh cbx (cby+.1.) acc
@@ -151,7 +165,7 @@ let rec generate_enemies (blockw: float) (blockh: float) (cbx: float)
 (*Generates an obj_coord list (typ, coordinates) of blocks to be placed.*)
 let rec generate_block_locs (blockw: float) (blockh: float) (cbx: float)
                     (cby: float) (acc: obj_coord list) : obj_coord list =
-  if(cbx > blockw) then acc
+  if(blockw-.cbx<33.) then acc
   else if (cby > (blockh-. 1.)) then
     generate_block_locs blockw blockh (cbx+.1.) 0. acc
   else if(mem_loc (cbx, cby) acc || cby = 0.) then
@@ -166,10 +180,7 @@ let rec generate_block_locs (blockw: float) (blockh: float) (cbx: float)
         generate_block_locs blockw blockh cbx (cby+.1.) called_acc
       else generate_block_locs blockw blockh cbx (cby+.1.) acc
 
-(*Generates an obj_coord list (typ, coordinates) of items to be placed.*)
-let rec generate_items (blockw: float) (blockh: float) (cbx:float)
-                       (cby: float) (acc: obj_coord list) : obj_coord list =
-  if(cbx > blockw) then []
+  (*if(cbx > blockw) then []
   else if (cby > (blockh -. 1.)) then
     generate_items blockw blockh (cbx +. 1.) 0. acc
   else if (mem_loc (cbx, cby) acc) then
@@ -180,12 +191,12 @@ let rec generate_items (blockw: float) (blockh: float) (cbx:float)
       if(prob < item_prob) then
         let item = [(0,(cbx*.16.,cby*.16.))] in
         item@(generate_items blockw blockh cbx (cby +. 1.) acc)
-      else generate_items blockw blockh cbx (cby +. 1.) acc
+      else generate_items blockw blockh cbx (cby +. 1.) acc*)
 
 let generate_panel (context:Dom_html.canvasRenderingContext2D Js.t)
                    (blockw: float) (blockh: float) : collidable =
   let ob = Object.spawn (SBlock Panel) context
-    ((blockw*.16.)-.100., (blockh *. 16.)/.2.) in
+    ((blockw*.16.)-.256., (blockh *. 16.)*.2./.3.) in
   ob
 
 (*Generates the list of brick locations needed to display the ground.
@@ -197,7 +208,7 @@ let rec generate_ground (blockw:float) (blockh:float) (inc:float)
     if(inc > 10.) then
       let skip = Random.int 10 in
       let newacc = acc@[(4, (inc*. 16.,blockh *. 16.))] in
-      if (skip = 7) then generate_ground blockw blockh (inc +. 1.) acc
+      if (skip = 7 && blockw-.inc>32.) then generate_ground blockw blockh (inc +. 1.) acc
       else  generate_ground blockw blockh (inc +. 1.) newacc
     else let newacc = acc@[(4, (inc*. 16.,blockh *. 16.))] in
       generate_ground blockw blockh (inc +. 1.) newacc
@@ -247,11 +258,15 @@ let generate_helper (blockw:float) (blockh:float) (cx:float) (cy:float)
   let all_blocks = obj_converted_block_locs@obj_converted_ground_blocks in
   let enemy_locs = generate_enemies blockw blockh 0. 0. block_locations in
   let obj_converted_enemies = convert_to_enemy_obj enemy_locs context in
-  let all_taken = block_locations@enemy_locs in
-  let item_locs = generate_items blockw blockh 0. 0. all_taken in
-  let obj_converted_items = convert_to_item_obj item_locs context in
+  (*let all_taken = block_locations@enemy_locs in*)
+  (*let item_locs = generate_items blockw blockh 0. 0. all_taken in*)
+ (* let obj_converted_items = convert_to_item_obj item_locs context in*)
+  let coin_locs = generate_items block_locs in
+  let undup_coin_locs = avoid_overlap coin_locs converted_block_locs in
+  let coin_objects = convert_to_item_obj undup_coin_locs context in
   let obj_panel = generate_panel context blockw blockh in
-  all_blocks@obj_converted_enemies@obj_converted_items@[obj_panel]
+  all_blocks@obj_converted_enemies@coin_objects@[obj_panel]
+ (* all_blocks@obj_converted_enemies@obj_converted_items@[obj_panel]*)
 
 (*Main function called to procedurally generate the level map.*)
 let generate (w:float) (h:float)
