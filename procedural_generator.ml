@@ -3,16 +3,6 @@ open Object
 
 type obj_coord =  int * (float * float)
 
-(*Set boundary variables*)
-(*Max height Mario can jump*)
-let max_jump = 3;;
-
-(*Max distance Mario can jump*)
-let max_dist = 3;;
-
-(*Height of ground based on number of grids*)
-let ground_height = 2;;
-
 (*Canvas is 512 by 256 (w*h) -> 32 by 16 blocks
 * Let the first generaed map just be of size 5 by 5 blocks *)
 
@@ -94,16 +84,16 @@ let rec generate_clouds cbx cby typ num =
   if(num = 0) then []
   else [(typ,(cbx, cby))]@generate_clouds (cbx+.1.) cby typ (num-1)
 
-(*Generates an obj_coord list (typ, coordinates) of items to be placed.*)
-let rec generate_items (block_coord: obj_coord list) : obj_coord list =
+(*Generates an obj_coord list (typ, coordinates) of coins to be placed.*)
+let rec generate_coins (block_coord: obj_coord list) : obj_coord list =
   let place_coin = Random.int 2 in
   match block_coord with
   |[] -> []
   |h::t ->  if(place_coin = 0) then
               let xc = fst(snd h) in
               let yc = snd(snd h) in
-              [(0,(16.*.xc,16.*.(yc-.1.)))]@generate_items t
-            else generate_items t
+              [(0,(16.*.xc,16.*.(yc-.1.)))]@generate_coins t
+            else generate_coins t
 
 (*Chooses the form of the blocks to be placed.
 * When called, leaves a 1 block gap from canvas size.
@@ -180,19 +170,7 @@ let rec generate_block_locs (blockw: float) (blockh: float) (cbx: float)
         generate_block_locs blockw blockh cbx (cby+.1.) called_acc
       else generate_block_locs blockw blockh cbx (cby+.1.) acc
 
-  (*if(cbx > blockw) then []
-  else if (cby > (blockh -. 1.)) then
-    generate_items blockw blockh (cbx +. 1.) 0. acc
-  else if (mem_loc (cbx, cby) acc) then
-    generate_items blockw blockh cbx (cby +. 1.) acc
-  else
-    let prob = Random.int 100 in
-    let item_prob = 10 in
-      if(prob < item_prob) then
-        let item = [(0,(cbx*.16.,cby*.16.))] in
-        item@(generate_items blockw blockh cbx (cby +. 1.) acc)
-      else generate_items blockw blockh cbx (cby +. 1.) acc*)
-
+(*Generates the ending item panel in order to end the game.*)
 let generate_panel (context:Dom_html.canvasRenderingContext2D Js.t)
                    (blockw: float) (blockh: float) : collidable =
   let ob = Object.spawn (SBlock Panel) context
@@ -235,14 +213,15 @@ let rec convert_to_enemy_obj (lst:obj_coord list)
     let ob = Object.spawn (SEnemy senemy_typ) context (snd h) in
     [ob]@(convert_to_enemy_obj t context)
 
-let rec convert_to_item_obj (lst:obj_coord list)
+(*Converts the list of coordinates into a list of Coin objects*)
+let rec convert_to_coin_obj (lst:obj_coord list)
             (context:Dom_html.canvasRenderingContext2D Js.t) : collidable list =
   match lst with
   |[] -> []
   |h::t ->
     let sitem_typ = Coin in
     let ob = Object.spawn (SItem sitem_typ) context (snd h) in
-    [ob]@(convert_to_item_obj t context)
+    [ob]@(convert_to_coin_obj t context)
 
 (*Procedurally generates a map given canvas width, height and context*)
 let generate_helper (blockw:float) (blockh:float) (cx:float) (cy:float)
@@ -258,15 +237,11 @@ let generate_helper (blockw:float) (blockh:float) (cx:float) (cy:float)
   let all_blocks = obj_converted_block_locs@obj_converted_ground_blocks in
   let enemy_locs = generate_enemies blockw blockh 0. 0. block_locations in
   let obj_converted_enemies = convert_to_enemy_obj enemy_locs context in
-  (*let all_taken = block_locations@enemy_locs in*)
-  (*let item_locs = generate_items blockw blockh 0. 0. all_taken in*)
- (* let obj_converted_items = convert_to_item_obj item_locs context in*)
-  let coin_locs = generate_items block_locs in
+  let coin_locs = generate_coins block_locs in
   let undup_coin_locs = avoid_overlap coin_locs converted_block_locs in
-  let coin_objects = convert_to_item_obj undup_coin_locs context in
+  let coin_objects = convert_to_coin_obj undup_coin_locs context in
   let obj_panel = generate_panel context blockw blockh in
   all_blocks@obj_converted_enemies@coin_objects@[obj_panel]
- (* all_blocks@obj_converted_enemies@obj_converted_items@[obj_panel]*)
 
 (*Main function called to procedurally generate the level map.*)
 let generate (w:float) (h:float)

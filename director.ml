@@ -55,6 +55,7 @@ let game_over state =
   state.ctx##fillText (Js.string ("You win!"), 180., 128.);
   failwith "Game over."
 
+(*gave_loss displays a black screen stating a loss to finish that level play.*)
 let game_loss state =
   state.ctx##rect (0.,0.,512.,512.);
   state.ctx##fillStyle <- (Js.string "black");
@@ -86,7 +87,7 @@ let player_attack_enemy s1 o1 typ s2 o2 state context =
       let r2 = evolve_enemy o1.dir typ s2 o2 context in
       o1.vel.y <- ~-. dampen_jump;
       o1.pos.y <- o1.pos.y -. 5.;
-      (None,r2)      
+      (None,r2)
   | _ ->
       dec_health o2;
       o1.vel.y <- ~-. dampen_jump;
@@ -145,11 +146,11 @@ let col_enemy_enemy t1 s1 o1 t2 s2 o2 dir =
 
 let obj_at_pos dir (pos: xy) (collids: Object.collidable list) : Object.collidable list =
   match dir with
-  | Left -> List.filter (fun (col: Object.collidable) -> 
+  | Left -> List.filter (fun (col: Object.collidable) ->
       (get_obj col).pos.y = pos.y && (get_obj col).pos.x = pos.x -. 16.)
             collids
-  | _ -> List.filter (fun (col: Object.collidable) -> 
-      (get_obj col).pos.y = pos.y && (get_obj col).pos.x = pos.x +. 16.) 
+  | _ -> List.filter (fun (col: Object.collidable) ->
+      (get_obj col).pos.y = pos.y && (get_obj col).pos.x = pos.x +. 16.)
             collids
 
 let is_block dir pos collids =
@@ -169,7 +170,7 @@ let is_rkoopa collid =
  * a new item spawned as a result of the first collidable. None indicates that
  * no new item should be spawned. Transformations to existing objects occur
  * mutably, as many changes are side-effectual.*)
-let process_collision (dir : Actors.dir_2d) (c1 : Object.collidable) 
+let process_collision (dir : Actors.dir_2d) (c1 : Object.collidable)
   (c2 : Object.collidable) (state : st) : (Object.collidable option * Object.collidable option) =
   let context = state.ctx in
   match (c1, c2, dir) with
@@ -182,7 +183,7 @@ let process_collision (dir : Actors.dir_2d) (c1 : Object.collidable)
   | (Player(_,s1,o1), Item(t2,s2,o2), _)
   | (Item(t2,s2,o2), Player(_,s1,o1), _) ->
       begin match t2 with
-      | Mushroom -> 
+      | Mushroom ->
           dec_health o2;
           (if o1.health = 2 then () else o1.health <- o1.health + 1);
           o1.vel.x <- 0.;
@@ -271,7 +272,7 @@ let rec narrow_phase c cs state =
             | _ -> is_block c_obj.dir {x= c_obj.pos.x +. 16.; y= c_obj.pos.y -. 27.} cs
             end else false) then rev_dir c_obj RKoopa (Object.get_sprite c) else
             ());*)
-            process_collision dir c h state 
+            process_collision dir c h state
           end
           else (None,None)
       end else (None,None) in
@@ -285,7 +286,7 @@ let rec narrow_phase c cs state =
   in narrow_helper c cs state []
 
 (* This is an optimization setp to determine which objects require narrow phase
- * checking. This excludes static collidables, allowing collision to only be 
+ * checking. This excludes static collidables, allowing collision to only be
  * checked with moving objects. This method is called once per collidable.
  * Collision detection proceeds as follows:
    * 1. Broad phase - filter collidables that cannot possibly collide with
@@ -323,10 +324,10 @@ let update_collidable state (collid:Object.collidable) all_collids =
     (* Render and update animation *)
     let vpt_adj_xy = coord_to_viewport state.vpt obj.pos in
     Draw.render spr (vpt_adj_xy.x,vpt_adj_xy.y);
-    if check_bbox_enabled() 
+    if check_bbox_enabled()
       then Draw.render_bbox spr (vpt_adj_xy.x,vpt_adj_xy.y);
 
-    if obj.vel.x <> 0. || not (is_enemy collid) 
+    if obj.vel.x <> 0. || not (is_enemy collid)
       then Sprite.update_animation spr;
     evolved
   end else []
@@ -403,14 +404,14 @@ let update_loop canvas (player,objs) map_dim =
         let player = run_update_collid state player objs in
 
         if (get_obj player).kill = true then game_loss state else begin
-          let state = 
+          let state =
             {state with vpt = Viewport.update state.vpt (get_obj player).pos} in
           List.iter (fun obj -> ignore (run_update_collid state obj objs)) objs;
           List.iter (fun part -> run_update_particle state part) parts;
           Draw.fps canvas fps;
           Draw.hud canvas state.score state.coins;
           ignore Dom_html.window##requestAnimationFrame(
-            Js.wrap_callback (fun (t:float) -> 
+            Js.wrap_callback (fun (t:float) ->
               update_helper t state player !collid_objs !particles))
         end
       end
@@ -418,8 +419,8 @@ let update_loop canvas (player,objs) map_dim =
 
 let keydown evt =
   let () = match evt##keyCode with
-  | 38 | 32 | 87 -> pressed_keys.up <- true 
-  | 39 | 68 -> pressed_keys.right <- true 
+  | 38 | 32 | 87 -> pressed_keys.up <- true
+  | 39 | 68 -> pressed_keys.right <- true
   | 37 | 65 -> pressed_keys.left <- true
   | 40 | 83 -> pressed_keys.down <- true
   | 66 -> pressed_keys.bbox <- (pressed_keys.bbox + 1) mod 2
