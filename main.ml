@@ -6,7 +6,7 @@ module Pg = Procedural_generator
 
 let loadCount =  ref 0
 let imgsToLoad = 4
-let level_width = 2500.
+let level_width = 2400.
 let level_height = 256.
 
 let get_width () = level_width
