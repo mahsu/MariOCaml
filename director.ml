@@ -371,9 +371,10 @@ let run_update_particle state part =
 (*update_loop is constantly being called to check for collisions and to
  *update each of the objects in the game.*)
 let update_loop canvas (player,objs) map_dim =
+  let scale = 1. in
   let ctx = canvas##getContext (Dom_html._2d_) in
-  let cwidth = float_of_int canvas##width in
-  let cheight = float_of_int canvas##height in
+  let cwidth = (float_of_int canvas##width) /. scale in
+  let cheight = (float_of_int canvas##height) /. scale in
   let viewport = Viewport.make (cwidth,cheight) map_dim in
   let state = {
       bgd = Sprite.make_bgd ctx;
@@ -385,6 +386,7 @@ let update_loop canvas (player,objs) map_dim =
       map = snd map_dim;
       game_over = false;
   } in
+  state.ctx##scale(scale,scale);
   let rec update_helper time state player objs parts =
       if state.game_over = true then game_over state else begin
         collid_objs := [];
