@@ -1,36 +1,92 @@
 <!DOCTYPE html>
 <html>
   <head>
-  <link href='https://fonts.googleapis.com/css?family=Press+Start+2P' rel='stylesheet' type='text/css'>
-  <link href='https://fonts.googleapis.com/css?family=Droid+Sans:400,700' rel='stylesheet' type='text/css'>
+  <!--<link href='https://fonts.googleapis.com/css?family=Press+Start+2P' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Droid+Sans:400,700' rel='stylesheet' type='text/css'>-->
+  <link rel="stylesheet" href="css/keys.css" type="text/css" />
     <style>
+      @font-face {
+        font-family: 'Press Start 2P';
+        src: url(fonts/PressStart2P-Regular.ttf);
+      }
+      
+      @font-face {
+        font-family: 'Droid Sans';
+        src: url(fonts/DroidSans.ttf);
+      }
+      
       html {
-        display: table;
         width: 100%;
       }
 
       body {
-        margin: 0 auto;
+        background-color: #2c3e50;
+        margin: 0 0;
         padding: 0;
-        text-align: center;
-        display: table-cell;
         font-family: 'Droid Sans' 'sans-serif';
+        color: #bdc3c7;
       }
 
+      .center {
+        width: 50%;
+        display: block;
+        margin: auto;
+        padding: 0;
+      }
+      
       h1, p {
         text-align: center
       }
 
       #canvas {
+        padding: 0;
+        margin: auto;
+        display: block;
         border-style: solid;
         border-width: 1px;
         font-family: 'Press Start 2P';
       }
+      
+      kbd {
+        font-size: 8pt;
+      }
     </style>
   </head>
   <body>
+  <div class="center">
     <h1>MariOcaml</h1>
     <canvas id="canvas" width="512" height="256"></canvas>
+  </div>
+  <div class="center" style="padding:5px">
+    <h3>How to play:</h3>
+    <table>
+      <tr>
+        <td>
+          <kbd class="light">&larr;</kbd>/<kbd class="light">A</kbd>&nbsp
+          <kbd class="light">&rarr;</kbd>/<kbd class="light">D</kbd>
+        </td>
+        <td>Move left/right</td>
+      </tr>
+      <tr>
+        <td>
+          <kbd class="light">&uarr;</kbd>/<kbd class="light">SPACE</kbd>/<kbd class="light">W</kbd>&nbsp
+        </td>
+        <td>Jump</td>
+      </tr>
+      <tr>
+        <td>
+          <kbd class="light">&darr;</kbd>&nbsp;<kbd class="light">D</kbd>&nbsp
+        </td>
+        <td>Crouch</td>
+      </tr>
+      <tr>
+        <td>
+          <kbd class="light">B</kbd>&nbsp
+        </td>
+        <td>Toggle draw bounding boxes</td>
+      </tr>
+    </table>
+  </div>
         <script src="_build/main.d.js"></script>
   </body>
 </html>

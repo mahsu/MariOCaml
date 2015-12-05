@@ -2,7 +2,7 @@ open Sprite
 open Actors
 open Particle
 
-let friction = 0.85
+let friction = 0.9
 let gravity = 0.2
 let max_y_vel = 4.5
 let player_speed = 2.8
@@ -51,7 +51,7 @@ type collidable =
 
 
 (*setup_obj is used to set gravity and speed, with default values true and 1.*)
-let setup_obj ?anim:(anim=true) ?g:(has_gravity=true) ?spd:(speed=1.) () =
+let setup_obj ?g:(has_gravity=true) ?spd:(speed=1.) () =
   {
     has_gravity;
     speed;
@@ -65,7 +65,9 @@ let set_vel_to_speed obj =
   | Left -> obj.vel.x <- ~-.speed
   | Right -> obj.vel.x <- speed
 
-(*The following make functions all set the objects' has_gravity and speed.*)
+(* The following make functions all set the objects' has_gravity and speed,
+ * returning an [obj_params] that can be directly plugged into the [obj] 
+ * during creation. *)
 let make_player () = setup_obj ~spd:player_speed ()
 
 let make_item = function
@@ -78,8 +80,8 @@ let make_enemy = function
   | Goomba -> setup_obj ()
   | GKoopa -> setup_obj ()
   | RKoopa -> setup_obj ()
-  | GKoopaShell -> setup_obj ~spd:3.2 ()
-  | RKoopaShell -> setup_obj ~spd:3.2 ()
+  | GKoopaShell -> setup_obj ~spd:3. ()
+  | RKoopaShell -> setup_obj ~spd:3. ()
 
 let make_block = function
   | QBlock i -> setup_obj ~g:false ()
@@ -160,13 +162,13 @@ let update_player_keys (player : obj) (controls : controls) : unit =
   | CLeft ->
     if not player.crouch then begin
       if player.vel.x > ~-.(player.params.speed)
-      then player.vel.x <- player.vel.x -. (0.5 -. lr_acc);
+      then player.vel.x <- player.vel.x -. (0.4 -. lr_acc);
       player.dir <- Left
     end
   | CRight ->
     if not player.crouch then begin
       if player.vel.x < player.params.speed
-      then player.vel.x <- player.vel.x +. (0.5 +. lr_acc);
+      then player.vel.x <- player.vel.x +. (0.4 +. lr_acc);
       player.dir <- Right
     end
   | CUp ->
@@ -193,7 +195,6 @@ let normalize_pos pos (p1:Sprite.sprite_params) (p2:Sprite.sprite_params) =
 (*Update plyaer is constantly being called to check for if big or small
  *Mario sprites/collidables should be used.*)
 let update_player player keys context =
-  Printf.printf "%i\n" player.invuln;
   let prev_jumping = player.jumping in
   let prev_dir = player.dir and prev_vx = abs_float player.vel.x in
   List.iter (update_player_keys player) keys;
@@ -326,7 +327,7 @@ let get_aabb obj  =
     half = {x=sx/.2.;y=sy/.2.};
   }
 
-let collision_cond c1 c2 =
+let col_bypass c1 c2 =
   let o1 = get_obj c1 and o2 = get_obj c2 in
   let ctypes = match(c1,c2) with
   | (Item(_,_,_), Enemy(_,_,_))
@@ -342,7 +343,7 @@ let collision_cond c1 c2 =
 let check_collision c1 c2 =
   let b1 = get_aabb c1 and b2 = get_aabb c2 in
   let o1 = get_obj c1 in
-  if collision_cond c1 c2 then None else
+  if col_bypass c1 c2 then None else
   let vx = (b1.center.x) -. (b2.center.x) in
   let vy = (b1.center.y) -. (b2.center.y) in
   let hwidths = (b1.half.x) +. (b2.half.x) in
@@ -382,7 +383,7 @@ let kill collid ctx =
       end
   | Item(t,s,o) ->
       begin match t with
-      | Mushroom -> [Particle.make_score 1000 (o.pos.x,o.pos.y) ctx]
+      | Mushroom -> [Particle.make_score o.score (o.pos.x,o.pos.y) ctx]
       | _ -> []
       end
   | _ -> []

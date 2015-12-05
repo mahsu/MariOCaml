@@ -108,6 +108,7 @@ let make_particle = function
   | GoombaSquish -> setup_sprite "enemies.png" 1 0 (16.,16.) (0.,144.)
   | BrickChunkL -> setup_sprite "chunks.png" 1 0 (8.,8.) (0.,0.)
   | BrickChunkR -> setup_sprite "chunks.png" 1 0 (8.,8.) (8.,0.)
+  (*| MarioDead -> setup_sprite "mario-small.png" 1 0 (16.,16.)*)
   | Score100 -> setup_sprite "score.png" 1 0 (12.,8.) (0.,0.)
   | Score200 -> setup_sprite "score.png" 1 0 (12.,9.) (0.,9.)
   | Score400 -> setup_sprite "score.png" 1 0 (12.,9.) (0.,18.)

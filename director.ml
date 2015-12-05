@@ -4,13 +4,15 @@ open Actors
 open Viewport
 open Particle
 
-(*keys represents the arrow keys pressed via boolean*)
+(* Represents the values of relevant key bindings. *)
 type keys = {
   mutable left: bool;
   mutable right: bool;
   mutable up: bool;
   mutable down: bool;
+  mutable bbox: int;
 }
+
 
 (*st represents the state of the game. It includes a background sprite (e.g.,
  * (e.g., hills), a context (used for rendering onto the page), a viewport
@@ -36,14 +38,12 @@ let pressed_keys = {
   right = false;
   up = false;
   down = false;
+  bbox = 0;
 }
 
-(*collid_objs is a list of collidable objects that have to be checked. This
- *is used in a list, so must be a reference. last_time is used for calculating
- *fps. *)
-let collid_objs = ref []
-let particles = ref []
-let last_time = ref 0.
+let collid_objs = ref [] (* List of next iteration collidable objects *)
+let particles = ref [] (* List of next iteration particles *)
+let last_time = ref 0. (* Used for calculating fps *)
 
 (*game_over displays a black screen when you finish a game.*)
 let game_over state =
@@ -64,10 +64,12 @@ let game_loss state =
   state.ctx##fillText (Js.string ("GAME OVER. You lose!"), 60., 128.);
   failwith "Game over."
 
+(* Calculates fps as the difference between [t0] and [t1] *)
 let calc_fps t0 t1 =
   let delta = (t1 -. t0) /. 1000. in
   1. /. delta
 
+(* Adds [i] to the score in [state] *)
 let update_score state i =
   state.score <- state.score + i
 
@@ -84,7 +86,7 @@ let player_attack_enemy s1 o1 typ s2 o2 state context =
       let r2 = evolve_enemy o1.dir typ s2 o2 context in
       o1.vel.y <- ~-. dampen_jump;
       o1.pos.y <- o1.pos.y -. 5.;
-      (None,r2)
+      (None,r2)      
   | _ ->
       dec_health o2;
       o1.vel.y <- ~-. dampen_jump;
@@ -143,9 +145,12 @@ let col_enemy_enemy t1 s1 o1 t2 s2 o2 dir =
 
 let obj_at_pos dir (pos: xy) (collids: Object.collidable list) : Object.collidable list =
   match dir with
-  | Left -> (List.filter (fun (col: Object.collidable) -> (get_obj col).pos.y = pos.y && (get_obj col).pos.x = pos.x -. 16.)
-            collids)
-  | _ -> (List.filter (fun (col: Object.collidable) -> (get_obj col).pos.y = pos.y && (get_obj col).pos.x = pos.x +. 16.) collids)
+  | Left -> List.filter (fun (col: Object.collidable) -> 
+      (get_obj col).pos.y = pos.y && (get_obj col).pos.x = pos.x -. 16.)
+            collids
+  | _ -> List.filter (fun (col: Object.collidable) -> 
+      (get_obj col).pos.y = pos.y && (get_obj col).pos.x = pos.x +. 16.) 
+            collids
 
 let is_block dir pos collids =
   match obj_at_pos dir pos collids with
@@ -158,9 +163,14 @@ let is_rkoopa collid =
   | Enemy(RKoopa,_,_) -> true
   | _ -> false
 
-(*Process collision is called to match each of the possible collisions that
- *may occur. *)
-let process_collision dir c1 c2  state =
+(* Process collision is called to match each of the possible collisions that
+ * may occur. Returns a pair of collidable options, representing objects that
+ * were created from the existing ones. That is, the first element represents
+ * a new item spawned as a result of the first collidable. None indicates that
+ * no new item should be spawned. Transformations to existing objects occur
+ * mutably, as many changes are side-effectual.*)
+let process_collision (dir : Actors.dir_2d) (c1 : Object.collidable) 
+  (c2 : Object.collidable) (state : st) : (Object.collidable option * Object.collidable option) =
   let context = state.ctx in
   match (c1, c2, dir) with
   | (Player(_,s1,o1), Enemy(typ,s2,o2), South)
@@ -172,13 +182,17 @@ let process_collision dir c1 c2  state =
   | (Player(_,s1,o1), Item(t2,s2,o2), _)
   | (Item(t2,s2,o2), Player(_,s1,o1), _) ->
       begin match t2 with
-      | Mushroom -> dec_health o2;
-                    (if o1.health = 2 then () else o1.health <- o1.health + 1);
-                    o1.vel.x <- 0.; o1.vel.y <- 0.;
-                    update_score state 1000; (None, None)
+      | Mushroom -> 
+          dec_health o2;
+          (if o1.health = 2 then () else o1.health <- o1.health + 1);
+          o1.vel.x <- 0.;
+          o1.vel.y <- 0.;
+          update_score state 1000;
+          o2.score <- 1000;
+          (None, None)
       | Coin -> state.coins <- state.coins + 1; dec_health o2;
           update_score state 100;
-          Printf.printf "Coins: %d \n" state.coins; (None, None)
+          (None, None)
       | _ -> dec_health o2; update_score state 1000; (None, None)
       end
   | (Enemy(t1,s1,o1), Enemy(t2,s2,o2), dir) ->
@@ -193,7 +207,7 @@ let process_collision dir c1 c2  state =
     | (RKoopaShell, QBlock typ) | (GKoopaShell, QBlock typ) ->
         let updated_block = evolve_block o2 context in
         let spawned_item = spawn_above o1.dir o2 typ context in
-        collide_block dir o1; rev_dir o1 t1 s1;
+         rev_dir o1 t1 s1;
         (Some updated_block, Some spawned_item)
     | (_,_) ->
         rev_dir o1 t1 s1;
@@ -230,9 +244,11 @@ let process_collision dir c1 c2  state =
     end
   | (_, _, _) -> (None,None)
 
-let broad_cache = ref []
-let broad_phase collid =
-  !broad_cache
+let broad_phase collid all_collids state =
+  let obj = get_obj collid in
+  List.filter (fun c ->
+    in_viewport state.vpt obj.pos || is_player collid ||
+      out_of_viewport_below state.vpt obj.pos.y) all_collids
 
 (*narrow_phase of collision is used in order to continuously loop through
  *each of the collidable objects to constantly check if collisions are
@@ -248,14 +264,15 @@ let rec narrow_phase c cs state =
         | None -> (None,None)
         | Some dir ->
           if (get_obj h).id <> c_obj.id
-          then
-            ( (if (if is_rkoopa c then
+          then begin
+            (*( (if (if is_rkoopa c then
             begin match c_obj.dir with
             | Left -> is_block c_obj.dir {x= c_obj.pos.x -. 16.; y= c_obj.pos.y -. 27.} cs
             | _ -> is_block c_obj.dir {x= c_obj.pos.x +. 16.; y= c_obj.pos.y -. 27.} cs
             end else false) then rev_dir c_obj RKoopa (Object.get_sprite c) else
-            ());
-            process_collision dir c h state )
+            ());*)
+            process_collision dir c h state 
+          end
           else (None,None)
       end else (None,None) in
       let acc = match new_objs with
@@ -267,32 +284,50 @@ let rec narrow_phase c cs state =
       narrow_helper c t state acc
   in narrow_helper c cs state []
 
-let check_collisions collid state =
+(* This is an optimization setp to determine which objects require narrow phase
+ * checking. This excludes static collidables, allowing collision to only be 
+ * checked with moving objects. This method is called once per collidable.
+ * Collision detection proceeds as follows:
+   * 1. Broad phase - filter collidables that cannot possibly collide with
+   *    this object.
+   * 2. Narrow phase - compare against all objects to determine whether there
+   *    is a collision, and process the collision.
+ * This method returns a list of objects that are created, which should be
+ * added to the list of collidables for the next iteration.
+ * *)
+let check_collisions collid all_collids state =
   match collid with
   | Block(_,_,_) -> []
   | _ ->
-    let broad = broad_phase collid in
+    let broad = broad_phase collid all_collids state in
     narrow_phase collid broad state
 
-(*update_collidable is primarily used for updating animation*)
+(* Returns whether the bounding box should be drawn *)
+let check_bbox_enabled () = pressed_keys.bbox = 1
+
+(* update_collidable is the primary update method for collidable objects,
+ * checking the collision, updating the object, and drawing to the canvas.*)
 let update_collidable state (collid:Object.collidable) all_collids =
  (* TODO: optimize. Draw static elements only once *)
   let obj = Object.get_obj collid in
   let spr = Object.get_sprite collid in
-  obj.invuln <- if obj.invuln > 0 then obj.invuln-1 else 0;
+  obj.invuln <- if obj.invuln > 0 then obj.invuln - 1 else 0;
+  (* Prevent position from being updated outside of viewport *)
   let viewport_filter = in_viewport state.vpt obj.pos || is_player collid ||
       out_of_viewport_below state.vpt obj.pos.y in
   if not obj.kill &&  viewport_filter then begin
     obj.grounded <- false;
     Object.process_obj obj state.map;
     (* Run collision detection if moving object*)
-    let evolved = check_collisions collid state in
+    let evolved = check_collisions collid all_collids state in
     (* Render and update animation *)
     let vpt_adj_xy = coord_to_viewport state.vpt obj.pos in
     Draw.render spr (vpt_adj_xy.x,vpt_adj_xy.y);
-    Draw.render_bbox spr (vpt_adj_xy.x,vpt_adj_xy.y);
+    if check_bbox_enabled() 
+      then Draw.render_bbox spr (vpt_adj_xy.x,vpt_adj_xy.y);
 
-    if obj.vel.x <> 0. || not (is_enemy collid) then Sprite.update_animation spr;
+    if obj.vel.x <> 0. || not (is_enemy collid) 
+      then Sprite.update_animation spr;
     evolved
   end else []
 
@@ -301,8 +336,10 @@ let translate_keys () =
   let ctrls = [(k.left,CLeft);(k.right,CRight);(k.up,CUp);(k.down,CDown)] in
   List.fold_left (fun a x -> if fst x then (snd x)::a else a) [] ctrls
 
-(*run_update is used to update all of the collidables at once. Primarily used
- *as a wrapper method.*)
+(* run_update is used to update all of the collidables at once. Primarily used
+ * as a wrapper method. This method is necessary to differentiate between
+ * the player collidable and the remaining collidables, as special operations
+ * such as viewport centering only occur with the player.*)
 let run_update_collid state collid all_collids =
   match collid with
   | Player(t,s,o) as p ->
@@ -356,8 +393,6 @@ let update_loop canvas (player,objs) map_dim =
         let fps = calc_fps !last_time time in
         last_time := time;
 
-        broad_cache := objs;
-
         Draw.clear_canvas canvas;
 
         (* Parallax background *)
@@ -366,31 +401,36 @@ let update_loop canvas (player,objs) map_dim =
         Draw.draw_bgd state.bgd (float_of_int (vpos_x_int mod bgd_width));
 
         let player = run_update_collid state player objs in
-        if (get_obj player).kill = true then game_loss state else
-        (let state = {state with vpt = Viewport.update state.vpt (get_obj player).pos} in
-        List.iter (fun obj -> ignore (run_update_collid state obj objs)) objs ;
-        List.iter (fun part -> run_update_particle state part) parts;
-        Draw.fps canvas fps;
-        Draw.hud canvas state.score state.coins;
-        ignore Dom_html.window##requestAnimationFrame(
-        Js.wrap_callback (fun (t:float) -> update_helper t state player !collid_objs !particles)))
+
+        if (get_obj player).kill = true then game_loss state else begin
+          let state = 
+            {state with vpt = Viewport.update state.vpt (get_obj player).pos} in
+          List.iter (fun obj -> ignore (run_update_collid state obj objs)) objs;
+          List.iter (fun part -> run_update_particle state part) parts;
+          Draw.fps canvas fps;
+          Draw.hud canvas state.score state.coins;
+          ignore Dom_html.window##requestAnimationFrame(
+            Js.wrap_callback (fun (t:float) -> 
+              update_helper t state player !collid_objs !particles))
+        end
       end
   in update_helper 0. state player objs []
 
 let keydown evt =
   let () = match evt##keyCode with
-  | 38 | 32 -> pressed_keys.up <- true; print_endline  "Jump"
-  | 39 -> pressed_keys.right <- true; print_endline "Right"
-  | 37 -> pressed_keys.left <- true; print_endline "Left"
-  | 40 -> pressed_keys.down <- true; print_endline "Crouch"
+  | 38 | 32 | 87 -> pressed_keys.up <- true 
+  | 39 | 68 -> pressed_keys.right <- true 
+  | 37 | 65 -> pressed_keys.left <- true
+  | 40 | 83 -> pressed_keys.down <- true
+  | 66 -> pressed_keys.bbox <- (pressed_keys.bbox + 1) mod 2
   | _ -> ()
   in Js._true
 
 let keyup evt =
   let () = match evt##keyCode with
-  | 38 | 32 -> pressed_keys.up <- false
-  | 39 -> pressed_keys.right <- false
-  | 37 -> pressed_keys.left <- false
-  | 40 -> pressed_keys.down <- false
+  | 38 | 32 | 87 -> pressed_keys.up <- false
+  | 39 | 68 -> pressed_keys.right <- false
+  | 37 | 65 -> pressed_keys.left <- false
+  | 40 | 83 -> pressed_keys.down <- false
   | _ -> ()
   in Js._true
