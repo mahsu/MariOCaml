@@ -62,5 +62,3 @@ type spawn_typ =
   | SEnemy of enemy_typ
   | SItem of item_typ
   | SBlock of block_typ
-  (*| SGround of ground_typ*)
-

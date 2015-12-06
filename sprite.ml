@@ -2,7 +2,6 @@ open Actors
 
 type xy = float * float
 
-
 type sprite_params =
   {
     max_frames: int;
@@ -25,7 +24,7 @@ type sprite =
   }
 
 (*setup_sprite is used to initialize a sprite.*)
-let setup_sprite  ?loop:(loop=true) ?bb_off:(bbox_offset=(0.,0.)) 
+let setup_sprite  ?loop:(loop=true) ?bb_off:(bbox_offset=(0.,0.))
           ?bb_sz:(bbox_size=(0.,0.))
                  img_src max_frames max_ticks frame_size src_offset =
   let bbox_size = if bbox_size = (0.,0.) then frame_size else bbox_size in
@@ -43,6 +42,8 @@ let setup_sprite  ?loop:(loop=true) ?bb_off:(bbox_offset=(0.,0.))
 
 (*The following functions are used in order to define sprite animations
  *from their sprite sheets. Also creates bounding boxes if necessary.*)
+
+(*Sets sprite for small mario.*)
 let make_small_player (typ, dir) =
   match dir with
     (* 16x16 grid with 0x0 offset*)
@@ -59,6 +60,7 @@ let make_small_player (typ, dir) =
       | Crouching -> setup_sprite "mario-small.png" ~bb_off:(1.,5.) ~bb_sz:(14.,10.) 1 0 (16.,16.) (0.,64.)
       end
 
+(*Sets sprite for big mario.*)
 let make_big_player (typ, dir) =
   match dir with
   | Left -> begin match typ with
@@ -74,6 +76,7 @@ let make_big_player (typ, dir) =
     | Crouching -> setup_sprite "mario-big.png" 1 0 ~bb_off:(2.,10.) ~bb_sz:(13.,17.) (16.,27.) (32.,69.)
     end
 
+(*Sets sprites for enemies: Goomba, Red Koopa, Green Koopa.*)
 let make_enemy (typ, dir) =
   match (typ, dir) with
       | (Goomba,_) -> setup_sprite "enemies.png" ~bb_off:(1.,1.) ~bb_sz:(14.,14.) 2 10 (16.,16.) (0.,128.)
@@ -84,6 +87,7 @@ let make_enemy (typ, dir) =
       | (GKoopaShell,_) -> setup_sprite "enemies.png" ~bb_off:(2.,2.) ~bb_sz:(12.,13.) 4 10 (16.,16.) (0.,96.)
       | (RKoopaShell,_) -> setup_sprite "enemies.png" ~bb_off:(2.,2.) ~bb_sz:(12.,13.) 4 10 (16.,16.) (0.,32.)
 
+(*Sets sprites for items: coin, fireflower, mushroom, star.*)
 let make_item = function
   (* 16x16 grid with 0x0 offset *)
   | Coin -> setup_sprite "items.png" ~bb_off:(3.,0.) ~bb_sz:(12.,16.) 3 15 (16.,16.) (0.,80.)
@@ -91,6 +95,8 @@ let make_item = function
   | Mushroom -> setup_sprite "items.png" ~bb_off:(2.,0.) ~bb_sz: (12.,16.) 1 0 (16.,16.) (0.,0.)
   | Star -> setup_sprite "items.png" 1 0 (16.,16.) (16.,48.)
 
+(*Sets sprites for blocks: brick, question block, unbreakable block, cloud block
+* panel block, ground block.*)
 let make_block = function
   (* 16x16 grid with 0x0 offset *)
   | Brick -> setup_sprite "blocks.png" 5 10 (16.,16.) (0.,0.)
@@ -101,11 +107,12 @@ let make_block = function
   | Panel -> setup_sprite "panel.png" 3 15 (26., 26.) (0., 0.)
   | Ground -> setup_sprite "ground.png" 1 0 (16., 16.) (0., 32.)
 
+(*Sets sprites for particles, squished goomba, brick chunks (upon destruction
+* of brick), score text.*)
 let make_particle = function
   | GoombaSquish -> setup_sprite "enemies.png" 1 0 (16.,16.) (0.,144.)
   | BrickChunkL -> setup_sprite "chunks.png" 1 0 (8.,8.) (0.,0.)
   | BrickChunkR -> setup_sprite "chunks.png" 1 0 (8.,8.) (8.,0.)
-  (*| MarioDead -> setup_sprite "mario-small.png" 1 0 (16.,16.)*)
   | Score100 -> setup_sprite "score.png" 1 0 (12.,8.) (0.,0.)
   | Score200 -> setup_sprite "score.png" 1 0 (12.,9.) (0.,9.)
   | Score400 -> setup_sprite "score.png" 1 0 (12.,9.) (0.,18.)
@@ -115,11 +122,13 @@ let make_particle = function
   | Score4000 -> setup_sprite "score.png" 1 0 (14.,9.) (13.,18.)
   | Score8000 -> setup_sprite "score.png" 1 0 (14.,9.) (13.,27.)
 
+(*Calls to set sprite for either big or small mario.*)
 let make_player pt spr_type =
   match pt with
   | BigM -> make_big_player spr_type
   | SmallM -> make_small_player spr_type
 
+(*Calls to set sprites for each type of object.*)
 let make_type typ (dir : Actors.dir_1d) =
   match typ with
   | SPlayer(pt,st) -> make_player pt (st,dir)
