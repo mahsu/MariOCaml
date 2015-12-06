@@ -1,10 +1,10 @@
 open Actors
 open Object
 
+(*Holds obj typ and its coordinates. (int, (x-coord, y-coord))*)
 type obj_coord =  int * (float * float)
 
-(*Canvas is 512 by 256 (w*h) -> 32 by 16 blocks
-* Let the first generaed map just be of size 5 by 5 blocks *)
+(*Canvas is 512 by 256 (w*h) -> 32 by 16 blocks*)
 
 (*Checks if the given location checkloc is already part of the list of locations
 * in loclist.*)
@@ -77,8 +77,7 @@ let generate_ground_stairs cbx cby typ =
 * on the ground.*)
 let generate_airup_stairs cbx cby typ =
   let one = [(typ,(cbx, cby));(typ,(cbx +. 1., cby))] in
-  let two = [(typ,(cbx +. 3., cby -. 1.));
-            (typ,(cbx +. 4., cby -. 1.))] in
+  let two = [(typ,(cbx +. 3., cby -. 1.));(typ,(cbx +. 4., cby -. 1.))] in
   let three = [(typ,(cbx +. 4., cby -. 2.));(typ,(cbx +. 5., cby -. 2.));
               (typ,(cbx +. 6., cby -. 2.))] in
   one@two@three
@@ -88,8 +87,7 @@ let generate_airup_stairs cbx cby typ =
 let generate_airdown_stairs cbx cby typ =
   let three = [(typ,(cbx, cby));(typ,(cbx +. 1., cby));(typ,(cbx +. 2., cby))]in
   let two = [(typ,(cbx +. 2., cby +. 1.));(typ,(cbx +. 3., cby +. 1.))] in
-  let one = [(typ,(cbx +. 5., cby +. 2.));
-            (typ,(cbx +. 6., cby +. 2.))] in
+  let one = [(typ,(cbx +. 5., cby +. 2.));(typ,(cbx +. 6., cby +. 2.))] in
   three@two@one
 
 (*Generates a cloud block platform with some length num.*)
@@ -250,7 +248,9 @@ let rec convert_to_coin_obj (lst:obj_coord list)
     let ob = Object.spawn (SItem sitem_typ) context (snd h) in
     [ob]@(convert_to_coin_obj t context)
 
-(*Procedurally generates a map given canvas width, height and context*)
+(*Procedurally generates a list of collidables given canvas width, height and
+* context. Arguments block width (blockw) and block height (blockh) are in
+* block form, not pixels.*)
 let generate_helper (blockw:float) (blockh:float) (cx:float) (cy:float)
             (context:Dom_html.canvasRenderingContext2D Js.t) : collidable list =
   let block_locs = generate_block_locs blockw blockh 0. 0. [] in
@@ -277,7 +277,8 @@ let generate_helper (blockw:float) (blockh:float) (cx:float) (cy:float)
   let obj_panel = generate_panel context blockw blockh in
   all_blocks@obj_converted_enemies@coin_objects@obj_enemy_blocks@[obj_panel]
 
-(*Main function called to procedurally generate the level map.*)
+(*Main function called to procedurally generate the level map. w and h args
+* are in pixel form. Converts to block form to call generate_helper.*)
 let generate (w:float) (h:float)
                     (context:Dom_html.canvasRenderingContext2D Js.t) :
                     (collidable * collidable list) =
