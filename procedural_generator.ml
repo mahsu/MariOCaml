@@ -62,8 +62,8 @@ let generate_ground_stairs cbx cby typ =
 (*Generates a stair formation going upwards with the starting step not being
 * on the ground.*)
 let generate_airup_stairs cbx cby typ =
-  let one = [(typ,(cbx, cby));(typ,(cbx +. 1., cby));(typ,(cbx +. 2., cby))] in
-  let two = [(typ,(cbx +. 2., cby -. 1.));(typ,(cbx +. 3., cby -. 1.));
+  let one = [(typ,(cbx, cby));(typ,(cbx +. 1., cby))] in
+  let two = [(typ,(cbx +. 3., cby -. 1.));
             (typ,(cbx +. 4., cby -. 1.))] in
   let three = [(typ,(cbx +. 4., cby -. 2.));(typ,(cbx +. 5., cby -. 2.));
               (typ,(cbx +. 6., cby -. 2.))] in
@@ -73,9 +73,8 @@ let generate_airup_stairs cbx cby typ =
 * on the ground. *)
 let generate_airdown_stairs cbx cby typ =
   let three = [(typ,(cbx, cby));(typ,(cbx +. 1., cby));(typ,(cbx +. 2., cby))]in
-  let two = [(typ,(cbx +. 2., cby +. 1.));(typ,(cbx +. 3., cby +. 1.));
-            (typ,(cbx +. 4., cby +. 1.))] in
-  let one = [(typ,(cbx +. 4., cby +. 2.));(typ,(cbx +. 5., cby +. 2.));
+  let two = [(typ,(cbx +. 2., cby +. 1.));(typ,(cbx +. 3., cby +. 1.))] in
+  let one = [(typ,(cbx +. 5., cby +. 2.));
             (typ,(cbx +. 6., cby +. 2.))] in
   three@two@one
 
@@ -113,9 +112,9 @@ let choose_block_pattern (blockw:float) (blockh: float) (cbx:float) (cby:float)
     let stair_typ = Random.int 2 in
     let obj_coord =
     match prob with
-    |0 -> if(blockw -. cbx = 2.) then [(block_typ, (cbx, cby));
+    |0 -> if(blockw -. cbx > 2.) then [(block_typ, (cbx, cby));
             (block_typ,(cbx +. 1., cby));(block_typ,(cbx +. 2., cby))]
-          else if (blockw -. cbx = 1.) then [(block_typ,(cbx, cby));
+          else if (blockw -. cbx > 1.) then [(block_typ,(cbx, cby));
             (block_typ,(cbx +. 1., cby))]
           else [(block_typ,(cbx, cby))]
     |1 -> let num_clouds = (Random.int 5) + 5 in
@@ -136,7 +135,8 @@ let choose_block_pattern (blockw:float) (blockh: float) (cbx:float) (cby:float)
     |_ -> failwith "Shouldn't reach here" in
     obj_coord
 
-(*Generates an obj_coord list (typ, coordinates) of enemies to be placed.*)
+(*Generates an obj_coord list (typ, coordinates) of enemies to be placed on the
+* ground.*)
 let rec generate_enemies (blockw: float) (blockh: float) (cbx: float)
                     (cby: float) (acc: obj_coord list) =
   if(cbx > (blockw-.32.)) then []
@@ -145,12 +145,25 @@ let rec generate_enemies (blockw: float) (blockh: float) (cbx: float)
   else if(mem_loc (cbx, cby) acc || cby = 0.) then
     generate_enemies blockw blockh cbx (cby+.1.) acc
   else
-    let prob = Random.int 10 in
+    let prob = Random.int 30 in
     let enem_prob = 3 in
       if(prob < enem_prob && (blockh -. 1. = cby)) then
         let enemy = [(prob,(cbx*.16.,cby*.16.))] in
         enemy@(generate_enemies blockw blockh cbx (cby+.1.) acc)
       else generate_enemies blockw blockh cbx (cby+.1.) acc
+
+(*Generate an obj_coord list (typ, coordinates) of enemies to be places upon
+* the block objects.*)
+let rec generate_block_enemies (block_coord: obj_coord list) : obj_coord list =
+  let place_enemy = Random.int 30 in
+  let enemy_typ = Random.int 3 in
+  match block_coord with
+  |[] -> []
+  |h::t ->  if(place_enemy = 0) then
+              let xc = fst(snd h) in
+              let yc = snd(snd h) in
+              [(enemy_typ,(16.*.xc,16.*.(yc-.1.)))]@generate_block_enemies t
+            else generate_block_enemies t
 
 (*Generates an obj_coord list (typ, coordinates) of blocks to be placed.*)
 let rec generate_block_locs (blockw: float) (blockh: float) (cbx: float)
@@ -239,9 +252,14 @@ let generate_helper (blockw:float) (blockh:float) (cx:float) (cy:float)
   let obj_converted_enemies = convert_to_enemy_obj enemy_locs context in
   let coin_locs = generate_coins block_locs in
   let undup_coin_locs = avoid_overlap coin_locs converted_block_locs in
+  let converted_block_coin_locs = converted_block_locs@coin_locs in
+  let enemy_block_locs = generate_block_enemies block_locs in
+  let undup_enemy_block_locs = avoid_overlap enemy_block_locs
+    converted_block_coin_locs in
+  let obj_enemy_blocks = convert_to_enemy_obj undup_enemy_block_locs context in
   let coin_objects = convert_to_coin_obj undup_coin_locs context in
   let obj_panel = generate_panel context blockw blockh in
-  all_blocks@obj_converted_enemies@coin_objects@[obj_panel]
+  all_blocks@obj_converted_enemies@coin_objects@obj_enemy_blocks@[obj_panel]
 
 (*Main function called to procedurally generate the level map.*)
 let generate (w:float) (h:float)
