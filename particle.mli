@@ -1,11 +1,6 @@
 open Actors
 open Sprite
 
-type xy = {
-  mutable x: float;
-  mutable y: float;
-} 
-
 type part_params = {
   sprite: Sprite.sprite;
   rot: float;
@@ -15,9 +10,9 @@ type part_params = {
 type particle = {
   params: part_params;
   part_type: Actors.part_typ;
-  pos:  xy;
-  vel:  xy;
-  acc:  xy;
+  pos:  Actors.xy;
+  vel:  Actors.xy;
+  acc:  Actors.xy;
   mutable kill: bool;
   mutable life: int;
 }

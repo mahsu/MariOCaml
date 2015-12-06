@@ -5,11 +5,6 @@ open Particle
 val invuln : int (* # of frames of invulnerability *)
 val dampen_jump : float (* Boost to jump when enemy jumped on *)
 
-type xy = {
-  mutable x: float;
-  mutable y: float;
-}
-
 type aabb = {
   center: xy;
   half: xy;

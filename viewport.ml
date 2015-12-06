@@ -1,9 +1,9 @@
-open Object
+open Actors
 
 type viewport = {
-  pos: Object.xy;
-  v_dim: Object.xy;
-  m_dim: Object.xy;
+  pos: Actors.xy;
+  v_dim: Actors.xy;
+  m_dim: Actors.xy;
 }
 
 let make (vx,vy) (mx,my) = 

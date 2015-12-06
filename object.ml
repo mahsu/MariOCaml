@@ -11,11 +11,6 @@ let player_max_jump = -6.
 let dampen_jump = 4.
 let invuln = 60
 
-type xy = {
-  mutable x: float;
-  mutable y: float;
-}
-
 type aabb = {
   center: xy;
   half: xy;
