@@ -80,10 +80,10 @@ let make_big_player (typ, dir) =
 let make_enemy (typ, dir) =
   match (typ, dir) with
       | (Goomba,_) -> setup_sprite "enemies.png" ~bb_off:(1.,1.) ~bb_sz:(14.,14.) 2 10 (16.,16.) (0.,128.)
-      | (GKoopa,Left) -> setup_sprite "enemies.png" ~bb_off:(4.,8.) ~bb_sz:(11.,18.) 2 10 (16.,27.) (0.,69.)
-      | (GKoopa,Right) -> setup_sprite "enemies.png" ~bb_off:(1.,9.) ~bb_sz:(11.,17.) 2 10 (16.,27.) (32.,69.)
-      | (RKoopa,Left) -> setup_sprite "enemies.png" ~bb_off:(4.,9.) ~bb_sz:(11.,17.) 2 10 (16.,27.) (0.,5.)
-      | (RKoopa,Right) -> setup_sprite "enemies.png" ~bb_off:(1.,8.) ~bb_sz:(11.,18.) 2 10 (16.,27.) (32.,5.)
+      | (GKoopa,Left) -> setup_sprite "enemies.png" ~bb_off:(4.,10.) ~bb_sz:(11.,16.) 2 10 (16.,27.) (0.,69.)
+      | (GKoopa,Right) -> setup_sprite "enemies.png" ~bb_off:(1.,10.) ~bb_sz:(11.,16.) 2 10 (16.,27.) (32.,69.)
+      | (RKoopa,Left) -> setup_sprite "enemies.png" ~bb_off:(4.,10.) ~bb_sz:(11.,16.) 2 10 (16.,27.) (0.,5.)
+      | (RKoopa,Right) -> setup_sprite "enemies.png" ~bb_off:(1.,10.) ~bb_sz:(11.,16.) 2 10 (16.,27.) (32.,5.)
       | (GKoopaShell,_) -> setup_sprite "enemies.png" ~bb_off:(2.,2.) ~bb_sz:(12.,13.) 4 10 (16.,16.) (0.,96.)
       | (RKoopaShell,_) -> setup_sprite "enemies.png" ~bb_off:(2.,2.) ~bb_sz:(12.,13.) 4 10 (16.,16.) (0.,32.)
 
