@@ -194,7 +194,8 @@ let rec generate_block_locs (blockw: float) (blockh: float) (cbx: float)
         generate_block_locs blockw blockh cbx (cby+.1.) called_acc
       else generate_block_locs blockw blockh cbx (cby+.1.) acc
 
-(*Generates the ending item panel in order to end the game.*)
+(*Generates the ending item panel at the end of the level. Games ends upon
+* collision with player.*)
 let generate_panel (context:Dom_html.canvasRenderingContext2D Js.t)
                    (blockw: float) (blockh: float) : collidable =
   let ob = Object.spawn (SBlock Panel) context
@@ -202,7 +203,7 @@ let generate_panel (context:Dom_html.canvasRenderingContext2D Js.t)
   ob
 
 (*Generates the list of brick locations needed to display the ground.
-* 1/10 chance that a ground block is skipped each call.*)
+* 1/10 chance that a ground block is skipped each call to create holes.*)
 let rec generate_ground (blockw:float) (blockh:float) (inc:float)
                         (acc: obj_coord list) : obj_coord list =
   if(inc > blockw) then acc
