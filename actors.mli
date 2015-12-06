@@ -1,12 +1,20 @@
-type dir_1d = | Left | Right
+type dir_1d = | Left | Right 
 type dir_2d = | North | South | East | West
 
+(* Generic xy record for easy position access *)
+type xy = {
+  mutable x: float;
+  mutable y: float;
+}
+
+(* Controls correspond to keyboard input *)
 type controls =
   | CLeft
   | CRight
   | CUp
   | CDown
 
+(* Player ability type *)
 type pl_typ =
   | BigM
   | SmallM
@@ -33,12 +41,14 @@ type block_typ =
   | Panel
   | Ground
 
+(* Player action type *)
 type player_typ =
   | Standing
   | Jumping
   | Running
   | Crouching
 
+(* Particle Type *)
 type part_typ =
   | GoombaSquish
   | BrickChunkL

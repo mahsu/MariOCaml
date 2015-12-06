@@ -2,7 +2,6 @@ open Actors
 
 type xy = float * float
 
-type animation_typ =  | Reflect | Frame
 
 type sprite_params =
   {
@@ -13,7 +12,6 @@ type sprite_params =
     src_offset: xy;
     bbox_offset: xy;
     bbox_size: xy;
-    anim: animation_typ;
     loop: bool;
   }
 
@@ -27,8 +25,8 @@ type sprite =
   }
 
 (*setup_sprite is used to initialize a sprite.*)
-let setup_sprite ?anim:(anim=Frame) ?loop:(loop=true)
-         ?bb_off:(bbox_offset=(0.,0.)) ?bb_sz:(bbox_size=(0.,0.))
+let setup_sprite  ?loop:(loop=true) ?bb_off:(bbox_offset=(0.,0.)) 
+          ?bb_sz:(bbox_size=(0.,0.))
                  img_src max_frames max_ticks frame_size src_offset =
   let bbox_size = if bbox_size = (0.,0.) then frame_size else bbox_size in
   let img_src = "./sprites/" ^ img_src in
@@ -40,7 +38,6 @@ let setup_sprite ?anim:(anim=Frame) ?loop:(loop=true)
     src_offset;
     bbox_offset;
     bbox_size;
-    anim;
     loop;
   }
 
@@ -80,10 +77,10 @@ let make_big_player (typ, dir) =
 let make_enemy (typ, dir) =
   match (typ, dir) with
       | (Goomba,_) -> setup_sprite "enemies.png" ~bb_off:(1.,1.) ~bb_sz:(14.,14.) 2 10 (16.,16.) (0.,128.)
-      | (GKoopa,Left) -> setup_sprite "enemies.png" ~bb_off:(4.,8.) ~bb_sz:(11.,18.) 2 10 (16.,27.) (0.,69.)
-      | (GKoopa,Right) -> setup_sprite "enemies.png" ~bb_off:(1.,9.) ~bb_sz:(11.,17.) 2 10 (16.,27.) (32.,69.)
-      | (RKoopa,Left) -> setup_sprite "enemies.png" ~bb_off:(4.,9.) ~bb_sz:(11.,17.) 2 10 (16.,27.) (0.,5.)
-      | (RKoopa,Right) -> setup_sprite "enemies.png" ~bb_off:(1.,8.) ~bb_sz:(11.,18.) 2 10 (16.,27.) (32.,5.)
+      | (GKoopa,Left) -> setup_sprite "enemies.png" ~bb_off:(4.,10.) ~bb_sz:(11.,16.) 2 10 (16.,27.) (0.,69.)
+      | (GKoopa,Right) -> setup_sprite "enemies.png" ~bb_off:(1.,10.) ~bb_sz:(11.,16.) 2 10 (16.,27.) (32.,69.)
+      | (RKoopa,Left) -> setup_sprite "enemies.png" ~bb_off:(4.,10.) ~bb_sz:(11.,16.) 2 10 (16.,27.) (0.,5.)
+      | (RKoopa,Right) -> setup_sprite "enemies.png" ~bb_off:(1.,10.) ~bb_sz:(11.,16.) 2 10 (16.,27.) (32.,5.)
       | (GKoopaShell,_) -> setup_sprite "enemies.png" ~bb_off:(2.,2.) ~bb_sz:(12.,13.) 4 10 (16.,16.) (0.,96.)
       | (RKoopaShell,_) -> setup_sprite "enemies.png" ~bb_off:(2.,2.) ~bb_sz:(12.,13.) 4 10 (16.,16.) (0.,32.)
 
@@ -130,6 +127,7 @@ let make_type typ (dir : Actors.dir_1d) =
   | SItem t -> make_item t
   | SBlock t -> make_block t
 
+(* Makes a sprite from provided [params]. *)
 let make_from_params params context =
   let img = (Dom_html.createImg Dom_html.document) in
   img##src <- (Js.string params.img_src) ;
@@ -146,10 +144,12 @@ let make spawn dir context  =
   let params = make_type spawn dir in
   make_from_params params context
 
+(* Make a background *)
 let make_bgd context =
   let params = setup_sprite "bgd-1.png" 1 0 (512.,256.) (0.,0.) in
   make_from_params params context
 
+(* Make a particle from the given particle type *)
 let make_particle ptyp context =
   let params = make_particle ptyp in
   make_from_params params context
@@ -162,17 +162,12 @@ let transform_enemy enemy_typ spr dir =
   spr.params <- params;
   spr.img <- img
 
-let reflect_sprite spr = failwith "todo"
-
 (*update_animation is the main method to cycle through sprite animations*)
 let update_animation (spr: sprite) =
   (* Only advance frame when ticked *)
   let curr_ticks = !(spr.ticks) in
-  if curr_ticks >= spr.params.max_ticks then (
+  if curr_ticks >= spr.params.max_ticks then begin
     spr.ticks := 0;
-    match spr.params.anim with
-    | Frame ->
-        if spr.params.loop then
-        spr.frame := (!(spr.frame) + 1) mod spr.params.max_frames
-    | Reflect -> reflect_sprite spr
-  ) else spr.ticks := curr_ticks + 1
+    if spr.params.loop then
+    spr.frame := (!(spr.frame) + 1) mod spr.params.max_frames
+  end else spr.ticks := curr_ticks + 1
