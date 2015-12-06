@@ -15,3 +15,7 @@ to compile the binaries to the `_build` folder.
         js_of_ocaml _build/main.d.byte
 
 4. Open `index.html` to run!
+
+##Notes
+* Alternatively, to build the files, run `./build.sh`.
+* Note that the game might be slower on a VM depending on your VM configuration. The game should run at 60fps in a normal desktop environment. If it does not, it might be a good idea to copy the files out of the VM after compiling.
