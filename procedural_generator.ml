@@ -48,6 +48,20 @@ let rec avoid_overlap (lst:obj_coord list) (currentLst:obj_coord list)
   |h::t -> if(mem_loc (snd h) currentLst) then avoid_overlap t currentLst
            else [h]@(avoid_overlap t currentLst)
 
+(*Gets rid of objects placed in the ending frame, within 128 pixels of the start
+* at the very top and two within the ground.*)
+let rec trim_edges (lst: obj_coord list) (blockw:float) (blockh: float)
+                   : obj_coord list =
+  match lst with
+  |[] -> []
+  |h::t -> let cx = fst(snd h) in
+           let cy = snd(snd h) in
+           let pixx = blockw*.16. in
+           let pixy = blockh*.16. in
+           if(cx<128. || pixx-.cx<528. || cy = 0. || pixy-.cy<48.)
+            then trim_edges t blockw blockh
+           else [h]@trim_edges t blockw blockh
+
 (*Generates a stair formation with block typ being dependent on typ. This type
 * of stair formation requires that the first step be on the ground.*)
 let generate_ground_stairs cbx cby typ =
@@ -91,7 +105,7 @@ let rec generate_coins (block_coord: obj_coord list) : obj_coord list =
   |h::t ->  if(place_coin = 0) then
               let xc = fst(snd h) in
               let yc = snd(snd h) in
-              [(0,(16.*.xc,16.*.(yc-.1.)))]@generate_coins t
+              [(0,(xc,(yc-.16.)))]@generate_coins t
             else generate_coins t
 
 (*Chooses the form of the blocks to be placed.
@@ -106,14 +120,13 @@ let rec generate_coins (block_coord: obj_coord list) : obj_coord list =
 let choose_block_pattern (blockw:float) (blockh: float) (cbx:float) (cby:float)
                          (prob:int) : obj_coord list=
   if(cbx > blockw || cby > blockh) then []
-  else if (cbx < 10. || blockw -. cbx < 10.) then []
   else
     let block_typ = Random.int 4 in
     let stair_typ = Random.int 2 in
     let obj_coord =
     match prob with
-    |0 -> if(blockw -. cbx > 2.) then [(block_typ, (cbx, cby));
-            (block_typ,(cbx +. 1., cby));(block_typ,(cbx +. 2., cby))]
+    |0 -> if(blockw -. cbx > 2.) then [(stair_typ, (cbx, cby));
+            (3,(cbx +. 1., cby));(stair_typ,(cbx +. 2., cby))]
           else if (blockw -. cbx > 1.) then [(block_typ,(cbx, cby));
             (block_typ,(cbx +. 1., cby))]
           else [(block_typ,(cbx, cby))]
@@ -155,14 +168,14 @@ let rec generate_enemies (blockw: float) (blockh: float) (cbx: float)
 (*Generate an obj_coord list (typ, coordinates) of enemies to be places upon
 * the block objects.*)
 let rec generate_block_enemies (block_coord: obj_coord list) : obj_coord list =
-  let place_enemy = Random.int 30 in
+  let place_enemy = Random.int 20 in
   let enemy_typ = Random.int 3 in
   match block_coord with
   |[] -> []
   |h::t ->  if(place_enemy = 0) then
               let xc = fst(snd h) in
               let yc = snd(snd h) in
-              [(enemy_typ,(16.*.xc,16.*.(yc-.1.)))]@generate_block_enemies t
+              [(enemy_typ,(xc,(yc-.16.)))]@generate_block_enemies t
             else generate_block_enemies t
 
 (*Generates an obj_coord list (typ, coordinates) of blocks to be placed.*)
@@ -199,7 +212,8 @@ let rec generate_ground (blockw:float) (blockh:float) (inc:float)
     if(inc > 10.) then
       let skip = Random.int 10 in
       let newacc = acc@[(4, (inc*. 16.,blockh *. 16.))] in
-      if (skip = 7 && blockw-.inc>32.) then generate_ground blockw blockh (inc +. 1.) acc
+      if (skip = 7 && blockw-.inc>32.)
+        then generate_ground blockw blockh (inc +. 1.) acc
       else  generate_ground blockw blockh (inc +. 1.) newacc
     else let newacc = acc@[(4, (inc*. 16.,blockh *. 16.))] in
       generate_ground blockw blockh (inc +. 1.) newacc
@@ -240,7 +254,8 @@ let rec convert_to_coin_obj (lst:obj_coord list)
 let generate_helper (blockw:float) (blockh:float) (cx:float) (cy:float)
             (context:Dom_html.canvasRenderingContext2D Js.t) : collidable list =
   let block_locs = generate_block_locs blockw blockh 0. 0. [] in
-  let converted_block_locs = convert_list block_locs in
+  let converted_block_locs = trim_edges (convert_list block_locs)
+    blockw blockh in
   let obj_converted_block_locs = convert_to_block_obj converted_block_locs
     context in
   let ground_blocks = generate_ground blockw blockh 0. [] in
@@ -250,10 +265,11 @@ let generate_helper (blockw:float) (blockh:float) (cx:float) (cy:float)
   let all_blocks = obj_converted_block_locs@obj_converted_ground_blocks in
   let enemy_locs = generate_enemies blockw blockh 0. 0. block_locations in
   let obj_converted_enemies = convert_to_enemy_obj enemy_locs context in
-  let coin_locs = generate_coins block_locs in
-  let undup_coin_locs = avoid_overlap coin_locs converted_block_locs in
+  let coin_locs = generate_coins converted_block_locs in
+  let undup_coin_locs = trim_edges(avoid_overlap coin_locs converted_block_locs)
+    blockw blockh in
   let converted_block_coin_locs = converted_block_locs@coin_locs in
-  let enemy_block_locs = generate_block_enemies block_locs in
+  let enemy_block_locs = generate_block_enemies converted_block_locs in
   let undup_enemy_block_locs = avoid_overlap enemy_block_locs
     converted_block_coin_locs in
   let obj_enemy_blocks = convert_to_enemy_obj undup_enemy_block_locs context in

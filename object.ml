@@ -2,6 +2,7 @@ open Sprite
 open Actors
 open Particle
 
+(*Variables*)
 let friction = 0.9
 let gravity = 0.2
 let max_y_vel = 4.5
@@ -61,7 +62,7 @@ let set_vel_to_speed obj =
   | Right -> obj.vel.x <- speed
 
 (* The following make functions all set the objects' has_gravity and speed,
- * returning an [obj_params] that can be directly plugged into the [obj] 
+ * returning an [obj_params] that can be directly plugged into the [obj]
  * during creation. *)
 let make_player () = setup_obj ~spd:player_speed ()
 
@@ -220,6 +221,7 @@ let update_pos obj =
   obj.pos.x <- (obj.vel.x +. obj.pos.x);
   if obj.params.has_gravity then obj.pos.y <- (obj.vel.y +. obj.pos.y)
 
+(*Calls two above helper functions to update velocity and position of player.*)
 let process_obj obj mapy =
   update_vel obj;
   update_pos obj;
@@ -233,6 +235,7 @@ let normalize_origin pos (spr:Sprite.sprite) =
   pos.x <- pos.x -. box;
   pos.y <- pos.y -. (boy +. bh)
 
+(*Checks upon collision of block and updates the values of the object.*)
 let collide_block ?check_x:(check_x=true) dir obj =
   match dir with
   | North -> obj.vel.y <- -0.001
@@ -274,6 +277,7 @@ let evolve_enemy player_dir typ (spr:Sprite.sprite) obj context =
       None
   | _ -> obj.kill <- true; None
 
+(*Updates the direction of the sprite. *)
 let rev_dir o t (s:sprite) =
   reverse_left_right o;
   let old_params = s.params in
@@ -310,7 +314,7 @@ let spawn_above player_dir obj typ context =
   set_vel_to_speed item_obj;
   item
 
-
+(*Used to get the bounding box.*)
 let get_aabb obj  =
   let spr = ((get_sprite obj).params)  in
   let obj = get_obj obj in
@@ -355,6 +359,7 @@ let check_collision c1 c2 =
     end
   end else None
 
+(*"Kills" the matched object by setting certain parameters for each.*)
 let kill collid ctx =
   match collid with
   | Enemy(t,s,o) ->
