@@ -1,10 +1,10 @@
 open Actors
 open Object
 
+(*Note: Canvas is 512 by 256 (w*h) -> 32 by 16 blocks*)
+
 (*Holds obj typ and its coordinates. (int, (x-coord, y-coord))*)
 type obj_coord =  int * (float * float)
-
-(*Canvas is 512 by 256 (w*h) -> 32 by 16 blocks*)
 
 (*Checks if the given location checkloc is already part of the list of locations
 * in loclist.*)
@@ -15,7 +15,7 @@ let rec mem_loc (checkloc: float * float) (loclist: obj_coord list) : bool =
            else mem_loc checkloc t
 
 (*Converts list of locations from blocksize to pixelsize by multiplying (x,y) by
-16*)
+* 16.*)
 let rec convert_list (lst:obj_coord list) :obj_coord list =
   match lst with
   |[] -> []
@@ -48,8 +48,8 @@ let rec avoid_overlap (lst:obj_coord list) (currentLst:obj_coord list)
   |h::t -> if(mem_loc (snd h) currentLst) then avoid_overlap t currentLst
            else [h]@(avoid_overlap t currentLst)
 
-(*Gets rid of objects placed in the ending frame, within 128 pixels of the start
-* at the very top and two within the ground.*)
+(*Gets rid of objects with coordinates in the ending frame, within 128 pixels of
+* the start, at the very top, and two blocks from the ground.*)
 let rec trim_edges (lst: obj_coord list) (blockw:float) (blockh: float)
                    : obj_coord list =
   match lst with
@@ -73,8 +73,7 @@ let generate_ground_stairs cbx cby typ =
   let one = [(typ,(cbx +. 3., cby -. 3.))] in
   four@three@two@one
 
-(*Generates a stair formation going upwards with the starting step not being
-* on the ground.*)
+(*Generates a stair formation going upwards.*)
 let generate_airup_stairs cbx cby typ =
   let one = [(typ,(cbx, cby));(typ,(cbx +. 1., cby))] in
   let two = [(typ,(cbx +. 3., cby -. 1.));(typ,(cbx +. 4., cby -. 1.))] in
@@ -82,8 +81,7 @@ let generate_airup_stairs cbx cby typ =
               (typ,(cbx +. 6., cby -. 2.))] in
   one@two@three
 
-(*Generates a stair formation going downwards with the starting step not being
-* on the ground. *)
+(*Generates a stair formation going downwards*)
 let generate_airdown_stairs cbx cby typ =
   let three = [(typ,(cbx, cby));(typ,(cbx +. 1., cby));(typ,(cbx +. 2., cby))]in
   let two = [(typ,(cbx +. 2., cby +. 1.));(typ,(cbx +. 3., cby +. 1.))] in
@@ -146,8 +144,7 @@ let choose_block_pattern (blockw:float) (blockh: float) (cbx:float) (cby:float)
     |_ -> failwith "Shouldn't reach here" in
     obj_coord
 
-(*Generates an obj_coord list (typ, coordinates) of enemies to be placed on the
-* ground.*)
+(*Generates a list of enemies to be placed on the ground.*)
 let rec generate_enemies (blockw: float) (blockh: float) (cbx: float)
                     (cby: float) (acc: obj_coord list) =
   if(cbx > (blockw-.32.)) then []
@@ -163,8 +160,7 @@ let rec generate_enemies (blockw: float) (blockh: float) (cbx: float)
         enemy@(generate_enemies blockw blockh cbx (cby+.1.) acc)
       else generate_enemies blockw blockh cbx (cby+.1.) acc
 
-(*Generate an obj_coord list (typ, coordinates) of enemies to be places upon
-* the block objects.*)
+(*Generates a list of enemies to be placed upon the block objects.*)
 let rec generate_block_enemies (block_coord: obj_coord list) : obj_coord list =
   let place_enemy = Random.int 20 in
   let enemy_typ = Random.int 3 in

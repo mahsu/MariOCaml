@@ -25,8 +25,6 @@ let load _ =
         Printf.printf "cant find canvas %s \n" canvas_id;
         failwith "fail"
       ) in
-  (*let () = Graphics_js.open_canvas canvas in*)
-  (*let context = get_context() in*)
   let context = canvas##getContext (Dom_html._2d_) in
   let _ = Html.addEventListener Html.document Html.Event.keydown (Html.handler Director.keydown) Js._true in
   let _ = Html.addEventListener Html.document Html.Event.keyup (Html.handler Director.keyup) Js._true in
