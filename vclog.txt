@@ -1,0 +1,1788 @@
+commit 54a3edb202b24e4def68ced0adbc78e3952616a1
+Author: Ashley Xue <ax25@cornell.edu>
+Date:   Sat Dec 5 23:35:12 2015 -0500
+
+    DONNNNEEEEE
+
+ main.ml                 |  2 --
+ procedural_generator.ml | 22 +++++++++-------------
+ vector.ml               | 10 ----------
+ 3 files changed, 9 insertions(+), 25 deletions(-)
+
+commit 91a005a186ba138678504bfd28d4e700d88fb3a8
+Author: Ashley Xue <ax25@cornell.edu>
+Date:   Sat Dec 5 23:26:32 2015 -0500
+
+    comments
+
+ procedural_generator.ml | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
+
+commit e233c886c19601003571f8c157f841f71777108b
+Author: Ashley Xue <ax25@cornell.edu>
+Date:   Sat Dec 5 23:25:30 2015 -0500
+
+    comments
+
+ procedural_generator.ml | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+commit a9e6f2d9665c5a47f6dca7cd9ddbd27597f5f7f4
+Author: Ashley Xue <ax25@cornell.edu>
+Date:   Sat Dec 5 23:24:13 2015 -0500
+
+    comments
+
+ procedural_generator.ml | 19 ++++++++++---------
+ 1 file changed, 10 insertions(+), 9 deletions(-)
+
+commit 21934b26aa54bf2c3f20abb7f50bab66e2479418
+Author: Ashley Xue <ax25@cornell.edu>
+Date:   Sat Dec 5 23:14:17 2015 -0500
+
+    hm
+
+ vector.ml | 10 ++++++++++
+ 1 file changed, 10 insertions(+)
+
+commit f28aa0fc487772f4cc91c638878757254a97b3af
+Author: Ashley Xue <ax25@cornell.edu>
+Date:   Sat Dec 5 22:35:10 2015 -0500
+
+    block generation fixes
+
+ actors.ml |  4 +---
+ sprite.ml | 15 ++++++++++++---
+ 2 files changed, 13 insertions(+), 6 deletions(-)
+
+commit a32a6bd845b237035626c7014e8ea25f75590ef1
+Author: Ashley Xue <ax25@cornell.edu>
+Date:   Sat Dec 5 22:28:24 2015 -0500
+
+    block generation fixes
+
+ object.ml               |  9 +++++++--
+ procedural_generator.ml | 38 +++++++++++++++++++++++++++-----------
+ 2 files changed, 34 insertions(+), 13 deletions(-)
+
+commit 074708435e881e48789eec907e099c680f38412c
+Merge: 01ca885 446feef
+Author: Ashley Xue <ax25@cornell.edu>
+Date:   Sat Dec 5 21:04:18 2015 -0500
+
+    Merge branch 'master' of https://github.com/mahsu/MariOCaml
+
+commit 01ca885d6feec9d3a90f8d4c9a911beb8ef87138
+Author: Ashley Xue <ax25@cornell.edu>
+Date:   Sat Dec 5 21:01:41 2015 -0500
+
+    much enemies
+
+ procedural_generator.ml | 38 ++++++++++++++++++++++++++++----------
+ 1 file changed, 28 insertions(+), 10 deletions(-)
+
+commit 446feef70dd0db4275a358813636a759f6550173
+Author: Matthew Hsu <mdh267@cornell.edu>
+Date:   Sat Dec 5 20:48:46 2015 -0500
+
+    Commenting, cleanup
+
+ actors.mli   |  7 ++++++-
+ director.ml  | 49 +++++++++++++++++++++----------------------------
+ director.mli |  2 ++
+ draw.ml      | 20 ++++++++++++++++++++
+ draw.mli     | 10 ++++++++++
+ particle.ml  |  9 ++++++++-
+ particle.mli | 22 +++++++++++++++-------
+ sprite.ml    | 23 +++++++++--------------
+ sprite.mli   | 16 +++++++++-------
+ viewport.ml  | 11 +++++++++++
+ viewport.mli | 12 +++++++++---
+ 11 files changed, 120 insertions(+), 61 deletions(-)
+
+commit 49af92c267160102710bb09910ceef951a363552
+Author: Matthew Hsu <mdh267@cornell.edu>
+Date:   Sat Dec 5 19:59:24 2015 -0500
+
+    Move xy type to actors module for consistency
+
+ actors.ml    |  5 +++++
+ actors.mli   |  5 +++++
+ object.ml    |  5 -----
+ object.mli   |  5 -----
+ particle.ml  | 11 +++--------
+ particle.mli | 11 +++--------
+ viewport.ml  |  8 ++++----
+ viewport.mli | 14 +++++++-------
+ 8 files changed, 27 insertions(+), 37 deletions(-)
+
+commit b1d34c088a6596b4d23ce1a59b7e4aa43f0423c1
+Author: Matthew Hsu <mdh267@cornell.edu>
+Date:   Sat Dec 5 19:52:16 2015 -0500
+
+    Make koopa bounding boxes slightly smaller
+
+ sprite.ml | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+commit 1a10cdafdb4f8c1181ef43c074f68d8af432d07d
+Merge: 41a5a14 e99191a
+Author: Matthew Hsu <mdh267@cornell.edu>
+Date:   Sat Dec 5 17:38:53 2015 -0500
+
+    Merge branch 'master' of https://github.com/mahsu/MariOCaml
+
+commit 41a5a140fd8184c732aeaeacffe419a1959863d0
+Author: Matthew Hsu <mdh267@cornell.edu>
+Date:   Sat Dec 5 17:38:49 2015 -0500
+
+    Add support for canvas scaling
+
+ director.ml | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+commit e99191a283ffed9b52cd8a7a5dae491662de7eb1
+Author: Ashley Xue <ax25@cornell.edu>
+Date:   Sat Dec 5 17:25:44 2015 -0500
+
+    format
+
+ actors.mli              |  1 -
+ director.ml             | 29 +++++++++++++++--------------
+ director.mli            | 11 ++++-------
+ procedural_generator.ml | 45 ++++++++++-----------------------------------
+ 4 files changed, 29 insertions(+), 57 deletions(-)
+
+commit 9a0242497adeff24bec3699ccd7be193073ebf04
+Merge: 6013d60 f747c90
+Author: Ashley Xue <ax25@cornell.edu>
+Date:   Sat Dec 5 17:15:36 2015 -0500
+
+    Merge branch 'master' of https://github.com/mahsu/MariOCaml
+
+commit 6013d60b8ec72ba240e6a3c679efdd7de2d68b99
+Author: Ashley Xue <ax25@cornell.edu>
+Date:   Sat Dec 5 17:15:32 2015 -0500
+
+    coinz
+
+ main.ml                 |  2 +-
+ procedural_generator.ml | 47 +++++++++++++++++++++++++++++++----------------
+ 2 files changed, 32 insertions(+), 17 deletions(-)
+
+commit f747c9086d593454dcb5986b7a47a9a6f3a33fe1
+Author: Matthew Hsu <mdh267@cornell.edu>
+Date:   Sat Dec 5 14:41:49 2015 -0500
+
+    Add comments to director, refactoring to use broad phase, restyle index
+
+ css/keys.css                   |  55 +++++++++++
+ director.ml                    |  76 ++++++++++------
+ fonts/DroidSans-Bold.ttf       | Bin 0 -> 42480 bytes
+ fonts/DroidSans.ttf            | Bin 0 -> 41028 bytes
+ fonts/LICENSE.txt              | 202 +++++++++++++++++++++++++++++++++++++++++
+ fonts/OFL.txt                  |  92 +++++++++++++++++++
+ fonts/PressStart2P-Regular.ttf | Bin 0 -> 69748 bytes
+ index.html                     |  68 ++++++++++++--
+ sprite.ml                      |   1 +
+ 9 files changed, 462 insertions(+), 32 deletions(-)
+
+commit bf80975b282bb2aa8f2f553802f1f6826c0d067e
+Author: Matthew Hsu <mdh267@cornell.edu>
+Date:   Fri Dec 4 17:41:18 2015 -0500
+
+    Controls using wasd. Support pressing b to toggle bounding box. Some cleanup
+
+ director.ml  | 72 +++++++++++++++++++++++++++++++++++++-----------------------
+ director.mli | 12 +++++-----
+ main.ml      |  5 +++--
+ object.ml    | 23 +++++++++----------
+ object.mli   | 17 +++++++++-----
+ 5 files changed, 75 insertions(+), 54 deletions(-)
+
+commit 7628fbe50114f8a09673f7beb013a8f19203f588
+Author: Matthew Hsu <mdh267@cornell.edu>
+Date:   Fri Dec 4 15:35:08 2015 -0500
+
+    Procedural generator doesn't generate enemies on top of player, fix invulnerability, increase speed of koopa shells slightly, add ability to draw bounding boxes
+
+ director.ml             | 29 ++++++++++++++---------------
+ draw.ml                 |  7 +++++++
+ draw.mli                |  1 +
+ object.ml               | 11 +++++++----
+ procedural_generator.ml |  2 +-
+ 5 files changed, 30 insertions(+), 20 deletions(-)
+
+commit 8cba3f99d7c1ce491ab8e94c275c4263356ef159
+Author: Ashley Xue <ax25@cornell.edu>
+Date:   Fri Dec 4 07:24:09 2015 -0500
+
+    panel
+
+ procedural_generator.ml | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+commit 657050186a36f3d7b15451969d0cdc1aa721705e
+Merge: d065244 5bdb8c8
+Author: Matthew Hsu <mdh267@cornell.edu>
+Date:   Fri Dec 4 07:10:56 2015 -0500
+
+    Merge branch 'master' of https://github.com/mahsu/MariOCaml
+
+commit 5bdb8c818f81891f4361c1a3b9de545f899c1bf2
+Author: liambui <lb598@cornell.edu>
+Date:   Fri Dec 4 07:11:02 2015 -0500
+
+    blah
+
+ director.ml | 3 ++-
+ sprite.ml   | 2 +-
+ 2 files changed, 3 insertions(+), 2 deletions(-)
+
+commit d065244876f8e33270c756d0c91f24cb96be2aa9
+Author: Matthew Hsu <mdh267@cornell.edu>
+Date:   Fri Dec 4 07:10:52 2015 -0500
+
+    link procedural generator and director
+
+ director.ml             | 8 +++-----
+ director.mli            | 2 +-
+ main.ml                 | 6 +++---
+ procedural_generator.ml | 6 ++++--
+ 4 files changed, 11 insertions(+), 11 deletions(-)
+
+commit 8a3169f8992b0ab28acf831590dc1d418bd2ede5
+Merge: f6f28ea c54b146
+Author: Ashley Xue <ax25@cornell.edu>
+Date:   Fri Dec 4 06:59:42 2015 -0500
+
+    Merge branch 'master' of https://github.com/mahsu/MariOCaml
+    
+    Conflicts:
+    	director.ml
+
+commit f6f28ea0cd8ab2851b36d0ca303461185c71df46
+Author: Ashley Xue <ax25@cornell.edu>
+Date:   Fri Dec 4 06:58:49 2015 -0500
+
+    ugh
+
+ actors.ml               |  1 +
+ actors.mli              |  1 +
+ director.ml             |  4 ++--
+ object.ml               | 13 +++++++------
+ procedural_generator.ml | 13 +++++++------
+ sprite.ml               |  5 +++--
+ 6 files changed, 21 insertions(+), 16 deletions(-)
+
+commit 7b27b536c21b34b1d14b963081091cccd01f83a3
+Merge: 7994d03 8a3169f
+Author: liambui <lb598@cornell.edu>
+Date:   Fri Dec 4 06:58:34 2015 -0500
+
+    Merge branch 'master' of github.com:mahsu/MariOCaml
+
+commit 7994d0364962ac2b44a4880aa905fd304e642e34
+Merge: 2e19870 c54b146
+Author: liambui <lb598@cornell.edu>
+Date:   Fri Dec 4 06:58:31 2015 -0500
+
+    what
+
+commit 2e19870fed3dbe75ff85361ccacbc91b84286f36
+Author: liambui <lb598@cornell.edu>
+Date:   Fri Dec 4 06:56:09 2015 -0500
+
+    comments
+
+ director.ml | 26 +++++++++++++++++++++++++-
+ draw.ml     |  7 +++++++
+ main.ml     |  4 ++++
+ object.ml   | 12 ++++++------
+ object.mli  |  2 ++
+ sprite.ml   |  4 +++-
+ 6 files changed, 47 insertions(+), 8 deletions(-)
+
+commit c54b14642da58fd691aba6acd7b3a9345f6c7ef7
+Merge: 042d8cc 6c6940d
+Author: Matthew Hsu <mdh267@cornell.edu>
+Date:   Fri Dec 4 06:54:52 2015 -0500
+
+    Merge branch 'master' of https://github.com/mahsu/MariOCaml
+
+commit 042d8ccf927a55d452c4bee39055a4ce4f00e2a2
+Author: Matthew Hsu <mdh267@cornell.edu>
+Date:   Fri Dec 4 06:54:43 2015 -0500
+
+    Don't update objects off screen except for if they fall below the map
+
+ director.ml  | 10 ++++++----
+ viewport.ml  |  7 +++++--
+ viewport.mli |  2 ++
+ 3 files changed, 13 insertions(+), 6 deletions(-)
+
+commit 6c6940d885a1032f74b4530e2646bb3cd2e607e8
+Merge: db5c43d c44adbe
+Author: Ashley Xue <ax25@cornell.edu>
+Date:   Fri Dec 4 06:29:08 2015 -0500
+
+    Merge branch 'master' of https://github.com/mahsu/MariOCaml
+
+commit db5c43d1434d17668dc56fc22099cc0c1062df34
+Author: Ashley Xue <ax25@cornell.edu>
+Date:   Fri Dec 4 06:29:03 2015 -0500
+
+    tired
+
+ director.ml             |  2 +-
+ procedural_generator.ml | 16 ++++++++++++----
+ 2 files changed, 13 insertions(+), 5 deletions(-)
+
+commit c44adbec80b8c0c266f89ccfac69442edc49750a
+Merge: 547d3e0 3c03ca2
+Author: Matthew Hsu <mdh267@cornell.edu>
+Date:   Fri Dec 4 06:07:39 2015 -0500
+
+    Merge branch 'master' of https://github.com/mahsu/MariOCaml
+
+commit 547d3e035d9700001548c0c1bc22023c81cbd389
+Author: Matthew Hsu <mdh267@cornell.edu>
+Date:   Fri Dec 4 06:07:30 2015 -0500
+
+    Support displaying score
+
+ actors.ml         |   8 ++++++++
+ actors.mli        |   8 ++++++++
+ director.ml       |  18 ++++++++++++------
+ object.ml         |  16 +++++++++++++---
+ object.mli        |   1 +
+ particle.ml       |  23 ++++++++++++++++++++++-
+ particle.mli      |   1 +
+ sprite.ml         |  10 +++++++++-
+ sprites/score.png | Bin 0 -> 351 bytes
+ 9 files changed, 74 insertions(+), 11 deletions(-)
+
+commit 3c03ca23a4234958689349b0e04f66d0af3291d6
+Author: Ashley Xue <ax25@cornell.edu>
+Date:   Fri Dec 4 06:02:46 2015 -0500
+
+    rainin money
+
+ procedural_generator.ml | 39 +++++++++++++++++++++++++++++++++------
+ 1 file changed, 33 insertions(+), 6 deletions(-)
+
+commit 774d3d873a2dc420e105ae47f2dac80bcfdcb155
+Author: Ashley Xue <ax25@cornell.edu>
+Date:   Fri Dec 4 05:42:03 2015 -0500
+
+    words
+
+ procedural_generator.ml  | 155 ++++++++++++++++++++++++-----------------------
+ procedural_generator.mli |  21 +------
+ 2 files changed, 82 insertions(+), 94 deletions(-)
+
+commit 449fddc45898b8c29261ae6adb7efaae5a62a739
+Merge: afa4afa 758a72e
+Author: Ashley Xue <ax25@cornell.edu>
+Date:   Fri Dec 4 05:13:22 2015 -0500
+
+    Merge branch 'master' of https://github.com/mahsu/MariOCaml
+
+commit afa4afa51b8cea18aed953305b70625040f3f936
+Author: Ashley Xue <ax25@cornell.edu>
+Date:   Fri Dec 4 05:13:17 2015 -0500
+
+    pooo
+
+ procedural_generator.ml  | 13 +++++--------
+ procedural_generator.mli |  2 --
+ 2 files changed, 5 insertions(+), 10 deletions(-)
+
+commit 758a72ef008bc34f54f2547c8f962c94a6d5d4c7
+Merge: 78a0a11 b3f7641
+Author: liambui <lb598@cornell.edu>
+Date:   Fri Dec 4 05:08:27 2015 -0500
+
+    Merge branch 'master' of github.com:mahsu/MariOCaml
+    
+    Conflicts:
+    	main.ml
+
+commit 78a0a1157a1821f2c2aa65af7536f7c8fc465d8f
+Author: liambui <lb598@cornell.edu>
+Date:   Fri Dec 4 05:06:57 2015 -0500
+
+    BLAH BLAH POOP
+
+ director.ml | 5 +++++
+ main.ml     | 3 ++-
+ 2 files changed, 7 insertions(+), 1 deletion(-)
+
+commit b3f764169548feb00e78548bd1a34e3f335be0dc
+Merge: 9d9acb7 2ed0c80
+Author: Ashley Xue <ax25@cornell.edu>
+Date:   Fri Dec 4 05:06:27 2015 -0500
+
+    Merge branch 'master' of https://github.com/mahsu/MariOCaml
+
+commit 9d9acb70fcc40a6fc9f9a203e2bfabb2e9c75dbc
+Author: Ashley Xue <ax25@cornell.edu>
+Date:   Fri Dec 4 05:06:22 2015 -0500
+
+    cows
+
+ director.ml              | 7 ++++---
+ director.mli             | 4 ++--
+ procedural_generator.ml  | 6 ++++--
+ procedural_generator.mli | 2 +-
+ 4 files changed, 11 insertions(+), 8 deletions(-)
+
+commit 2ed0c803cfdfb22daf904210f6cee73e5239595c
+Merge: a86cc20 f3daa59
+Author: Matthew Hsu <mdh267@cornell.edu>
+Date:   Fri Dec 4 04:58:37 2015 -0500
+
+    Merge branch 'master' of https://github.com/mahsu/MariOCaml
+    
+    Conflicts:
+    	main.ml
+
+commit a86cc20e636745f2dcbdc9d86715b7276ea5b1de
+Author: Matthew Hsu <mdh267@cornell.edu>
+Date:   Fri Dec 4 04:57:20 2015 -0500
+
+    Random seed for procedural generator
+
+ main.ml                  | 5 +++--
+ procedural_generator.ml  | 5 ++++-
+ procedural_generator.mli | 2 ++
+ 3 files changed, 9 insertions(+), 3 deletions(-)
+
+commit f3daa59b392e80352b50dfe72e4306bffa8cd307
+Merge: 52d1beb 603a92b
+Author: liambui <lb598@cornell.edu>
+Date:   Fri Dec 4 04:49:17 2015 -0500
+
+    Merge branch 'master' of github.com:mahsu/MariOCaml
+
+commit 52d1beb68602102845994670d384ca2cd600b5a3
+Author: liambui <lb598@cornell.edu>
+Date:   Fri Dec 4 04:49:10 2015 -0500
+
+    win game
+
+ main.ml   | 3 ++-
+ sprite.ml | 2 +-
+ 2 files changed, 3 insertions(+), 2 deletions(-)
+
+commit 603a92bba7473bc48cdeafbc5a189918e165e1df
+Merge: 2295f61 f1558a4
+Author: Ashley Xue <ax25@cornell.edu>
+Date:   Fri Dec 4 04:47:22 2015 -0500
+
+    Merge branch 'master' of https://github.com/mahsu/MariOCaml
+
+commit 2295f6187b6b6b368375bc768eb0deed88fd0a87
+Author: Ashley Xue <ax25@cornell.edu>
+Date:   Fri Dec 4 04:47:17 2015 -0500
+
+    much enemies WOW
+
+ main.ml                  |  1 +
+ procedural_generator.ml  | 35 +++++++++++++++++++++++++++++------
+ procedural_generator.mli |  3 +--
+ 3 files changed, 31 insertions(+), 8 deletions(-)
+
+commit f1558a4ff15db87559e8c7059a15fff4f55b7dc9
+Author: liambui <lb598@cornell.edu>
+Date:   Fri Dec 4 04:43:39 2015 -0500
+
+    game over
+
+ director.ml | 8 ++++++--
+ 1 file changed, 6 insertions(+), 2 deletions(-)
+
+commit e4eb8161c75c07169d43e912fc0f0850b367bc84
+Merge: 941855f 7a72e42
+Author: Matthew Hsu <mdh267@cornell.edu>
+Date:   Fri Dec 4 04:33:32 2015 -0500
+
+    Merge branch 'master' of https://github.com/mahsu/MariOCaml
+
+commit 941855f6ec92253832ff8bd98b12b40bc62c31bd
+Author: Matthew Hsu <mdh267@cornell.edu>
+Date:   Fri Dec 4 04:33:28 2015 -0500
+
+    Kill objects when outside the map
+
+ director.ml |  4 +++-
+ object.ml   | 18 +++++++++++-------
+ object.mli  |  2 +-
+ 3 files changed, 15 insertions(+), 9 deletions(-)
+
+commit 7a72e42bf795d3bbbf4fce1af97acab29bf7f2ba
+Author: liambui <lb598@cornell.edu>
+Date:   Fri Dec 4 04:32:03 2015 -0500
+
+    oops
+
+ director.ml | 1 +
+ 1 file changed, 1 insertion(+)
+
+commit f4d04197e16c283ce81033b0088c0f6a2c96f96f
+Author: liambui <lb598@cornell.edu>
+Date:   Fri Dec 4 04:23:21 2015 -0500
+
+    more game over nonsense
+
+ director.ml | 22 +++++++++++++++++-----
+ 1 file changed, 17 insertions(+), 5 deletions(-)
+
+commit 8b3c4129d39084623dc686a134b1d3805b64dc31
+Merge: b69d6b6 c32727e
+Author: Ashley Xue <ax25@cornell.edu>
+Date:   Fri Dec 4 04:19:38 2015 -0500
+
+    Merge branch 'master' of https://github.com/mahsu/MariOCaml
+
+commit b69d6b6271839ac1ab6e77f49c2da852e75fc25a
+Author: Ashley Xue <ax25@cornell.edu>
+Date:   Fri Dec 4 04:19:29 2015 -0500
+
+    panels for everyone
+
+ actors.ml               |  1 +
+ actors.mli              |  1 +
+ main.ml                 | 31 ++++++-------------------------
+ object.ml               |  1 +
+ procedural_generator.ml | 42 +++++++++++++++++++-----------------------
+ sprite.ml               |  1 +
+ 6 files changed, 29 insertions(+), 48 deletions(-)
+
+commit c32727ec136af54d452dde1ec1278754935ee7c4
+Merge: 8264568 82ae08e
+Author: Matthew Hsu <mdh267@cornell.edu>
+Date:   Fri Dec 4 04:09:54 2015 -0500
+
+    Merge branch 'master' of https://github.com/mahsu/MariOCaml
+
+commit 82645682bb0c67744e4f292e4a06e9fb62a28939
+Author: Matthew Hsu <mdh267@cornell.edu>
+Date:   Fri Dec 4 04:09:46 2015 -0500
+
+    Add brick destruction particles
+
+ object.ml | 9 ++++++++-
+ 1 file changed, 8 insertions(+), 1 deletion(-)
+
+commit 82ae08e441b3ec58e39d996b66973cd0cb8175b1
+Merge: 97532c2 4356ffa
+Author: liambui <lb598@cornell.edu>
+Date:   Fri Dec 4 04:03:20 2015 -0500
+
+    Merge branch 'master' of github.com:mahsu/MariOCaml
+    
+    Conflicts:
+    	director.ml
+    	sprite.ml
+
+commit 97532c2c058315843bd9e06067e173d62d00bd14
+Author: liambui <lb598@cornell.edu>
+Date:   Fri Dec 4 03:58:14 2015 -0500
+
+    lame
+
+ director.ml | 42 ++++++++++++++++++++++++++++++++++++++----
+ object.ml   | 28 +++++++++++++++++++++++++---
+ sprite.ml   |  4 +++-
+ 3 files changed, 66 insertions(+), 8 deletions(-)
+
+commit 4356ffad3966f9b4dccfa0f0b38b32263b37ec70
+Merge: e958b8c 84825eb
+Author: Matthew Hsu <mdh267@cornell.edu>
+Date:   Fri Dec 4 03:55:26 2015 -0500
+
+    Merge branch 'master' of https://github.com/mahsu/MariOCaml
+
+commit e958b8cf0ba6ad5d3b8bee431cf9b636452207b1
+Author: Matthew Hsu <mdh267@cornell.edu>
+Date:   Fri Dec 4 03:55:20 2015 -0500
+
+    Implement squished goomba particle
+
+ director.ml  | 65 ++++++++++++++++++++++++++++++++++++------------------------
+ index.html   |  1 +
+ object.ml    | 15 ++++++++++----
+ object.mli   |  5 +----
+ particle.ml  |  5 +++--
+ particle.mli |  2 +-
+ 6 files changed, 56 insertions(+), 37 deletions(-)
+
+commit 84825eb0043ff31a871c86fff584c605564a709f
+Author: Ashley Xue <ax25@cornell.edu>
+Date:   Fri Dec 4 03:38:39 2015 -0500
+
+    cloud formations are cool
+
+ procedural_generator.ml | 17 +++++++++++++----
+ 1 file changed, 13 insertions(+), 4 deletions(-)
+
+commit d73f328ec628b7840478caed8bdf23a174ecd968
+Author: Ashley Xue <ax25@cornell.edu>
+Date:   Fri Dec 4 03:30:15 2015 -0500
+
+    wow much clouds yes such cool
+
+ actors.ml  | 3 ++-
+ actors.mli | 3 ++-
+ main.ml    | 3 ++-
+ object.ml  | 3 ++-
+ sprite.ml  | 1 +
+ 5 files changed, 9 insertions(+), 4 deletions(-)
+
+commit bd8dd98d2af5121f6443a190fbd33a4bc1b78dce
+Merge: 7cdf5d0 05192bd
+Author: Ashley Xue <ax25@cornell.edu>
+Date:   Fri Dec 4 03:21:30 2015 -0500
+
+    Merge branch 'master' of https://github.com/mahsu/MariOCaml
+
+commit 7cdf5d0c0952db367d942b1e159da9a628ac4cdd
+Author: Ashley Xue <ax25@cornell.edu>
+Date:   Fri Dec 4 03:21:25 2015 -0500
+
+    generator changes, stairs, much wow
+
+ procedural_generator.ml | 116 +++++++++++++++++++++++++++++++++---------------
+ sprites/blocks.png      | Bin 1155 -> 1362 bytes
+ sprites/panel.png       | Bin 0 -> 934 bytes
+ 3 files changed, 80 insertions(+), 36 deletions(-)
+
+commit 05192bd46512bb5e6c4ecb852084c4b64ba52760
+Merge: 3135213 9ade68d
+Author: Matthew Hsu <mdh267@cornell.edu>
+Date:   Fri Dec 4 03:14:29 2015 -0500
+
+    Merge branch 'master' of https://github.com/mahsu/MariOCaml
+    
+    Conflicts:
+    	draw.ml
+
+commit 31352131c2cd40577d01a57b69eb448a393d4435
+Author: Matthew Hsu <mdh267@cornell.edu>
+Date:   Fri Dec 4 03:12:37 2015 -0500
+
+    Add particle module
+
+ actors.ml              |   5 ++++
+ actors.mli             |   5 ++++
+ draw.ml                |   4 +--
+ object.ml              |   4 ++-
+ object.mli             |   1 +
+ particle.ml            |  67 +++++++++++++++++++++++++++++++++++++++++++++++++
+ particle.mli           |  27 ++++++++++++++++++++
+ sprite.ml              |   9 +++++++
+ sprite.mli             |   2 ++
+ sprites/chunks.png     | Bin 0 -> 510 bytes
+ sprites/raw/chunks.xcf | Bin 0 -> 5452 bytes
+ 11 files changed, 120 insertions(+), 4 deletions(-)
+
+commit 9ade68da3af85a1930fb960a55b32c140f158d85
+Author: liambui <lb598@cornell.edu>
+Date:   Fri Dec 4 03:05:53 2015 -0500
+
+    added game over support
+
+ director.ml | 17 +++++++++++------
+ 1 file changed, 11 insertions(+), 6 deletions(-)
+
+commit 7ff72624bd8b3c46d861fe0e493921782cf4ee61
+Author: liambui <lb598@cornell.edu>
+Date:   Fri Dec 4 02:47:25 2015 -0500
+
+    shit works
+
+ director.ml |  9 ++++++---
+ draw.ml     |  9 ++++++++-
+ draw.mli    |  2 ++
+ index.html  |  9 +++++----
+ object.ml   | 14 +++++++-------
+ object.mli  |  2 ++
+ 6 files changed, 30 insertions(+), 15 deletions(-)
+
+commit 065b64d5accad8005455aec5b5a5e093bf425a6f
+Author: liambui <lb598@cornell.edu>
+Date:   Fri Dec 4 01:35:43 2015 -0500
+
+    Woo!
+
+ director.ml | 8 +++++---
+ 1 file changed, 5 insertions(+), 3 deletions(-)
+
+commit 79e380d0980e47fbd0900207d37852bead53f443
+Merge: 23bf07d af55ad9
+Author: liambui <lb598@cornell.edu>
+Date:   Fri Dec 4 01:18:02 2015 -0500
+
+    Merge branch 'master' of github.com:mahsu/MariOCaml
+    
+    Conflicts:
+    	director.ml
+
+commit 23bf07d613a27f3921190640a41bb7113f836a63
+Author: liambui <lb598@cornell.edu>
+Date:   Fri Dec 4 01:16:53 2015 -0500
+
+    stupid mushrooms
+
+ director.ml | 145 ++++++++++++++++++++++++++++++++++--------------------------
+ draw.ml     |   9 ++--
+ main.ml     |   6 ++-
+ object.ml   |   5 ++-
+ sprite.ml   |   2 +-
+ 5 files changed, 94 insertions(+), 73 deletions(-)
+
+commit af55ad90d02f94c878f44156b6e38c0a4a0c9e1f
+Author: Matthew Hsu <mdh267@cornell.edu>
+Date:   Fri Dec 4 01:07:49 2015 -0500
+
+    Support crouching
+
+ director.ml |  1 +
+ object.ml   | 25 +++++++++++++++++--------
+ object.mli  |  1 +
+ sprite.ml   | 10 +++++-----
+ 4 files changed, 24 insertions(+), 13 deletions(-)
+
+commit 297afcf2ae076808ca40db8e8baab2d325642301
+Author: Matthew Hsu <mdh267@cornell.edu>
+Date:   Fri Dec 4 00:29:34 2015 -0500
+
+    Remove unused files
+
+ hash.ml        |  30 ----------------------
+ interfaces.zip | Bin 2682 -> 0 bytes
+ quadtree.ml    |  79 ---------------------------------------------------------
+ vector.ml      |  10 --------
+ vector.mli     |  15 -----------
+ 5 files changed, 134 deletions(-)
+
+commit 5818c7537cb46b54f78353a77d4f196b73ef9991
+Merge: fdebcf7 9afc5b9
+Author: Matthew Hsu <mdh267@cornell.edu>
+Date:   Fri Dec 4 00:28:24 2015 -0500
+
+    Merge branch 'master' of https://github.com/mahsu/MariOCaml
+
+commit fdebcf77b315647dce13d39e866abcf089c2d090
+Author: Matthew Hsu <mdh267@cornell.edu>
+Date:   Fri Dec 4 00:28:15 2015 -0500
+
+    Refactor viewport code to separate module
+
+ director.ml  | 44 ++++----------------------------------------
+ viewport.ml  | 39 +++++++++++++++++++++++++++++++++++++++
+ viewport.mli | 17 +++++++++++++++++
+ 3 files changed, 60 insertions(+), 40 deletions(-)
+
+commit 9afc5b9b7be61cf99dab5ebba803b33d7cbd4752
+Merge: 9992f15 f74ce8f
+Author: Ashley Xue <ax25@cornell.edu>
+Date:   Fri Dec 4 00:19:48 2015 -0500
+
+    Merge branch 'master' of https://github.com/mahsu/MariOCaml
+    
+    Conflicts:
+    	actors.ml
+    	sprite.ml
+
+commit 9992f15b0f5ee0f0f42d5ce26fe9d9cbbf6e4b0d
+Author: Ashley Xue <ax25@cornell.edu>
+Date:   Fri Dec 4 00:17:27 2015 -0500
+
+    Procedurally generated blocks/ground
+
+ actors.mli               |   5 +-
+ build.sh                 |   0
+ level.ml                 |  17 ++++++
+ level.mli                |  12 ++++
+ map.ml                   |   0
+ map.mli                  |  14 -----
+ procedural_generator.ml  | 143 +++++++++++++++++++++++++++++++++++++++++++++--
+ procedural_generator.mli |  25 ++++++++-
+ 8 files changed, 192 insertions(+), 24 deletions(-)
+
+commit f74ce8faca0863e9415f47a0e9d83e68aec5c4f9
+Author: Matthew Hsu <mdh267@cornell.edu>
+Date:   Fri Dec 4 00:09:55 2015 -0500
+
+    Refactor collision checking to be in director
+
+ director.ml | 132 ++++++++++++++++++++++++++++++++++++++++++++++++++++++------
+ draw.ml     |   6 ++-
+ draw.mli    |   2 +-
+ object.ml   | 101 +---------------------------------------------
+ object.mli  |  16 +++++++-
+ 5 files changed, 142 insertions(+), 115 deletions(-)
+
+commit 82b9204a908aaf0708edbc31a77314c34b8a8bf7
+Author: Matthew Hsu <mdh267@cornell.edu>
+Date:   Thu Dec 3 22:56:02 2015 -0500
+
+    Fix bounding box bor big mario jumping. Tweak game physics parameters
+
+ object.ml | 10 +++++-----
+ sprite.ml | 10 +++++-----
+ 2 files changed, 10 insertions(+), 10 deletions(-)
+
+commit b87bada93080b871189200a9660d6e8b8e4f5963
+Merge: ae6bf49 912c162
+Author: Matthew Hsu <mdh267@cornell.edu>
+Date:   Thu Dec 3 22:35:40 2015 -0500
+
+    Merge branch 'master' of https://github.com/mahsu/MariOCaml
+
+commit 912c162554a9ede273eab7e5a03e32adbe500c1d
+Author: liambui <lb598@cornell.edu>
+Date:   Thu Dec 3 22:36:03 2015 -0500
+
+    big mario weird glitch
+
+ object.ml | 19 +++++++++++++------
+ sprite.ml |  6 +++---
+ 2 files changed, 16 insertions(+), 9 deletions(-)
+
+commit ae6bf49b67867323803db833576381036386e3d5
+Author: Matthew Hsu <mdh267@cornell.edu>
+Date:   Thu Dec 3 22:35:32 2015 -0500
+
+    Some tweaks to physics, refactor some of director
+
+ director.ml | 41 ++++++++++++++++++++++-------------------
+ object.ml   | 20 +++++++++++++-------
+ sprite.ml   |  8 ++++----
+ 3 files changed, 39 insertions(+), 30 deletions(-)
+
+commit 75abf368f6dcea82b7209193d67d0c8eeeb144e4
+Author: Matthew Hsu <mdh267@cornell.edu>
+Date:   Thu Dec 3 20:19:56 2015 -0500
+
+    Fix viewport
+
+ director.ml | 12 +++++++-----
+ 1 file changed, 7 insertions(+), 5 deletions(-)
+
+commit 1314fcda40847d4d09129cd611b2165d13d83c31
+Author: Matthew Hsu <mdh267@cornell.edu>
+Date:   Thu Dec 3 20:01:48 2015 -0500
+
+    Add viewport code to director. Not currently working
+
+ director.ml | 65 +++++++++++++++++++++++++++++++++++++++++++++++++------------
+ 1 file changed, 53 insertions(+), 12 deletions(-)
+
+commit 1cde716ecee75e78f62e81ea303bde78347ba98e
+Author: Matthew Hsu <mdh267@cornell.edu>
+Date:   Thu Dec 3 18:12:58 2015 -0500
+
+    Refactor so that player is no longer in collidable list
+
+ director.ml | 57 +++++++++++++++++++++++++++++++++------------------------
+ main.ml     |  4 ++--
+ object.ml   | 15 ++++++++-------
+ sprite.ml   |  2 +-
+ 4 files changed, 44 insertions(+), 34 deletions(-)
+
+commit ac360a2489526c3c8ea83781e1ea19aa4745718f
+Author: Matthew Hsu <mdh267@cornell.edu>
+Date:   Thu Dec 3 15:40:32 2015 -0500
+
+    Fix mario animation when moving in same direction after standing
+
+ object.ml | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+commit 1468ca1cc193c6b83dd8b698dd5e24642b418664
+Author: Matthew Hsu <mdh267@cornell.edu>
+Date:   Thu Dec 3 15:36:20 2015 -0500
+
+    Add big mario sprite support, fix sprite bounding boxes, support asymmetrical left/right sprite bounding boxes
+
+ actors.ml  |   2 +-
+ actors.mli |   2 +-
+ main.ml    |   2 +-
+ object.ml  | 116 ++++++++++++++++++++++++++++---------------------------------
+ sprite.ml  |  54 +++++++++++++++-------------
+ 5 files changed, 85 insertions(+), 91 deletions(-)
+
+commit 1f5112d91bfb3e3d37935db4a345a5293d145bb7
+Author: Matthew Hsu <mdh267@cornell.edu>
+Date:   Thu Dec 3 11:25:28 2015 -0500
+
+    Add support for custom bounding box
+
+ object.ml                   |   2 +-
+ sprite.ml                   |  41 +++++++++++++++++++++--------------------
+ sprite.mli                  |   2 +-
+ sprites/mario-big.png       | Bin 0 -> 3519 bytes
+ sprites/mario-luigi.png     | Bin 144370 -> 0 bytes
+ sprites/raw/mario-big.png   | Bin 3519 -> 0 bytes
+ sprites/raw/mario-luigi.png | Bin 0 -> 144370 bytes
+ 7 files changed, 23 insertions(+), 22 deletions(-)
+
+commit 8335cd6a368475eca586c0fae7e222ca12fa13f7
+Merge: 201f7e3 1d76921
+Author: liambui <lb598@cornell.edu>
+Date:   Thu Dec 3 02:07:39 2015 -0500
+
+    Merge branch 'master' of github.com:mahsu/MariOCaml
+
+commit 201f7e30b0742cacd657d6c383620da232e5cd75
+Author: liambui <lb598@cornell.edu>
+Date:   Thu Dec 3 02:07:31 2015 -0500
+
+    mushroom and qblock and big mario support
+
+ main.ml   |  5 +++--
+ object.ml | 47 ++++++++++++++++++++++++++++++++++++++++++-----
+ sprite.ml |  4 ++--
+ 3 files changed, 47 insertions(+), 9 deletions(-)
+
+commit 1d76921a4f46a05ce248f8be56af4a98b6313cac
+Merge: cf23629 09c5635
+Author: Matthew Hsu <mdh267@cornell.edu>
+Date:   Thu Dec 3 01:49:48 2015 -0500
+
+    Merge branch 'master' of https://github.com/mahsu/MariOCaml
+
+commit cf2362932db7b9844551b755acc438dda1be6153
+Author: Matthew Hsu <mdh267@cornell.edu>
+Date:   Thu Dec 3 01:49:43 2015 -0500
+
+    Add big mario sprite
+
+ sprites/coin.png          | Bin 374 -> 0 bytes
+ sprites/goomba.png        | Bin 619 -> 0 bytes
+ sprites/koopa.png         | Bin 1179 -> 0 bytes
+ sprites/qblock.png        | Bin 569 -> 0 bytes
+ sprites/raw/mario-big.png | Bin 0 -> 3519 bytes
+ sprites/raw/mario-big.xcf | Bin 0 -> 57953 bytes
+ 6 files changed, 0 insertions(+), 0 deletions(-)
+
+commit 09c5635c290cf7e85350355c289424b5d90eaaec
+Author: liambui <lb598@cornell.edu>
+Date:   Thu Dec 3 00:49:40 2015 -0500
+
+    shells only break bricks
+
+ object.ml | 7 ++++---
+ 1 file changed, 4 insertions(+), 3 deletions(-)
+
+commit d37630a1546086ea6335928803f5037a884826d4
+Author: liambui <lb598@cornell.edu>
+Date:   Thu Dec 3 00:46:23 2015 -0500
+
+    shell breaks blocks
+
+ object.ml | 8 ++++++--
+ 1 file changed, 6 insertions(+), 2 deletions(-)
+
+commit d92a2766a0154d9dae34ab7b31c3a5fda0ee9b01
+Merge: ff9c702 903fcc8
+Author: liambui <lb598@cornell.edu>
+Date:   Thu Dec 3 00:41:18 2015 -0500
+
+    Merge branch 'master' of github.com:mahsu/MariOCaml
+    
+    Conflicts:
+    	director.ml
+
+commit ff9c702f7ddda5ee4982f494a5d9f98495086987
+Author: liambui <lb598@cornell.edu>
+Date:   Thu Dec 3 00:40:20 2015 -0500
+
+    added big mario without png
+
+ actors.ml   | 12 ++++++----
+ actors.mli  |  4 ++++
+ build.sh    |  0
+ director.ml | 34 +++++++++++++--------------
+ hash.ml     | 30 ++++++++++++++++++++++++
+ object.ml   | 77 ++++++++++++++++++++++++++++++++++++++-----------------------
+ object.mli  |  7 +++---
+ sprite.ml   | 16 +++++++++++++
+ 8 files changed, 127 insertions(+), 53 deletions(-)
+
+commit 903fcc8acb390fed6400f673267a19eaa0515bbf
+Merge: 1f5d2b4 e1be805
+Author: Matthew Hsu <mdh267@cornell.edu>
+Date:   Thu Dec 3 00:23:17 2015 -0500
+
+    Merge branch 'master' of https://github.com/mahsu/MariOCaml
+
+commit 1f5d2b47e15d6ad73dcfbfa7e7e8932bda4010fc
+Author: Matthew Hsu <mdh267@cornell.edu>
+Date:   Thu Dec 3 00:23:08 2015 -0500
+
+    Add background
+
+ director.ml       |  14 ++++++++++++--
+ draw.ml           |   4 ++--
+ draw.mli          |   2 ++
+ index.html        |   2 +-
+ sprite.ml         |  12 ++++++++++--
+ sprite.mli        |   2 ++
+ sprites/bgd-1.png | Bin 0 -> 11849 bytes
+ 7 files changed, 29 insertions(+), 7 deletions(-)
+
+commit e1be8053a9d975ea9bd88dac3fe6a2753047084f
+Merge: 759a157 b3518be
+Author: liambui <lb598@cornell.edu>
+Date:   Wed Dec 2 23:50:05 2015 -0500
+
+    Merge branch 'master' of github.com:mahsu/MariOCaml
+
+commit 759a1579b4675a53861d7505f5afbf19e56bd4c1
+Author: liambui <lb598@cornell.edu>
+Date:   Wed Dec 2 23:49:58 2015 -0500
+
+    fixed stupid offset x problem
+
+ object.ml | 14 +++++++-------
+ 1 file changed, 7 insertions(+), 7 deletions(-)
+
+commit b3518be93e29e402af1a36cc069d3cd587bc6f27
+Merge: 48fea37 5a8f4b5
+Author: Matthew Hsu <mdh267@cornell.edu>
+Date:   Wed Dec 2 23:48:04 2015 -0500
+
+    Merge branch 'master' of https://github.com/mahsu/MariOCaml
+    
+    Conflicts:
+    	object.ml
+
+commit 48fea376b19c0b3a433d8b75eed6f4d5de245229
+Author: Matthew Hsu <mdh267@cornell.edu>
+Date:   Wed Dec 2 23:44:48 2015 -0500
+
+    Support temporary invulnerability for player
+
+ director.ml | 10 +++++++---
+ main.ml     |  4 ++--
+ object.ml   | 19 ++++++++++++-------
+ 3 files changed, 21 insertions(+), 12 deletions(-)
+
+commit 5a8f4b5ec571e1860153821a93717743aceb489a
+Author: liambui <lb598@cornell.edu>
+Date:   Wed Dec 2 23:02:54 2015 -0500
+
+    koopa shell support
+
+ object.ml | 50 +++++++++++++++++++++++++++++++++++++++-----------
+ 1 file changed, 39 insertions(+), 11 deletions(-)
+
+commit d3fbc73c2cf370d42a385737d8a3ff986bb26ea6
+Author: liambui <lb598@cornell.edu>
+Date:   Wed Dec 2 22:07:54 2015 -0500
+
+    normalize pos
+
+ object.ml | 10 +++++-----
+ 1 file changed, 5 insertions(+), 5 deletions(-)
+
+commit a7290d16618184aaaee2699b3182e8ee03777796
+Author: Matthew Hsu <mdh267@cornell.edu>
+Date:   Wed Dec 2 22:08:54 2015 -0500
+
+    Support sprite transformations for enemies
+
+ main.ml    |  4 +++-
+ object.ml  | 35 +++++++++++++++++++----------------
+ sprite.ml  | 13 ++++++++++---
+ sprite.mli |  6 ++++--
+ 4 files changed, 36 insertions(+), 22 deletions(-)
+
+commit 196e03e7d8cee7196ed0e6581acfce95ca34de43
+Merge: e8faa75 59d5fa0
+Author: liambui <lb598@cornell.edu>
+Date:   Wed Dec 2 21:06:59 2015 -0500
+
+    Merge branch 'master' of github.com:mahsu/MariOCaml
+
+commit 59d5fa0206eb943542cdaa824f39aa21d7d87d08
+Merge: 6fd482c 898f393
+Author: Matthew Hsu <mdh267@cornell.edu>
+Date:   Wed Dec 2 21:16:02 2015 -0500
+
+    Merge branch 'master' of https://github.com/mahsu/MariOCaml
+
+commit 6fd482c67cacde09555dad2e8866f93f5b164f16
+Author: Matthew Hsu <mdh267@cornell.edu>
+Date:   Wed Dec 2 21:15:58 2015 -0500
+
+    Exclude blocks from narrow phase checking
+
+ director.ml | 13 +++++++++----
+ 1 file changed, 9 insertions(+), 4 deletions(-)
+
+commit e8faa753e487d413c4abfc6798fec688550a5fe4
+Author: liambui <lb598@cornell.edu>
+Date:   Wed Dec 2 21:06:51 2015 -0500
+
+    syntax
+
+ object.ml | 5 ++---
+ 1 file changed, 2 insertions(+), 3 deletions(-)
+
+commit 6ce7eaf4983d0e66c3002eac51a777adc875e2a4
+Author: Matthew Hsu <mdh267@cornell.edu>
+Date:   Wed Dec 2 21:05:15 2015 -0500
+
+    Fix enemy movement, collisions
+
+ main.ml   |  2 +-
+ object.ml | 22 ++++++++++++----------
+ 2 files changed, 13 insertions(+), 11 deletions(-)
+
+commit 898f39366a6ab7021a22afc207199827307c6a99
+Author: liambui <lb598@cornell.edu>
+Date:   Wed Dec 2 21:03:02 2015 -0500
+
+    two way collision
+
+ object.ml | 10 ++++++----
+ 1 file changed, 6 insertions(+), 4 deletions(-)
+
+commit f053c470076cff8b1831a4420bf23bea4945fb9f
+Author: liambui <lb598@cornell.edu>
+Date:   Wed Dec 2 20:34:47 2015 -0500
+
+    map
+
+ main.ml | 11 ++++++++++-
+ 1 file changed, 10 insertions(+), 1 deletion(-)
+
+commit d09197130075304f9a11d670e17409f317601bae
+Author: Matthew Hsu <mdh267@cornell.edu>
+Date:   Wed Dec 2 20:46:21 2015 -0500
+
+    Some tweaks to jumping mechanics in object.ml
+
+ object.ml | 30 ++++++++++++++++++------------
+ 1 file changed, 18 insertions(+), 12 deletions(-)
+
+commit 632ebadbf869b521794e308dfa4154799f6065d4
+Author: liambui <lb598@cornell.edu>
+Date:   Wed Dec 2 20:10:55 2015 -0500
+
+    playable
+
+ main.ml   |  7 ++++++-
+ object.ml | 42 +++++++++++++++++++++---------------------
+ 2 files changed, 27 insertions(+), 22 deletions(-)
+
+commit 63886fe080e7e70f4cf5dd077d64184b81f87087
+Author: Matthew Hsu <mdh267@cornell.edu>
+Date:   Wed Dec 2 20:15:58 2015 -0500
+
+    Add support for propogating object transformations, fix bug where player can jump while in the air, add support for custom object ids
+
+ director.ml | 39 +++++++++++++++++++++++-----------
+ object.ml   | 69 +++++++++++++++++++++++++++++++++++++------------------------
+ object.mli  |  2 +-
+ 3 files changed, 70 insertions(+), 40 deletions(-)
+
+commit 82128d9347480644080f0a973a50ca39574013f9
+Author: Matthew Hsu <mdh267@cornell.edu>
+Date:   Wed Dec 2 17:24:53 2015 -0500
+
+    Add more to transformations, animate only non-moving enemies
+
+ director.ml |  4 ++--
+ object.ml   | 51 ++++++++++++++++++++++++++++++++++++---------------
+ object.mli  |  3 ++-
+ 3 files changed, 40 insertions(+), 18 deletions(-)
+
+commit 89b4d1888cc0ab101773e620355d555010af51c3
+Author: Matthew Hsu <mdh267@cornell.edu>
+Date:   Wed Dec 2 16:29:22 2015 -0500
+
+    Fix support for simultaneous keypress
+
+ director.ml | 27 ++++++++++-----------------
+ object.ml   | 28 ++++++++++++++++++----------
+ object.mli  |  2 +-
+ 3 files changed, 29 insertions(+), 28 deletions(-)
+
+commit 69917d5482f87fd1e173ecbd1036cf7df698b330
+Author: Matthew Hsu <mdh267@cornell.edu>
+Date:   Wed Dec 2 15:30:13 2015 -0500
+
+    Begin adding enemy transformations, add normalize origin functions
+
+ director.ml |  1 +
+ object.ml   | 58 +++++++++++++++++++++++++++++++++++++++-------------------
+ object.mli  |  2 ++
+ 3 files changed, 42 insertions(+), 19 deletions(-)
+
+commit c32ed2dc5d86a30f499946999e0509ac0d2325ba
+Merge: e93c791 f11a205
+Author: Ashley Xue <ax25@cornell.edu>
+Date:   Wed Dec 2 14:23:37 2015 -0500
+
+    Merge branch 'master' of https://github.com/mahsu/MariOCaml
+
+commit f11a205b46a11dcac92830dac97fa68ab390d364
+Author: Matthew Hsu <mdh267@cornell.edu>
+Date:   Wed Dec 2 03:16:59 2015 -0500
+
+    Fix North/South collision detection due to double counting. Fix player standing sprites.
+
+ director.ml |  9 ++++++---
+ object.ml   | 60 ++++++++++++++++++++++++++++++++++--------------------------
+ object.mli  |  2 ++
+ 3 files changed, 42 insertions(+), 29 deletions(-)
+
+commit e93c791e14f15e79f3ed6f1a22fbe9bbee20c283
+Merge: 278b0d9 54cdffb
+Author: Ashley Xue <ax25@cornell.edu>
+Date:   Wed Dec 2 01:43:01 2015 -0500
+
+    Merge branch 'master' of https://github.com/mahsu/MariOCaml
+
+commit 278b0d908e8202010f9f0e5d6df65fd9c26e8a54
+Author: Ashley Xue <ax25@cornell.edu>
+Date:   Wed Dec 2 01:42:56 2015 -0500
+
+    adding ground_typ
+
+ actors.ml  | 14 ++++++++++----
+ actors.mli |  6 ++++++
+ sprite.ml  |  6 ++++++
+ 3 files changed, 22 insertions(+), 4 deletions(-)
+
+commit 54cdffba6080643d93d0603a5ad8731fd0b1b558
+Author: Matthew Hsu <mdh267@cornell.edu>
+Date:   Wed Dec 2 01:30:40 2015 -0500
+
+    Blocks are no longer susceptible to gravity
+
+ object.ml | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+commit e1bb36dfdd4526c088673272a40a6e345283f04f
+Merge: db584c0 6400c2c
+Author: Matthew Hsu <mdh267@cornell.edu>
+Date:   Wed Dec 2 01:28:28 2015 -0500
+
+    Merge branch 'master' of https://github.com/mahsu/MariOCaml
+
+commit db584c0c917211d3c5b8fe7b80a6e0a9db7f6791
+Author: Matthew Hsu <mdh267@cornell.edu>
+Date:   Wed Dec 2 01:28:16 2015 -0500
+
+    Update object velocity and position, some fixes to player sprites
+
+ director.ml |  5 ++---
+ object.ml   | 62 +++++++++++++++++++++++++++++++++++++++++--------------------
+ object.mli  |  9 ++-------
+ sprite.ml   |  2 +-
+ 4 files changed, 47 insertions(+), 31 deletions(-)
+
+commit 6400c2ca1a6dc27f60467364fa724d5e6efdfe91
+Author: Ashley Xue <ax25@cornell.edu>
+Date:   Wed Dec 2 01:11:19 2015 -0500
+
+    ground sprite sheet and starting generation
+
+ main.ml                 |  19 ++++++++++---------
+ procedural_generator.ml |  20 ++++++++++++++++++++
+ sprite.ml               |  24 ++++++++++++------------
+ sprites/ground.png      | Bin 0 -> 1001 bytes
+ 4 files changed, 42 insertions(+), 21 deletions(-)
+
+commit 6c545333446ba7a56ce44ae2684c645904f4fa39
+Author: Matthew Hsu <mdh267@cornell.edu>
+Date:   Tue Dec 1 21:55:19 2015 -0500
+
+    Fix merge conflicts
+
+ object.ml | 5 -----
+ 1 file changed, 5 deletions(-)
+
+commit 143e73550bbc7fe52512b798fb521bbfa2565a81
+Merge: 41e2820 22fc5f2
+Author: liambui <lb598@cornell.edu>
+Date:   Tue Dec 1 22:00:08 2015 -0500
+
+    Merge branch 'master' of github.com:mahsu/MariOCaml
+    
+    Conflicts:
+    	object.ml
+
+commit 41e28206bbf1a3bb92326859ca9e934aef75b9b4
+Author: liambui <lb598@cornell.edu>
+Date:   Tue Dec 1 21:50:54 2015 -0500
+
+    added enemy enemy collisions in process_collision
+
+ object.ml | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+commit 22fc5f21a13275438ba40f326600d9e540c765a3
+Author: Matthew Hsu <mdh267@cornell.edu>
+Date:   Tue Dec 1 21:46:37 2015 -0500
+
+    Fix changing direction in player
+
+ object.ml | 11 ++++++-----
+ 1 file changed, 6 insertions(+), 5 deletions(-)
+
+commit bab972e3e40c4ee7492e110530bff2c950a71b8c
+Author: Matthew Hsu <mdh267@cornell.edu>
+Date:   Tue Dec 1 21:42:46 2015 -0500
+
+    Integrate player control processing
+
+ actors.ml    |  5 +++++
+ actors.mli   |  6 ++++++
+ director.ml  | 47 ++++++++++++++++++++++++++++++++++-------------
+ director.mli |  7 +++++++
+ draw.ml      |  2 ++
+ main.ml      | 11 +++++++----
+ object.ml    | 41 ++++++++++++++++++++++++-----------------
+ object.mli   |  4 +++-
+ sprite.ml    |  4 ++--
+ sprite.mli   |  2 +-
+ 10 files changed, 91 insertions(+), 38 deletions(-)
+
+commit 3f5f383a6240f5c4f0f54da0389eb1c35a483310
+Author: liambui <lb598@cornell.edu>
+Date:   Tue Dec 1 21:41:00 2015 -0500
+
+    process collide method compiles
+
+ object.ml | 45 +++++++++++++++++++++++++++++++++------------
+ 1 file changed, 33 insertions(+), 12 deletions(-)
+
+commit 24d1ea685b0d47303a92d1c19ea2463c3e714612
+Author: Matthew Hsu <mdh267@cornell.edu>
+Date:   Tue Dec 1 19:07:06 2015 -0500
+
+    Fix issue with unbounded object list
+
+ director.ml        |  23 ++++++++++++-----------
+ draw.ml            |   1 +
+ object.ml          |   1 +
+ sprite.ml          |   3 ++-
+ sprites/blocks.png | Bin 943 -> 1155 bytes
+ 5 files changed, 16 insertions(+), 12 deletions(-)
+
+commit e924f689ebbbc79787b06ca38618dd2a9017606b
+Author: Matthew Hsu <mdh267@cornell.edu>
+Date:   Tue Dec 1 18:29:14 2015 -0500
+
+    Add object initialization
+
+ object.ml | 44 +++++++++++++++++++++++---------------------
+ 1 file changed, 23 insertions(+), 21 deletions(-)
+
+commit 94d7e3dac19e98b0def0d5d11b5c3faf6c29184b
+Author: Matthew Hsu <mdh267@cornell.edu>
+Date:   Tue Dec 1 01:54:11 2015 -0500
+
+    Fix syntax errors
+
+ actors.ml   | 35 ++++++++++++++++++++++++++++
+ actors.mli  |  4 ++++
+ director.ml | 15 ++++++------
+ object.ml   | 76 +++++++++++++++++++++++++++++++++----------------------------
+ object.mli  | 19 ++++++++--------
+ sprite.ml   | 12 +++++-----
+ sprite.mli  |  3 +--
+ 7 files changed, 104 insertions(+), 60 deletions(-)
+
+commit eb50845fa0c36af8fbd59bf8d716e640b625948c
+Author: Matthew Hsu <mdh267@cornell.edu>
+Date:   Tue Dec 1 00:51:27 2015 -0500
+
+    Sprites use new sheets
+
+ sprite.ml                   |  51 ++++++++++++++++++++++----------------------
+ sprites/enemies-2.png       | Bin 42947 -> 0 bytes
+ sprites/enemies-resized.png | Bin 4916 -> 0 bytes
+ sprites/enemies.png         | Bin 79964 -> 5349 bytes
+ sprites/general.png         | Bin 59388 -> 0 bytes
+ sprites/mario-small.png     | Bin 0 -> 2501 bytes
+ sprites/raw/enemies-2.png   | Bin 0 -> 42947 bytes
+ sprites/raw/enemies.png     | Bin 0 -> 79964 bytes
+ sprites/raw/general.png     | Bin 0 -> 59388 bytes
+ 9 files changed, 26 insertions(+), 25 deletions(-)
+
+commit 1b83748092efd8ac36ec591009638abe08b02fe3
+Merge: b07a04e 4870611
+Author: Matthew Hsu <mdh267@cornell.edu>
+Date:   Mon Nov 30 23:58:42 2015 -0500
+
+    Merge branch 'master' of https://github.com/mahsu/MariOCaml
+
+commit 48706111838a0b882fcc38ffbfdc6f696019e728
+Author: Ashley Xue <ax25@cornell.edu>
+Date:   Tue Dec 1 00:03:18 2015 -0500
+
+    updated sprite sheets
+
+ sprites/block.png           | Bin 457 -> 0 bytes
+ sprites/blocks.png          | Bin 0 -> 943 bytes
+ sprites/enemies-resized.png | Bin 0 -> 4916 bytes
+ sprites/items.png           | Bin 0 -> 1514 bytes
+ 4 files changed, 0 insertions(+), 0 deletions(-)
+
+commit b07a04ed474e01edd5756d6b51c678c486641355
+Author: Matthew Hsu <mdh267@cornell.edu>
+Date:   Mon Nov 30 23:58:26 2015 -0500
+
+    Begin adding code for processing collisions
+
+ director.ml | 50 +++++++++++++++++++++++++++++++++++---------------
+ draw.ml     |  1 -
+ object.ml   |  7 +++++++
+ object.mli  |  5 ++++-
+ 4 files changed, 46 insertions(+), 17 deletions(-)
+
+commit 269d54684bd26be1f6c8ab9c4f4e4d7187f7e645
+Merge: 502c68a efde6dc
+Author: Ashley Xue <ax25@cornell.edu>
+Date:   Mon Nov 30 23:22:14 2015 -0500
+
+    Merge branch 'master' of https://github.com/mahsu/MariOCaml
+
+commit 502c68a56e84218fc76514c2f4f15cf1eafecb0b
+Author: Ashley Xue <ax25@cornell.edu>
+Date:   Mon Nov 30 23:22:04 2015 -0500
+
+    sprites and actor change
+
+ actors.mli         |  10 +++++-----
+ sprites/block.png  | Bin 0 -> 457 bytes
+ sprites/coin.png   | Bin 0 -> 374 bytes
+ sprites/goomba.png | Bin 0 -> 619 bytes
+ sprites/koopa.png  | Bin 0 -> 1179 bytes
+ sprites/qblock.png | Bin 0 -> 569 bytes
+ 6 files changed, 5 insertions(+), 5 deletions(-)
+
+commit efde6dc21cece2de32cddf50aa715df76c7e21a2
+Author: Matthew Hsu <mdh267@cornell.edu>
+Date:   Mon Nov 30 19:40:02 2015 -0500
+
+    Begin implementing update player, velocity, and position
+
+ director.ml |  4 +++-
+ object.ml   | 54 ++++++++++++++++++++++++++++++++++++++++++++----------
+ object.mli  | 13 ++++++++-----
+ 3 files changed, 55 insertions(+), 16 deletions(-)
+
+commit fce7a6b8b12886ede61c2f2d34aebedae043c69d
+Author: Matthew Hsu <mdh267@cornell.edu>
+Date:   Mon Nov 30 18:38:42 2015 -0500
+
+    Begin adding support for left and right sprites. Add more sprite sheets
+
+ object.ml             |   5 ++---
+ object.mli            |   1 -
+ sprite.ml             |  46 +++++++++++++++++++++++++++++-----------------
+ sprites/enemies-2.png | Bin 0 -> 42947 bytes
+ sprites/mapbg.png     | Bin 0 -> 292130 bytes
+ sprites/tileset.png   | Bin 0 -> 50026 bytes
+ 6 files changed, 31 insertions(+), 21 deletions(-)
+
+commit a322490fc1ee4d2b57630f84affb234b2a3d186f
+Author: Matthew Hsu <mdh267@cornell.edu>
+Date:   Mon Nov 23 18:03:09 2015 -0500
+
+    Refactor object structure to allow creation through factory spawn function
+
+ actors.mli   |  2 +-
+ director.ml  | 20 +++++++++++---------
+ director.mli |  2 +-
+ draw.ml      |  5 ++---
+ draw.mli     |  2 +-
+ object.ml    | 58 +++++++++++++++++++++++++++++++++++++++++++++++++---------
+ object.mli   | 14 ++++++++++----
+ sprite.ml    |  4 ++--
+ 8 files changed, 77 insertions(+), 30 deletions(-)
+
+commit 5b01942217466d23465830938c01a21514c063c9
+Author: Matthew Hsu <mdh267@cornell.edu>
+Date:   Mon Nov 23 01:02:24 2015 -0500
+
+    Restructure sprite creation to break down types
+
+ actors.ml  | 22 ----------------------
+ actors.mli | 27 ++++++++++++++++++---------
+ index.html | 24 ++++++++++++++++++++++--
+ main.ml    |  4 ++--
+ object.ml  | 13 +++++++------
+ object.mli | 10 +++++-----
+ sprite.ml  | 50 ++++++++++++++++++++++++++++++++++++++------------
+ sprite.mli |  2 +-
+ 8 files changed, 93 insertions(+), 59 deletions(-)
+
+commit c8fdddc7b2035384c27da8097831d7821f04128d
+Author: Matthew Hsu <mdh267@cornell.edu>
+Date:   Sun Nov 22 21:39:26 2015 -0500
+
+    Refactor sprite so that sprite params is a field to reduce repetition.
+
+ actors.ml    |  6 +++++-
+ actors.mli   |  8 ++++++--
+ director.ml  | 30 ++++++++++++++++++++++++------
+ director.mli |  5 +++--
+ draw.ml      |  7 +++----
+ main.ml      |  7 +++++--
+ object.ml    |  5 ++---
+ sprite.ml    | 33 +++++++++++----------------------
+ sprite.mli   |  9 +--------
+ 9 files changed, 60 insertions(+), 50 deletions(-)
+
+commit cd4730a7711262c5acb7b6225a0ba1e0e262ebd2
+Author: Matthew Hsu <mdh267@cornell.edu>
+Date:   Sun Nov 22 16:48:17 2015 -0500
+
+    Begin adding keypress events
+
+ coin.png     | Bin 54863 -> 0 bytes
+ director.ml  |  14 ++++++++++++++
+ director.mli |   3 +++
+ index.html   |   6 ++++++
+ main.ml      |   4 +++-
+ sprite.ml    |  17 ++++++++++++++---
+ sprite.mli   |   4 +++-
+ 7 files changed, 43 insertions(+), 5 deletions(-)
+
+commit a07f6421282cd0d5572d387a8c276d899840e7b0
+Author: Matthew Hsu <mdh267@cornell.edu>
+Date:   Sat Nov 21 19:25:11 2015 -0500
+
+    Add coin sprite, add support for ticks in animation
+
+ draw.ml    |  3 ++-
+ main.ml    |  2 --
+ sprite.ml  | 24 +++++++++++++++++-------
+ sprite.mli |  5 ++++-
+ 4 files changed, 23 insertions(+), 11 deletions(-)
+
+commit 838cbf942361be1cfb9b44ce37b83f4d07c2f8a8
+Author: Matthew Hsu <mdh267@cornell.edu>
+Date:   Sat Nov 21 17:09:58 2015 -0500
+
+    Start refactoring to create new sprites using factory. Build successful, and running still works
+
+ draw.ml    |  2 +-
+ sprite.ml  | 15 +++++++++------
+ sprite.mli |  6 +++---
+ 3 files changed, 13 insertions(+), 10 deletions(-)
+
+commit 641ee55c5252600aa04338afe7c22928e39dcf15
+Author: Matthew Hsu <mdh267@cornell.edu>
+Date:   Sat Nov 21 16:45:50 2015 -0500
+
+    Begin to refactor for proposed interface
+
+ actors.ml    |  4 +++-
+ actors.mli   |  4 +++-
+ director.ml  |  4 ++--
+ director.mli |  2 +-
+ main.ml      |  9 ++++----
+ object.ml    | 67 ++++++++++++++++++++++++++++++++++++++++++++++++------------
+ object.mli   | 24 ++++++++++++----------
+ sprite.ml    | 44 +++++++++++++++++++--------------------
+ sprite.mli   |  9 +++++---
+ vector.ml    | 10 +++++++++
+ vector.mli   | 15 ++++++++++++++
+ 11 files changed, 133 insertions(+), 59 deletions(-)
+
+commit d585ecc76fc8eb4ad001ee3296993f3ab02b8074
+Author: Matthew Hsu <mdh267@cornell.edu>
+Date:   Mon Nov 16 01:14:57 2015 -0500
+
+    Begin implementing quadtree
+
+ object.ml   |  5 ++++
+ quadtree.ml | 79 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 84 insertions(+)
+
+commit 7406262d397f70925b2025c3c068c16a840d30ef
+Author: Matthew Hsu <mdh267@cornell.edu>
+Date:   Sat Nov 14 00:07:50 2015 -0500
+
+    Revise interfaces
+
+ actors.ml                |  16 ++++++++++++++++
+ actors.mli               |  16 ++++++++++++++++
+ characters.ml            |  16 ----------------
+ director.mli             |   2 ++
+ draw.mli                 |   8 ++++++--
+ interfaces.zip           | Bin 0 -> 2682 bytes
+ map.ml                   |   0
+ map.mli                  |  14 ++++++++++++++
+ object.ml                |  22 +++++++++++-----------
+ object.mli               |  27 +++++++++++++++++++++------
+ procedural_generator.mli |   7 +++++++
+ sprite.mli               |  27 ++++++++++++++++++++++-----
+ 12 files changed, 115 insertions(+), 40 deletions(-)
+
+commit a2b56b565df3b3a75d7e55d571fff1b52bec91ab
+Author: Matthew Hsu <mdh267@cornell.edu>
+Date:   Tue Nov 10 23:02:56 2015 -0500
+
+    Add more to interfaces
+
+ characters.ml | 11 +++++------
+ director.ml   |  2 +-
+ draw.ml       |  2 --
+ object.ml     |  2 +-
+ object.mli    | 30 +++++++++++++++++++-----------
+ sprite.ml     | 23 ++++++++++++++++++++++-
+ 6 files changed, 48 insertions(+), 22 deletions(-)
+
+commit ae242a55b24d9b8c223d49640c3ab79c2602b5f7
+Author: Matthew Hsu <mdh267@cornell.edu>
+Date:   Mon Nov 9 16:55:18 2015 -0500
+
+    Make sprite sheets transparent
+
+ sprites/enemies.png     | Bin 81808 -> 79964 bytes
+ sprites/general.png     | Bin 59618 -> 59388 bytes
+ sprites/mario-luigi.png | Bin 147413 -> 144370 bytes
+ sprites/tiles.png       | Bin 125179 -> 125479 bytes
+ 4 files changed, 0 insertions(+), 0 deletions(-)
+
+commit 91612423ab0db9d4310469ef6520a45953022012
+Author: Matthew Hsu <mdh267@cornell.edu>
+Date:   Mon Nov 9 16:49:18 2015 -0500
+
+    Begin to extend objects to concrete characters, add sprites
+
+ characters.ml           |  17 +++++++++++++++++
+ object.ml               |  25 +++++++++++++++++++------
+ object.mli              |  14 +++++++++-----
+ sprites/enemies.png     | Bin 0 -> 81808 bytes
+ sprites/general.png     | Bin 0 -> 59618 bytes
+ sprites/mario-luigi.png | Bin 0 -> 147413 bytes
+ sprites/tiles.png       | Bin 0 -> 125179 bytes
+ 7 files changed, 45 insertions(+), 11 deletions(-)
+
+commit fd3376c4df7ac922623010004c44dda1a301c364
+Author: Matthew Hsu <mdh267@cornell.edu>
+Date:   Mon Nov 9 01:07:08 2015 -0500
+
+    Draw fps, add build script
+
+ README.md   | 6 +++---
+ build.sh    | 3 +++
+ director.ml | 2 +-
+ draw.ml     | 7 ++++++-
+ draw.mli    | 1 +
+ 5 files changed, 14 insertions(+), 5 deletions(-)
+
+commit 96946afd56288e2dc9ee45e5b339f1c4a544c4ff
+Author: Matthew Hsu <mdh267@cornell.edu>
+Date:   Mon Nov 9 00:30:28 2015 -0500
+
+    Refactor update loop to director.ml
+
+ director.ml  | 33 +++++++++++++++++++++++++++++++++
+ director.mli |  1 +
+ draw.ml      | 39 ++++++++-------------------------------
+ draw.mli     |  6 +++---
+ main.ml      |  4 ++--
+ object.ml    | 20 ++++++++------------
+ object.mli   | 20 +++++++++-----------
+ 7 files changed, 64 insertions(+), 59 deletions(-)
+
+commit 8c7177dae87d4da87d1abf8d7c1365d0c727bd89
+Author: Matthew Hsu <mdh267@cornell.edu>
+Date:   Sun Nov 8 21:27:58 2015 -0500
+
+    Canvas supports drawing multiple objects
+
+ draw.ml    | 40 +++++++++++++++++++++++++---------------
+ draw.mli   |  5 +++--
+ main.ml    | 23 +++++++++++++++++++++--
+ object.ml  |  4 ++++
+ object.mli | 24 +++++++++++++++++++-----
+ sprite.ml  |  4 ++++
+ sprite.mli |  6 +++---
+ 7 files changed, 79 insertions(+), 27 deletions(-)
+
+commit 6fe5f02b08470cb3069c337a73ecd0fc3f9395dd
+Author: Ashley Xue <ax25@cornell.edu>
+Date:   Sun Nov 8 18:22:13 2015 -0500
+
+    meh
+
+ object.ml | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+commit aa24a8f6e2a15dec4946e799bc8325fa74db4015
+Author: liambui <lb598@cornell.edu>
+Date:   Sun Nov 8 17:05:31 2015 -0500
+
+    added fields for game physics and collisions
+
+ object.ml  | 25 ++++++++++++++++++++-----
+ sprite.mli |  8 +++++---
+ 2 files changed, 25 insertions(+), 8 deletions(-)
+
+commit f99445f4dda09031e7d99e446bd8f2029fe19a05
+Author: Matthew Hsu <mdh267@cornell.edu>
+Date:   Sat Nov 7 16:39:48 2015 -0500
+
+    Finish refactoring to a cleaner interface. Begin implemented object-sprite model.
+
+ README.md  | 18 +++++++++++++++++-
+ draw.ml    | 46 ++++++++++++++++++++++++++++++++++++++++++++
+ draw.mli   |  3 +++
+ index.html |  2 +-
+ main.ml    | 14 ++++++++------
+ object.ml  | 18 +++++++++++++-----
+ object.mli | 15 ++++++++++-----
+ sprite.ml  | 40 +++++++++++++++++++++++++++++++++++++++
+ sprite.mli | 25 ++++++++++++++++++++++++
+ test.ml    | 64 --------------------------------------------------------------
+ 10 files changed, 163 insertions(+), 82 deletions(-)
+
+commit e79e54c3478e805782b4e4030f7d6124c5dbf1a4
+Author: Matthew Hsu <mdh267@cornell.edu>
+Date:   Sat Nov 7 13:06:13 2015 -0500
+
+    Start refactoring
+
+ main.ml    | 17 +++++++++++++++++
+ object.ml  |  9 +++++++++
+ object.mli |  9 +++++++++
+ test.ml    | 44 ++++++++++++++++----------------------------
+ 4 files changed, 51 insertions(+), 28 deletions(-)
+
+commit 2f775971b959db80dba1ef14711ba7d2e866c649
+Author: Matthew Hsu <mdh267@cornell.edu>
+Date:   Sat Nov 7 03:32:07 2015 -0500
+
+    Basic functionality for drawing sprites on canvas
+
+ .gitignore |   3 +++
+ coin.png   | Bin 0 -> 54863 bytes
+ index.html |   8 +++++++
+ test.ml    |  76 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 4 files changed, 87 insertions(+)
+
+commit 0ae88b66dfa2fa2d6176e6d4353fa6e563330fdb
+Author: Matthew Hsu <gears88@gmail.com>
+Date:   Sun Nov 1 23:02:53 2015 -0500
+
+    Initial commit
+
+ .gitignore | 20 ++++++++++++++++++++
+ README.md  |  1 +
+ 2 files changed, 21 insertions(+)

@@ -119,10 +119,12 @@ let choose_block_pattern (blockw:float) (blockh: float) (cbx:float) (cby:float)
   else
     let block_typ = Random.int 4 in
     let stair_typ = Random.int 2 in
+    let life_block_chance = Random.int 5 in
+    let middle_block = if(life_block_chance = 0) then 3 else stair_typ in
     let obj_coord =
     match prob with
     |0 -> if(blockw -. cbx > 2.) then [(stair_typ, (cbx, cby));
-            (3,(cbx +. 1., cby));(stair_typ,(cbx +. 2., cby))]
+            (middle_block,(cbx +. 1., cby));(stair_typ,(cbx +. 2., cby))]
           else if (blockw -. cbx > 1.) then [(block_typ,(cbx, cby));
             (block_typ,(cbx +. 1., cby))]
           else [(block_typ,(cbx, cby))]
