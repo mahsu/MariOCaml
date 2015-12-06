@@ -278,7 +278,8 @@ let generate_helper (blockw:float) (blockh:float) (cx:float) (cy:float)
   all_blocks@obj_converted_enemies@coin_objects@obj_enemy_blocks@[obj_panel]
 
 (*Main function called to procedurally generate the level map. w and h args
-* are in pixel form. Converts to block form to call generate_helper.*)
+* are in pixel form. Converts to block form to call generate_helper. Spawns
+* the list of collidables received from generate_helper to display on canvas.*)
 let generate (w:float) (h:float)
                     (context:Dom_html.canvasRenderingContext2D Js.t) :
                     (collidable * collidable list) =
