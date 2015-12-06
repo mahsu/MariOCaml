@@ -45,25 +45,6 @@ let collid_objs = ref [] (* List of next iteration collidable objects *)
 let particles = ref [] (* List of next iteration particles *)
 let last_time = ref 0. (* Used for calculating fps *)
 
-(*game_over displays a black screen when you finish a game.*)
-let game_over state =
-  state.ctx##rect (0.,0.,512.,512.);
-  state.ctx##fillStyle <- (Js.string "black");
-  state.ctx##fill ();
-  state.ctx##fillStyle <- (Js.string "white");
-  state.ctx##font <- (Js.string "20px 'Press Start 2P'");
-  state.ctx##fillText (Js.string ("You win!"), 180., 128.);
-  failwith "Game over."
-
-(*gave_loss displays a black screen stating a loss to finish that level play.*)
-let game_loss state =
-  state.ctx##rect (0.,0.,512.,512.);
-  state.ctx##fillStyle <- (Js.string "black");
-  state.ctx##fill ();
-  state.ctx##fillStyle <- (Js.string "white");
-  state.ctx##font <- (Js.string "20px 'Press Start 2P'");
-  state.ctx##fillText (Js.string ("GAME OVER. You lose!"), 60., 128.);
-  failwith "Game over."
 
 (* Calculates fps as the difference between [t0] and [t1] *)
 let calc_fps t0 t1 =
@@ -144,7 +125,9 @@ let col_enemy_enemy t1 s1 o1 t2 s2 o2 dir =
       end
   end
 
-let obj_at_pos dir (pos: xy) (collids: Object.collidable list) : Object.collidable list =
+(* Gets the object at a given position *)
+let obj_at_pos dir (pos: xy) (collids: Object.collidable list) 
+                                            : Object.collidable list =
   match dir with
   | Left -> List.filter (fun (col: Object.collidable) ->
       (get_obj col).pos.y = pos.y && (get_obj col).pos.x = pos.x -. 16.)
@@ -153,12 +136,14 @@ let obj_at_pos dir (pos: xy) (collids: Object.collidable list) : Object.collidab
       (get_obj col).pos.y = pos.y && (get_obj col).pos.x = pos.x +. 16.)
             collids
 
+(* Returns whether the object at a given position is a block *) 
 let is_block dir pos collids =
   match obj_at_pos dir pos collids with
   | [] -> false
   | [Block (_,_,_)] -> true
   | _ -> false
 
+(* Returns whether the given object is a red koopa *)
 let is_rkoopa collid =
   match collid with
   | Enemy(RKoopa,_,_) -> true
@@ -229,14 +214,15 @@ let process_collision (dir : Actors.dir_2d) (c1 : Object.collidable)
           let spawned_item = spawn_above o1.dir o2 typ context in
           collide_block dir o1;
           (Some spawned_item, Some updated_block)
-      | Brick -> if t1 = BigM then (collide_block dir o1; dec_health o2; (None, None))
+      | Brick -> if t1 = BigM then begin
+        collide_block dir o1; dec_health o2; (None, None) end
                  else (collide_block dir o1; (None,None))
-      | Panel -> game_over state
+      | Panel -> Draw.game_win state.ctx; (None,None)
       | _ -> collide_block dir o1; (None,None)
       end
   | (Player(_,s1,o1), Block(t,s2,o2), _) ->
     begin match t with
-    | Panel -> game_over state
+    | Panel -> Draw.game_win state.ctx; (None,None)
     | _ ->
         begin match dir with
         | South -> state.multiplier <- 1 ; collide_block dir o1; (None, None)
@@ -245,6 +231,7 @@ let process_collision (dir : Actors.dir_2d) (c1 : Object.collidable)
     end
   | (_, _, _) -> (None,None)
 
+(* Run the broad phase object filtering *)
 let broad_phase collid all_collids state =
   let obj = get_obj collid in
   List.filter (fun c ->
@@ -332,6 +319,8 @@ let update_collidable state (collid:Object.collidable) all_collids =
     evolved
   end else []
 
+(* Converts a keypress to a list of control keys, allowing more than one key
+ * to be processed each frame. *)
 let translate_keys () =
   let k = pressed_keys in
   let ctrls = [(k.left,CLeft);(k.right,CRight);(k.up,CUp);(k.down,CDown)] in
@@ -363,9 +352,10 @@ let run_update_collid state collid all_collids =
       particles := !particles @ new_parts;
       collid
 
+(* Primary update function to update and persist a particle *)
 let run_update_particle state part =
   Particle.process part;
-  let x = part.pos.x -. state.vpt.pos.x and y = part.pos.y -. state.vpt.pos.y in
+  let x=part.pos.x -. state.vpt.pos.x and y=part.pos.y -. state.vpt.pos.y in
   Draw.render part.params.sprite (x,y);
   if not part.kill then particles := part :: !particles
 
@@ -389,7 +379,7 @@ let update_loop canvas (player,objs) map_dim =
   } in
   state.ctx##scale(scale,scale);
   let rec update_helper time state player objs parts =
-      if state.game_over = true then game_over state else begin
+      if state.game_over = true then Draw.game_win state.ctx else begin
         collid_objs := [];
         particles := [];
 
@@ -405,9 +395,10 @@ let update_loop canvas (player,objs) map_dim =
 
         let player = run_update_collid state player objs in
 
-        if (get_obj player).kill = true then game_loss state else begin
-          let state =
-            {state with vpt = Viewport.update state.vpt (get_obj player).pos} in
+        if (get_obj player).kill = true 
+        then Draw.game_loss state.ctx else begin
+          let state = {
+            state with vpt = Viewport.update state.vpt (get_obj player).pos} in
           List.iter (fun obj -> ignore (run_update_collid state obj objs)) objs;
           List.iter (fun part -> run_update_particle state part) parts;
           Draw.fps canvas fps;
@@ -419,6 +410,7 @@ let update_loop canvas (player,objs) map_dim =
       end
   in update_helper 0. state player objs []
 
+(* Keydown event handler translates a key press *)
 let keydown evt =
   let () = match evt##keyCode with
   | 38 | 32 | 87 -> pressed_keys.up <- true
@@ -429,6 +421,7 @@ let keydown evt =
   | _ -> ()
   in Js._true
 
+(* Keyup event handler translates a key release *)
 let keyup evt =
   let () = match evt##keyCode with
   | 38 | 32 | 87 -> pressed_keys.up <- false

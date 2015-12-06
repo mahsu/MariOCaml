@@ -17,11 +17,14 @@ type particle = {
   mutable life: int;
 }
 
+(* Converts an x,y [pair] to an Actors.xy record *)
 let pair_to_xy pair = {
   x = fst pair;
   y = snd pair;
 }
 
+(* Function wrapper to assist in generating the template paramss for a
+ * particle. *)
 let make_params sprite rot lifetime = 
   {
     sprite;
@@ -29,6 +32,7 @@ let make_params sprite rot lifetime =
     lifetime;
   }
 
+(* Generate the template for a specific particle type *)
 let make_type typ ctx =
   match typ with
   | GoombaSquish as t -> make_params (Sprite.make_particle t ctx) 0. 30
@@ -45,7 +49,8 @@ let make_type typ ctx =
   
 let make ?vel:(vel=(0.,0.)) ?acc:(acc=(0.,0.)) part_type pos ctx =
   let params = make_type part_type ctx in
-  let pos = pair_to_xy pos and vel = pair_to_xy vel and acc = pair_to_xy acc in
+  let pos = pair_to_xy pos and vel = pair_to_xy vel 
+                           and acc = pair_to_xy acc in
   {
     params;
     part_type;
@@ -69,10 +74,12 @@ let make_score score pos ctx =
   | _ -> Score100
   in make ~vel:(0.5,-0.7) t pos ctx
 
+(* Mutably update the velocity of a particle *)
 let update_vel part =
   part.vel.x <- (part.vel.x +. part.acc.x);
   part.vel.y <- (part.vel.y +. part.acc.y) 
 
+(* Mutably update the position of a particle *)
 let update_pos part =
   part.pos.x <- (part.vel.x +. part.pos.x);
   part.pos.y <- (part.vel.y +. part.pos.y)

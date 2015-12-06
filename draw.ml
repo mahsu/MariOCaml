@@ -54,6 +54,26 @@ let fps canvas fps_val =
   let context = canvas##getContext (Dom_html._2d_) in
   ignore context##fillText (Js.string fps_str, 10.,18.)
 
+(*game_win displays a black screen when you finish a game.*)
+let game_win ctx =
+  ctx##rect (0.,0.,512.,512.);
+  ctx##fillStyle <- (Js.string "black");
+  ctx##fill ();
+  ctx##fillStyle <- (Js.string "white");
+  ctx##font <- (Js.string "20px 'Press Start 2P'");
+  ctx##fillText (Js.string ("You win!"), 180., 128.);
+  failwith "Game over."
+
+(*gave_loss displays a black screen stating a loss to finish that level play.*)
+let game_loss ctx =
+  ctx##rect (0.,0.,512.,512.);
+  ctx##fillStyle <- (Js.string "black");
+  ctx##fill ();
+  ctx##fillStyle <- (Js.string "white");
+  ctx##font <- (Js.string "20px 'Press Start 2P'");
+  ctx##fillText (Js.string ("GAME OVER. You lose!"), 60., 128.);
+  failwith "Game over."
+
 let draw_background_color canvas = failwith "todo"
 let debug f = Printf.ksprintf (fun s -> Firebug.console##log (jstr s)) f
 let alert f = Printf.ksprintf (fun s -> Dom_html.window##alert(Js.string s); failwith "poo") f
