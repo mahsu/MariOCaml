@@ -11,8 +11,13 @@
       }
       
       @font-face {
-        font-family: 'Droid Sans';
-        src: url(fonts/DroidSans.ttf);
+        font-family: "Droid Sans";
+        src: url('fonts/DroidSans.eot');
+        src: url('fonts/DroidSans.eot?#iefix') format('embedded-opentype'),
+         url('fonts/DroidSans.woff2') format('woff2'),
+         url('fonts/DroidSans.woff') format('woff'),
+         url('fonts/DroidSans.ttf') format('truetype'),
+         url('fonts/DroidSans.svg#droid_sansregular') format('svg');
       }
       
       html {
@@ -23,7 +28,7 @@
         background-color: #2c3e50;
         margin: 0 0;
         padding: 0;
-        font-family: 'Droid Sans' 'sans-serif';
+        font-family: "Droid Sans", "sans-serif";
         color: #bdc3c7;
       }
 
@@ -53,6 +58,7 @@
     </style>
   </head>
   <body>
+  <a href="https://github.com/mahsu/MariOCaml"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/365986a132ccd6a44c23a9169022c0b5c890c387/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f7265645f6161303030302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png"></a>
   <div class="center">
     <h1>MariOcaml</h1>
     <canvas id="canvas" width="512" height="256"></canvas>

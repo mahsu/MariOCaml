@@ -1,4 +1,4 @@
-MariOCaml
+[MariOCaml](https://mahsu.github.io/mariocaml/)
 =============
 MariOCaml is an HTML 5 canvas web-browser implementation of the Super Mario Bros platformer written exclusively in Ocaml.
 
