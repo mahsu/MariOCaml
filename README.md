@@ -2,7 +2,9 @@
 =============
 MariOCaml is an HTML 5 canvas web-browser implementation of the Super Mario Bros platformer written exclusively in Ocaml.
 
-![Alt Text](https://github.com/mahsu/MariOCaml/raw/master/screenshots/preview.gif)
+![Gameplay preview](https://github.com/mahsu/MariOCaml/raw/master/screenshots/preview.gif)
+
+[Try it out!](https://mahsu.github.io/mariocaml/)
 
 ##Key Features
 * 2D Mario platformer that emulates the platformer mechanics of Super Mario Bros.
@@ -30,15 +32,18 @@ The underlying procedural generation utilizes a grid system to generate objects,
 1. First, ensure that js\_of\_ocaml and its dependencies are installed by running:
 
         opam install js_of_ocaml
-2. With the cs3110 tool installed, run:
+2. With ocamlbuild installed, run:
 
-        cs3110 compile -p js_of_ocaml -p js_of_ocaml.syntax main.ml
-to compile the binaries to the `_build` folder.
+        make all
+to compile the binaries to the `_build` folder and run the jsoo cross-compiler.
 
-3. To cross-compile to javascript, run
+3. Open `index.html` to run!
 
-        js_of_ocaml _build/main.d.byte
+##Contributing
+Pull requests fixing bugs, adding functionality, or improving organization are welcome!
 
-4. Open `index.html` to run!
-
-Alternatively, to build the files, run `./build.sh`.
+##Authors
+MariOCaml was originally conceived for Cornell University's Fall 2015 CS3110 final project.
+* Matthew Hsu ([@mahsu](https://github.com/mahsu))
+* Ashley Xue ([@ashleyxue529](https://github.com/ashleyxue529))
+* Liam Bui ([@LiamBui](https://github.com/liambui))
