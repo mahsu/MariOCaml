@@ -29,7 +29,7 @@ The underlying procedural generation utilizes a grid system to generate objects,
 * **Draw** - Contains methods which update the canvas.
 
 ##Building the Project
-1. First, ensure that js\_of\_ocaml and its dependencies are installed by running:
+1. First, ensure that js\_of\_ocaml (>= 2.6) and its dependencies are installed by running:
 
         opam install js_of_ocaml
 2. With ocamlbuild installed, run:
