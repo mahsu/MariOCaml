@@ -188,7 +188,7 @@ let normalize_pos pos (p1:Sprite.sprite_params) (p2:Sprite.sprite_params) =
     pos.x <- pos.x -. (bw2 +. box2) +. (bw1 +. box1);
     pos.y <- pos.y -. (bh2 +. boy2) +. (bh1 +. boy1)
 
-(*Update plyaer is constantly being called to check for if big or small
+(*Update player is constantly being called to check for if big or small
  *Mario sprites/collidables should be used.*)
 let update_player player keys context =
   let prev_jumping = player.jumping in
