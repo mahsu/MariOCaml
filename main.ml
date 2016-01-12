@@ -9,8 +9,6 @@ let imgsToLoad = 4
 let level_width = 2400.
 let level_height = 256.
 
-let get_width () = level_width
-
 (*Canvas is chosen from the index.html file. The context is obtained from
  *the canvas. Listeners are added. A level is generated and the general
  *update_loop method is called to make the level playable.*)
@@ -19,13 +17,13 @@ let load _ =
   let canvas_id = "canvas" in
   let canvas =
     Js.Opt.get
-      (Js.Opt.bind ( Dom_html.document##getElementById(Js.string canvas_id))
-        Dom_html.CoerceTo.canvas)
+      (Js.Opt.bind ( Html.document##getElementById(Js.string canvas_id))
+        Html.CoerceTo.canvas)
       (fun () ->
         Printf.printf "cant find canvas %s \n" canvas_id;
         failwith "fail"
       ) in
-  let context = canvas##getContext (Dom_html._2d_) in
+  let context = canvas##getContext (Html._2d_) in
   let _ = Html.addEventListener Html.document Html.Event.keydown (Html.handler Director.keydown) Js._true in
   let _ = Html.addEventListener Html.document Html.Event.keyup (Html.handler Director.keyup) Js._true in
   let () = Pg.init () in
@@ -43,10 +41,10 @@ let preload _ =
   let imgs = [ "blocks.png";"items.png";"enemies.png";"mario-small.png" ] in
   List.map (fun img_src ->
     let img_src = root_dir ^ img_src in
-    let img = (Dom_html.createImg Dom_html.document) in
+    let img = (Html.createImg Html.document) in
     img##src <- (Js.string img_src) ;
-    ignore(Html.addEventListener  img Dom_html.Event.load
+    ignore(Html.addEventListener  img Html.Event.load
     (Html.handler (fun ev ->  inc_counter(); Js._true)) Js._true)) imgs
 
 
-let _ = Dom_html.window##onload <- Dom_html.handler (fun _ -> ignore (preload()); Js._true)
+let _ = Html.window##onload <- Html.handler (fun _ -> ignore (preload()); Js._true)
