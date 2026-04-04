@@ -30,19 +30,19 @@ The underlying procedural generation utilizes a grid system to generate objects,
 
 ## Building the Project
 
-1. First, ensure that [`ocamlbuild`](https://github.com/ocaml/ocamlbuild) and [`js_of_ocaml`](https://github.com/ocsigen/js_of_ocaml) (>= 2.6) and its dependencies are installed by running:
+1. First, ensure that [`dune`](https://github.com/ocaml/dune) and [`js_of_ocaml`](https://github.com/ocsigen/js_of_ocaml) (>= 2.6) and its dependencies are installed by running:
 
-        opam install ocamlbuild js_of_ocaml js_of_ocaml-ocamlbuild js_of_ocaml-camlp4
+        opam install dune js_of_ocaml
 
 2. (If you don't have `opam` installed, [see the official instructions](https://opam.ocaml.org/doc/Install.html))
 
-3. With `ocamlbuild` installed, run:
+3. With `dune` installed, run:
 
         make all
 
 to compile the binaries to the `_build` folder and run the `js_of_ocaml` cross-compiler.
 
-4. Open `index.html` in a web-browser to run the game!
+4. Open `http://localhost:8000` in a web-browser to run the game!
 
 ## Contributing
 Pull requests fixing bugs, adding functionality, or improving organization are welcome!

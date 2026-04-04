@@ -1,9 +1,14 @@
-# the resulting working website is to be found in _build/html
+# clean, compile and serve at http://localhost:8000
 all:
-	ocamlbuild -use-ocamlfind \
-	  -plugin-tag "package(js_of_ocaml.ocamlbuild)" \
-	  -no-links \
-	  main.d.js
+	make clean; make build; make web
 
 clean:
-	ocamlbuild -clean
+	dune clean
+
+# the resulting working website is to be found in _build/default/
+build:
+	dune build
+
+# serve the page locally, see http://localhost:8000
+web:
+	python3 -m  http.server 8000
