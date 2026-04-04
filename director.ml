@@ -38,12 +38,7 @@ let pressed_keys =
 
 let collid_objs = ref [] (* List of next iteration collidable objects *)
 let particles = ref [] (* List of next iteration particles *)
-let last_time = ref 0. (* Used for calculating fps *)
-
-(* Calculates fps as the difference between [t0] and [t1] *)
-let calc_fps t0 t1 =
-  let delta = (t1 -. t0) /. 1000. in
-  1. /. delta
+let fixed_dt = 1000. /. 60. (* Fixed time step for the game *)
 
 (* Adds [i] to the score in [state] *)
 let update_score state i = state.score <- state.score + i
@@ -320,7 +315,7 @@ let check_collisions collid all_collids state =
 let check_bbox_enabled () = pressed_keys.bbox = 1
 
 (* update_collidable is the primary update method for collidable objects,
- * checking the collision, updating the object, and drawing to the canvas.*)
+ * checking the collision and updating the object. *)
 let update_collidable state (collid : Object.collidable) all_collids =
   (* TODO: optimize. Draw static elements only once *)
   let obj = Object.get_obj collid in
@@ -337,15 +332,24 @@ let update_collidable state (collid : Object.collidable) all_collids =
     Object.process_obj obj state.map;
     (* Run collision detection if moving object*)
     let evolved = check_collisions collid all_collids state in
-    (* Render and update animation *)
-    let vpt_adj_xy = coord_to_viewport state.vpt obj.pos in
-    Draw.render spr (vpt_adj_xy.x, vpt_adj_xy.y);
-    if check_bbox_enabled () then
-      Draw.render_bbox spr (vpt_adj_xy.x, vpt_adj_xy.y);
-
     if obj.vel.x <> 0. || not (is_enemy collid) then Sprite.update_animation spr;
     evolved)
   else []
+
+(* draw_collidable is used to draw the collidable objects to the canvas. *)
+let draw_collidable state (collid : Object.collidable) =
+  let obj = Object.get_obj collid in
+  let spr = Object.get_sprite collid in
+  let viewport_filter =
+    in_viewport state.vpt obj.pos
+    || is_player collid
+    || out_of_viewport_below state.vpt obj.pos.y
+  in
+  if (not obj.kill) && viewport_filter then (
+    let vpt_adj_xy = coord_to_viewport state.vpt obj.pos in
+    Draw.render spr (vpt_adj_xy.x, vpt_adj_xy.y);
+    if check_bbox_enabled () then
+      Draw.render_bbox spr (vpt_adj_xy.x, vpt_adj_xy.y))
 
 (* Converts a keypress to a list of control keys, allowing more than one key
  * to be processed each frame. *)
@@ -384,11 +388,16 @@ let run_update_collid state collid all_collids =
       collid
 
 (* Primary update function to update and persist a particle *)
-let run_update_particle state part =
+let run_update_particle part =
   Particle.process part;
-  let x = part.pos.x -. state.vpt.pos.x and y = part.pos.y -. state.vpt.pos.y in
-  Draw.render part.params.sprite (x, y);
   if not part.kill then particles := part :: !particles
+
+(* draw_particle is used to draw the particle to the canvas. *)
+let draw_particle state part =
+  if not part.kill then
+    let x = part.pos.x -. state.vpt.pos.x
+    and y = part.pos.y -. state.vpt.pos.y in
+    Draw.render part.params.sprite (x, y)
 
 (*update_loop is constantly being called to check for collisions and to
  *update each of the objects in the game.*)
@@ -411,41 +420,67 @@ let update_loop canvas (player, objs) map_dim =
     }
   in
   state.ctx##scale (Js.number_of_float scale) (Js.number_of_float scale);
-  let rec update_helper time state player objs parts =
-    if state.game_over = true then Draw.game_win state.ctx
-    else (
-      collid_objs := [];
-      particles := [];
+  let last_time = ref None in
+  let accumulator = ref 0. in
+  let rec update_helper state player objs parts time =
+    if state.game_over then Draw.game_win state.ctx
+    else
+      let elapsed =
+        match !last_time with
+        | None -> 0.
+        | Some prev -> min (time -. prev) 200.
+      in
+      last_time := Some time;
+      accumulator := !accumulator +. elapsed;
+      let rec tick_loop state player objs parts =
+        if !accumulator >= fixed_dt then (
+          accumulator := !accumulator -. fixed_dt;
+          collid_objs := [];
+          particles := [];
+          let player = run_update_collid state player objs in
+          if (get_obj player).kill then (state, player, !collid_objs, !particles)
+          else
+            let state =
+              {
+                state with
+                vpt = Viewport.update state.vpt (get_obj player).pos;
+              }
+            in
+            List.iter
+              (fun obj -> ignore (run_update_collid state obj objs))
+              objs;
+            List.iter run_update_particle parts;
+            tick_loop state player !collid_objs !particles)
+        else (state, player, objs, parts)
+      in
+      let state, player, objs, parts = tick_loop state player objs parts in
+      if (get_obj player).kill then Draw.game_loss state.ctx
+      else (
+        Draw.clear_canvas canvas;
 
-      let fps = calc_fps !last_time time in
-      last_time := time;
+        (* Parallax background *)
+        let vpos_x_int = int_of_float (state.vpt.pos.x /. 5.) in
+        let bgd_width = int_of_float (fst state.bgd.params.frame_size) in
+        Draw.draw_bgd state.bgd (float_of_int (vpos_x_int mod bgd_width));
 
-      Draw.clear_canvas canvas;
+        draw_collidable state player;
+        List.iter (fun obj -> draw_collidable state obj) objs;
+        List.iter (fun part -> draw_particle state part) parts;
 
-      (* Parallax background *)
-      let vpos_x_int = int_of_float (state.vpt.pos.x /. 5.) in
-      let bgd_width = int_of_float (fst state.bgd.params.frame_size) in
-      Draw.draw_bgd state.bgd (float_of_int (vpos_x_int mod bgd_width));
-
-      let player = run_update_collid state player objs in
-
-      if (get_obj player).kill = true then Draw.game_loss state.ctx
-      else
-        let state =
-          { state with vpt = Viewport.update state.vpt (get_obj player).pos }
-        in
-        List.iter (fun obj -> ignore (run_update_collid state obj objs)) objs;
-        List.iter (fun part -> run_update_particle state part) parts;
+        let fps = if elapsed > 0. then 1000. /. elapsed else 0. in
         Draw.fps canvas fps;
         Draw.hud canvas state.score state.coins;
         ignore
         @@ Dom_html.window##requestAnimationFrame
              (Js.wrap_callback (fun t ->
-                  update_helper
-                    (Js_of_ocaml__Js.float_of_number t)
-                    state player !collid_objs !particles)))
+                  update_helper state player objs parts
+                    (Js_of_ocaml__Js.float_of_number t))))
   in
-  update_helper 0. state player objs []
+  ignore
+  @@ Dom_html.window##requestAnimationFrame
+       (Js.wrap_callback (fun t ->
+            update_helper state player objs []
+              (Js_of_ocaml__Js.float_of_number t)))
 
 (* Keydown event handler translates a key press *)
 let keydown evt =
