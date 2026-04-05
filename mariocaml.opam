@@ -5,7 +5,7 @@ description:
   "MariOCaml is an HTML5 canvas implementation of Super Mario Bros mechanics, compiled to JavaScript with js_of_ocaml."
 depends: [
   "ocaml" {>= "4.14"}
-  "dune" {>= "3.5"}
+  "dune" {>= "3.17"}
   "js_of_ocaml" {>= "4.1"}
   "js_of_ocaml-compiler" {>= "4.1"}
   "js_of_ocaml-ppx" {>= "4.1"}

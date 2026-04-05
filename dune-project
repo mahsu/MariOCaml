@@ -1,4 +1,4 @@
-(lang dune 3.5)
+(lang dune 3.17)
 
 (name mariocaml)
 
