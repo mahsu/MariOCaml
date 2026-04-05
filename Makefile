@@ -9,6 +9,9 @@ clean:
 build:
 	dune build
 
+build-release:
+	dune build --profile release
+
 # serve the page locally, see http://localhost:8000
 web:
 	python3 -m  http.server 8000
